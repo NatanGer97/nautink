@@ -361,7 +361,7 @@ Keep v1's endpoints and Server-Sent Events (SSE), typed with Zod.
 | Q2 | Review-before-apply default on or off | Proposed: on |
 | Q3 | Keep visual edits in place (edit only the changed lines, preserving comments) instead of re-serializing | Proposed for v2.1 |
 | Q4 | Edge routing that avoids crossing boxes (ELK or custom router) | Proposed for v2.1 |
-| Q5 | Package manager and monorepo tool | Decided: pnpm workspaces + Turborepo |
+| Q5 | Package manager and monorepo tool | Decided: pnpm workspaces + Turborepo (ADR-001) |
 
 ### Known v1 issues to fix in v2
 - Duplicate undo/redo on the canvas toolbar and the top bar (§3.4).
