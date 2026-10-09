@@ -1,7 +1,7 @@
 import type { EditMeta } from './edit-history.ts';
 import type { Diagram } from '@nautink/storage/records';
 
-/** The code of a new diagram until the template gallery lands (v1's blank flowchart). */
+/** The code of a quick new diagram and of the first one (v1's blank flowchart). */
 export const BLANK_FLOWCHART: string = 'flowchart TD\n';
 
 /** The first step of a new diagram's edit history. */

@@ -1,11 +1,13 @@
 import { searchDiagrams } from '@nautink/storage/search';
 import { Button } from '@nautink/ui/components/button';
-import { Plus } from 'lucide-react';
+import { IconButton } from '@nautink/ui/icon-button';
+import { LayoutGrid, Plus } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
 import { EmptyState } from './empty-state.tsx';
 import { PanelHeader } from './panel-header.tsx';
 import { ImportMenu } from '../../import/import-menu.tsx';
+import { useUiStore } from '../../state/ui-store.ts';
 import {
   ALL_FILTER,
   applyTypeFilter,
@@ -93,22 +95,32 @@ function useFilteredHits(
   return { hits, filters, active };
 }
 
-/** "Diagrams" with the New diagram button. */
+/** "Diagrams" with the New diagram button and the template gallery. */
 function DiagramsPanelHeader({ isReady }: { isReady: boolean }): ReactElement {
   return (
     <PanelHeader
       title="Diagrams"
       actions={
-        <Button
-          variant="outline"
-          size="xs"
-          className={OUTLINE_BUTTON_CLASS}
-          disabled={!isReady}
-          onClick={() => void useWorkspaceStore.getState().createDiagram()}
-        >
-          <Plus aria-hidden="true" />
-          New diagram
-        </Button>
+        <>
+          <IconButton
+            label="New from a template"
+            icon={<LayoutGrid />}
+            className="size-7"
+            onClick={() => {
+              useUiStore.getState().setTemplatesOpen(true);
+            }}
+          />
+          <Button
+            variant="outline"
+            size="xs"
+            className={OUTLINE_BUTTON_CLASS}
+            disabled={!isReady}
+            onClick={() => void useWorkspaceStore.getState().createDiagram()}
+          >
+            <Plus aria-hidden="true" />
+            New diagram
+          </Button>
+        </>
       }
     />
   );

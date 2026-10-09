@@ -138,11 +138,11 @@ describe('App shell', () => {
     expect(useUiStore.getState().defaultModel).toBeNull();
   });
 
-  it('opens the templates placeholder and hands off to chat', async () => {
+  it('opens the template gallery and hands off to chat', async () => {
     const user = renderApp();
     await user.click(screen.getByRole('button', { name: 'Templates' }));
     const dialog = await screen.findByRole('dialog', { name: 'New diagram' });
-    await user.click(within(dialog).getByRole('button', { name: 'Describe it in chat' }));
+    await user.click(within(dialog).getByRole('button', { name: /^Or describe it/ }));
     expect(useUiStore.getState().isTemplatesOpen).toBe(false);
     expect(useUiStore.getState().activePanel).toBe('chat');
   });

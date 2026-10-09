@@ -26,7 +26,19 @@ class ResizeObserverStub {
   }
 }
 
+// Never reports an intersection, so lazy thumbnails stay unrendered unless a test asks for them.
+class IntersectionObserverStub extends ResizeObserverStub {
+  readonly root: null = null;
+  readonly rootMargin: string = '';
+  readonly thresholds: readonly number[] = [];
+
+  takeRecords(): IntersectionObserverEntry[] {
+    return [];
+  }
+}
+
 globalThis.ResizeObserver = ResizeObserverStub;
+globalThis.IntersectionObserver = IntersectionObserverStub;
 Element.prototype.scrollIntoView = (): undefined => undefined;
 Element.prototype.hasPointerCapture = (): boolean => false;
 Element.prototype.releasePointerCapture = (): undefined => undefined;

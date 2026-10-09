@@ -77,7 +77,7 @@ export function DiagramThumbnail({
       ref={ref}
       data-state={thumbnail?.kind ?? 'pending'}
       className={cn(
-        'grid shrink-0 place-items-center overflow-hidden rounded-control border bg-background text-2xs text-faint',
+        'relative grid shrink-0 place-items-center overflow-hidden rounded-control border bg-background text-2xs text-faint',
         className,
       )}
     >
@@ -86,7 +86,7 @@ export function DiagramThumbnail({
           src={thumbnail.url}
           alt=""
           draggable={false}
-          className="size-full object-contain p-1"
+          className="absolute inset-0 size-full object-contain p-1"
         />
       ) : (
         <span aria-hidden="true">{thumbnail?.message ?? ''}</span>
