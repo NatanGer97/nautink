@@ -5,6 +5,7 @@ import {
   addEdge,
   addNode,
   deleteItems,
+  duplicateNodes,
   groupNodes,
   reverseEdge,
   setNodeGroup,
@@ -139,5 +140,46 @@ describe('deleteItems', () => {
 
   it('does nothing for an empty selection', () => {
     expect(deleteItems(sample(), {})).toEqual(sample());
+  });
+});
+
+describe('duplicateNodes', () => {
+  it('copies nodes and the links between them into their groups, under fresh ids', () => {
+    const graph = {
+      ...sample(),
+      nodes: [...sample().nodes, { id: 'n1', label: 'N', shape: 'rect', classes: ['hot'] }],
+    };
+    const { graph: next, copies } = duplicateNodes(graph, ['a', 'b', 'inner', 'missing']);
+    expect([...copies]).toEqual([
+      ['a', 'n2'],
+      ['b', 'n3'],
+    ]);
+    expect(next.nodes.slice(-2)).toEqual([
+      { id: 'n2', label: 'A', shape: 'rect', classes: [] },
+      { id: 'n3', label: 'B', shape: 'rect', classes: [] },
+    ]);
+    expect(next.edges.slice(2)).toEqual([
+      { id: 'L_n2_n3_0', source: 'n2', target: 'n3', label: '', arrow: 'point', stroke: 'normal' },
+    ]);
+    expect(next.subgraphs.find((subgraph) => subgraph.id === 'inner')?.members).toEqual([
+      'b',
+      'n3',
+    ]);
+    expect(next.subgraphs.find((subgraph) => subgraph.id === 'outer')?.members).toEqual([
+      'a',
+      'inner',
+      'n2',
+    ]);
+  });
+
+  it('keeps top-level copies at the top level and copies classes', () => {
+    const graph = {
+      ...sample(),
+      nodes: [{ id: 'x', label: 'X', shape: 'diam', classes: ['hot'] }],
+      subgraphs: [],
+    };
+    const { graph: next } = duplicateNodes(graph, ['x']);
+    expect(next.nodes[1]).toEqual({ id: 'n1', label: 'X', shape: 'diam', classes: ['hot'] });
+    expect(next.subgraphs).toEqual([]);
   });
 });

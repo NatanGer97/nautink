@@ -182,3 +182,49 @@ export function updateGroup(graph: FlowGraph, id: string, patch: Partial<FlowSub
     ),
   };
 }
+
+/** What `duplicateNodes` made: the new graph, and each copied id → its copy's id. */
+export interface Duplicated {
+  graph: FlowGraph;
+  copies: Map<string, string>;
+}
+
+function copyNodes(graph: FlowGraph, ids: ReadonlySet<string>): Duplicated {
+  const parent: Map<string, string> = parentMap(graph.subgraphs);
+  const groupIds: Set<string> = new Set<string>(
+    graph.subgraphs.map((subgraph: FlowSubgraph) => subgraph.id),
+  );
+  const copies: Map<string, string> = new Map<string, string>();
+  let next: FlowGraph = graph;
+  for (const node of graph.nodes.filter(
+    (item: FlowNode) => ids.has(item.id) && !groupIds.has(item.id),
+  )) {
+    const id: string = uniqueId(next);
+    copies.set(node.id, id);
+    next = addNode(next, { ...node, id, classes: [...node.classes] }, parent.get(node.id) ?? null);
+  }
+  return { graph: next, copies };
+}
+
+/**
+ * Copies nodes under fresh ids, with the links between them; each copy joins its original's
+ * subgraph. Links to nodes that were not copied stay with the originals.
+ */
+export function duplicateNodes(graph: FlowGraph, ids: readonly string[]): Duplicated {
+  const { graph: withNodes, copies } = copyNodes(graph, new Set(ids));
+  let next: FlowGraph = withNodes;
+  for (const edge of graph.edges) {
+    const source: string | undefined = copies.get(edge.source);
+    const target: string | undefined = copies.get(edge.target);
+    if (source !== undefined && target !== undefined) {
+      next = addEdge(next, {
+        source,
+        target,
+        label: edge.label,
+        arrow: edge.arrow,
+        stroke: edge.stroke,
+      });
+    }
+  }
+  return { graph: next, copies };
+}
