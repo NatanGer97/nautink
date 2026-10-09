@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { deleteActions } from './delete-actions.ts';
 import { editActions } from './edit-actions.ts';
 import { fieldActions, requestActions } from './field-actions.ts';
+import { importActions } from './import-actions.ts';
 import { libraryActions } from './library-actions.ts';
 import { loadAction } from './load-action.ts';
 import { errorMessage } from './workspace-context.ts';
@@ -37,6 +38,7 @@ export function createWorkspaceStore(deps: WorkspaceDeps): WorkspaceStore {
       ...INITIAL_WORKSPACE,
       load: loadAction(ctx),
       ...libraryActions(ctx),
+      ...importActions(ctx),
       ...deleteActions(ctx),
       ...editActions(ctx),
       ...fieldActions(ctx),

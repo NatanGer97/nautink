@@ -11,8 +11,10 @@ import { ToggleGroup, ToggleGroupItem } from '@nautink/ui/components/toggle-grou
 import { isThemePreference, THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/theme';
 
 import { CodebaseSetting } from './codebase-setting.tsx';
+import { backUpAll, pickAndRestoreBackup } from '../import/import-files.ts';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { useUiStore } from '../state/ui-store.ts';
+import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { ModelId } from '@nautink/contracts/models';
 import type { ThemePreference } from '@nautink/ui/theme';
@@ -102,14 +104,27 @@ export function CodebaseField(): ReactElement {
   return <CodebaseSetting />;
 }
 
-/** Back up and restore every diagram. Placeholder until storage lands. */
+/** Back up every diagram to a JSON file, or restore one (a v1 backup too, PRD §8). */
 export function BackupField(): ReactElement {
+  const isReady: boolean = useWorkspaceStore((state) => state.status === 'ready');
   return (
     <div className="flex gap-1.5 border-t border-border-subtle pt-3">
-      <Button variant="outline" size="sm" className={`flex-1 ${OUTLINE_BUTTON_CLASS}`} disabled>
+      <Button
+        variant="outline"
+        size="sm"
+        className={`flex-1 ${OUTLINE_BUTTON_CLASS}`}
+        disabled={!isReady}
+        onClick={() => void backUpAll()}
+      >
         Back up all
       </Button>
-      <Button variant="outline" size="sm" className={`flex-1 ${OUTLINE_BUTTON_CLASS}`} disabled>
+      <Button
+        variant="outline"
+        size="sm"
+        className={`flex-1 ${OUTLINE_BUTTON_CLASS}`}
+        disabled={!isReady}
+        onClick={() => void pickAndRestoreBackup()}
+      >
         Restore backup
       </Button>
     </div>

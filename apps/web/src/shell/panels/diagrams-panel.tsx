@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from 'react';
 
 import { EmptyState } from './empty-state.tsx';
 import { PanelHeader } from './panel-header.tsx';
+import { ImportMenu } from '../../import/import-menu.tsx';
 import {
   ALL_FILTER,
   applyTypeFilter,
@@ -166,8 +167,9 @@ export function DiagramsPanel(): ReactElement {
           }}
         />
       )}
-      <div className="shrink-0 border-t border-border-subtle px-3 py-2.5 text-xs text-faint">
+      <div className="flex shrink-0 items-center justify-between border-t border-border-subtle px-3 py-2.5 text-xs text-faint">
         {countLabel(total)}
+        <ImportMenu isDisabled={status !== 'ready'} />
       </div>
     </>
   );

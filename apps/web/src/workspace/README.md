@@ -32,7 +32,9 @@ the open database for stores the workspace does not own (versions); it throws be
 | Unsent chat text | `setDraft(id, draft)` |
 | Preview / Edit / Split | `setView(id, view)` |
 | Title, pin, duplicate, delete, download | `renameDiagram`, `togglePin`, `duplicateDiagram`, `deleteDiagram` (Undo notice), `downloadDiagram` |
-| New / open | `createDiagram()`, `selectDiagram(id)` |
+| New / open | `createDiagram()` (blank flowchart), `selectDiagram(id)` |
+| New from code (templates, imported files) | `createDiagrams([{ fields: { code, title?, view? }, step }])`: saves, opens the last |
+| Backups | `exportBackup()`, `importBackup(parsedJson)` (Nautink or v1; throws `InvalidBackupError`) |
 | Versions and other records of your own | `requireDb()` gives the open database; call `flushSaves()` first |
 
 Messages and session id are typed with `ChatMessage` and `Diagram['sessionId']` from
@@ -71,6 +73,7 @@ undo/redo stack (`edit-history.ts`, 200 steps, session only) and queues the save
 | `autosave.ts` | Debounced, ordered writes with retry |
 | `undo-redo-controls.tsx`, `history-shortcuts.ts` | Top bar ↶ ↷ with the step menu; ⌘Z / ⌘⇧Z / ⌘Y |
 | `workspace-commands.ts`, `diagram-commands.ts`, `use-workspace-commands.ts` | The workspace's ⌘K commands |
+| `untouched.ts` | `isUntouchedWorkspace`: only the blank diagram of a first start (first run, restore) |
 | `two-tab-notice.ts` | `BroadcastChannel('nautink')`: both tabs warn that their edits overwrite each other (PRD §11) |
 | `panel/` | The diagrams panel: search, type chips, the keyboard listbox, row menu, inline rename |
 | `workspace-deps.ts`, `default-workspace-deps.ts` | Database, notices, downloads, clock: swapped in tests |

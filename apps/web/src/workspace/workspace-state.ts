@@ -2,6 +2,8 @@ import type { SaveState } from './autosave.ts';
 import type { EditEntry, EditMeta, EditStack } from './edit-history.ts';
 import type { WorkspaceDeps } from './workspace-deps.ts';
 import type { WorkspaceRuntime } from './workspace-runtime.ts';
+import type { ImportResult } from '@nautink/storage/backup';
+import type { Backup } from '@nautink/storage/backup-format';
 import type { NautinkDb } from '@nautink/storage/db';
 import type { DeletedDiagram } from '@nautink/storage/diagram-delete';
 import type { ChatMessage, Diagram, DiagramView } from '@nautink/storage/records';
@@ -43,6 +45,32 @@ export interface LibraryActions {
   deleteDiagram: (id: string) => Promise<void>;
   restoreDiagram: (deleted: DeletedDiagram, shouldOpen: boolean) => Promise<void>;
   downloadDiagram: (id: string) => void;
+}
+
+/** What a new diagram is made from: its code, and optionally its title and view. */
+export type NewDiagramFields = Pick<Diagram, 'code'> &
+  Partial<Pick<Diagram, 'title' | 'titleAuto' | 'view'>>;
+
+/** A diagram to create, and the first step of its history ("New pie chart from example"). */
+export interface NewDiagramDraft {
+  fields: NewDiagramFields;
+  step: EditMeta;
+}
+
+/** New diagrams from code, and backups. */
+export interface ImportActions {
+  /**
+   * Saves a diagram per draft and opens the last one. Returns the saved records; on a failure it
+   * shows an error notice and returns none.
+   */
+  createDiagrams: (drafts: readonly NewDiagramDraft[]) => Promise<Diagram[]>;
+  /**
+   * Merges a parsed backup file (Nautink or v1) into the workspace; opens its most recent diagram
+   * when the workspace was untouched. Throws `InvalidBackupError` for a file that is not a backup.
+   */
+  importBackup: (data: unknown) => Promise<ImportResult>;
+  /** Every diagram, version and position, after writing what is queued. */
+  exportBackup: () => Promise<Backup>;
 }
 
 /** Code changes and undo/redo. Every feature changes code through `applyEdit`. */
@@ -92,6 +120,7 @@ export interface RequestActions {
 
 export type WorkspaceState = WorkspaceData &
   LibraryActions &
+  ImportActions &
   EditActions &
   FieldActions &
   RequestActions;
