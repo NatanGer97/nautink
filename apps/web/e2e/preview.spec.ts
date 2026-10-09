@@ -52,4 +52,18 @@ test.describe('preview', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
   });
+
+  test('fits a tall diagram above the floating prompt bar', async ({ page }) => {
+    await page.getByRole('button', { name: 'Close panel' }).click();
+    const steps = [...Array.from({ length: 14 }).keys()].map(
+      (index) => `  S${String(index)} --> S${String(index + 1)}`,
+    );
+    await editCode(page, `flowchart TD\n${steps.join('\n')}`);
+    const preview = page.getByRole('group', { name: 'Diagram preview' });
+    await expect(preview.getByText('S14', { exact: true })).toBeVisible();
+    const promptBar = page.getByLabel('Ask Claude to change this diagram');
+    const bar = await promptBar.boundingBox();
+    const last = await preview.getByText('S14', { exact: true }).boundingBox();
+    expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThan(bar?.y ?? 0);
+  });
 });

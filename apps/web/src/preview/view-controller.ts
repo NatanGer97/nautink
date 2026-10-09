@@ -31,6 +31,7 @@ export class ViewController {
   private isFollowing: boolean = true;
   private viewport: Size = { width: 0, height: 0 };
   private content: Size = { width: 0, height: 0 };
+  private bottomInset: number = 0;
   private drag: Drag | null = null;
   private readonly listeners: Set<() => void> = new Set<() => void>();
 
@@ -44,7 +45,7 @@ export class ViewController {
   /** Fits now and follows the diagram from here on. */
   fit = (): void => {
     this.isFollowing = true;
-    this.publish(fitView(this.content, this.viewport));
+    this.publish(fitView(this.content, this.viewport, this.bottomInset));
   };
 
   /** A different diagram: fit it once it has a size. */
@@ -54,6 +55,12 @@ export class ViewController {
 
   setViewport(size: Size): void {
     this.viewport = size;
+    this.refit();
+  }
+
+  /** Room to keep free at the bottom (the floating prompt bar); refits while following. */
+  setBottomInset(inset: number): void {
+    this.bottomInset = inset;
     this.refit();
   }
 
@@ -104,7 +111,7 @@ export class ViewController {
 
   private refit(): void {
     if (this.isFollowing) {
-      this.publish(fitView(this.content, this.viewport));
+      this.publish(fitView(this.content, this.viewport, this.bottomInset));
     }
   }
 

@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 
 import { createExportActions, exportAvailability } from './export-actions.ts';
 import { svgToPng } from './svg-to-png.ts';
+import { useViewedVersion, useViewedVersionStore } from '../history/viewed-version.ts';
+import { renderIdOf } from '../preview/background-render.tsx';
 import { usePreviewStatus, usePreviewStatusStore } from '../preview/preview-status.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import {
@@ -13,7 +15,7 @@ import {
 
 import type { ExportActions, ExportDeps, ExportSource } from './export-actions.ts';
 import type { PreviewStatus } from '../preview/preview-status.ts';
-import type { Diagram } from '@nautink/storage/records';
+import type { Diagram, Version } from '@nautink/storage/records';
 
 const ERROR_TOAST_MS: number = 6000;
 
@@ -22,13 +24,22 @@ function currentSvg(status: PreviewStatus, diagramId: string | undefined): strin
   return status.validity === 'valid' && status.diagramId === diagramId ? status.svg : '';
 }
 
-/** The open diagram and its render, read when an export runs. */
+/** What is on the canvas: a version viewed in the history panel, or the diagram itself. */
+function shownCode(diagram: Diagram | undefined, viewed: Version | null): string {
+  return viewed?.code ?? diagram?.code ?? '';
+}
+
+/**
+ * The open diagram and its render, read when an export runs. While the history panel views an older
+ * version, that version is exported: what you see is what you export.
+ */
 export function readExportSource(): ExportSource {
   const diagram: Diagram | undefined = selectActiveDiagram(useWorkspaceStore.getState());
+  const viewed: Version | null = useViewedVersionStore.getState().version;
   const isSystemDark: boolean = window.matchMedia(DARK_QUERY).matches;
   return {
-    svg: currentSvg(usePreviewStatusStore.getState(), diagram?.id),
-    code: diagram?.code ?? '',
+    svg: currentSvg(usePreviewStatusStore.getState(), renderIdOf(diagram?.id ?? '', viewed)),
+    code: shownCode(diagram, viewed),
     title: diagram?.title ?? '',
     isDark: resolveTheme(useUiStore.getState().themePreference, isSystemDark) === 'dark',
   };
@@ -76,9 +87,10 @@ export const appExportActions: ExportActions = createExportActions(
 export function useExportAvailability(): { hasImage: boolean; hasCode: boolean } {
   const status: PreviewStatus = usePreviewStatus();
   const diagram: Diagram | undefined = useActiveDiagram();
+  const viewed: Version | null = useViewedVersion();
   return exportAvailability({
-    svg: currentSvg(status, diagram?.id),
-    code: diagram?.code ?? '',
+    svg: currentSvg(status, renderIdOf(diagram?.id ?? '', viewed)),
+    code: shownCode(diagram, viewed),
     title: '',
     isDark: false,
   });

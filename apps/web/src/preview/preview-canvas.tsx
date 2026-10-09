@@ -14,6 +14,7 @@ import { ZoomControls } from './zoom-controls.tsx';
 import { revealLineInCode } from '../code/code-reveal.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
+import { usePromptBarInset } from '../shell/prompt-bar-inset.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
@@ -73,8 +74,9 @@ interface StageProps {
 /** The stage: clickable shapes, and an accent outline on shapes selected in the editor (Split). */
 const STAGE_CLASS: string = [
   'absolute top-0 left-0 origin-top-left [&_.edgeLabel]:cursor-pointer [&_.node]:cursor-pointer',
-  '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:stroke-accent-ink',
-  '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:[stroke-width:2.5px]',
+  // Important: Mermaid styles its shapes with id selectors, which a class cannot outweigh.
+  '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:stroke-accent-ink!',
+  '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:[stroke-width:2.5px]!',
 ].join(' ');
 
 /** The pan surface and the rendered SVG, placed by the current view. */
@@ -131,6 +133,7 @@ function PreviewSurface({
   const { viewportRef, stageRef, view, controller, handlers } = usePanZoom({
     svg,
     fitKey: diagramId,
+    bottomInset: usePromptBarInset(),
     onShapeClick:
       onShapeClick ??
       ((target: Element): void => {

@@ -26,6 +26,15 @@ describe('fitView', () => {
     expect(fitView({ width: 10, height: 10 }, { width: 1000, height: 1000 }).k).toBe(2);
   });
 
+  it('keeps the bottom inset free for the prompt bar, so a tall diagram stays above it', () => {
+    const view = fitView({ width: 100, height: 800 }, { width: 848, height: 848 }, 76);
+    expect(view.k).toBeCloseTo((848 - 76 - 48) / 800);
+    expect(view.y + 800 * view.k).toBeLessThanOrEqual(848 - 76);
+    expect(fitView({ width: 10, height: 10 }, { width: 100, height: 50 }, 50)).toEqual(
+      IDENTITY_VIEW,
+    );
+  });
+
   it('returns the identity view when either side has no size', () => {
     expect(fitView({ width: 0, height: 10 }, { width: 100, height: 100 })).toEqual(IDENTITY_VIEW);
     expect(fitView({ width: 10, height: 10 }, { width: 0, height: 0 })).toEqual(IDENTITY_VIEW);

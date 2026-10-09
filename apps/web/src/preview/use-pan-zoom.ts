@@ -13,6 +13,8 @@ export interface PanZoomOptions {
   fitKey: string;
   /** A click (not a drag) on something inside the diagram. */
   onShapeClick?: (target: Element) => void;
+  /** Room a fit keeps free at the bottom, for the floating prompt bar. */
+  bottomInset?: number;
 }
 
 export interface PointerHandlers {
@@ -146,15 +148,28 @@ function pointerHandlers(
   };
 }
 
+/** A new diagram starts fitted again; the prompt bar's room is kept free when fitting. */
+function useFitInputs(controller: ViewController, fitKey: string, bottomInset: number): void {
+  useLayoutEffect(() => {
+    controller.follow();
+  }, [controller, fitKey]);
+  useLayoutEffect(() => {
+    controller.setBottomInset(bottomInset);
+  }, [controller, bottomInset]);
+}
+
 /** Pan, zoom and fit for the preview canvas. */
-export function usePanZoom({ svg, fitKey, onShapeClick }: PanZoomOptions): PanZoom {
+export function usePanZoom({
+  svg,
+  fitKey,
+  onShapeClick,
+  bottomInset = 0,
+}: PanZoomOptions): PanZoom {
   const viewportRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const stageRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const [controller] = useState<ViewController>(() => new ViewController());
   const view: ViewTransform = useSyncExternalStore(controller.subscribe, controller.getView);
-  useLayoutEffect(() => {
-    controller.follow();
-  }, [controller, fitKey]);
+  useFitInputs(controller, fitKey, bottomInset);
   useContentSize(stageRef, svg, controller);
   useViewportSize(viewportRef, controller);
   useWheel(viewportRef, controller);

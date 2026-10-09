@@ -35,24 +35,28 @@ export function clampZoom(k: number): number {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, k));
 }
 
-/** The view that centers `content` in `viewport`, as large as fits. Identity when either is empty. */
-export function fitView(content: Size, viewport: Size): ViewTransform {
+/**
+ * The view that centers `content` in `viewport`, as large as fits, above a `bottomInset` kept free
+ * (the floating prompt bar). Identity when either is empty.
+ */
+export function fitView(content: Size, viewport: Size, bottomInset: number = 0): ViewTransform {
+  const height: number = viewport.height - bottomInset;
   const isMeasurable: boolean =
-    content.width > 0 && content.height > 0 && viewport.width > 0 && viewport.height > 0;
+    content.width > 0 && content.height > 0 && viewport.width > 0 && height > 0;
   if (!isMeasurable) {
     return IDENTITY_VIEW;
   }
   const k: number = clampZoom(
     Math.min(
       (viewport.width - FIT_PADDING) / content.width,
-      (viewport.height - FIT_PADDING) / content.height,
+      (height - FIT_PADDING) / content.height,
       MAX_FIT_ZOOM,
     ),
   );
   return {
     k,
     x: (viewport.width - content.width * k) * HALF,
-    y: (viewport.height - content.height * k) * HALF,
+    y: (height - content.height * k) * HALF,
   };
 }
 
