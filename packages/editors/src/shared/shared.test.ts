@@ -4,7 +4,7 @@ import { createLayoutGraph, runLayout, sizeLabel, topLeftOf } from './dagre-grap
 import { hasMethods } from './mermaid-parse.ts';
 import { positionOf, rectAt } from './positions.ts';
 import { parentMap } from './subgraphs.ts';
-import { numberOr, numberOrNull } from './values.ts';
+import { numberAt, numberOr, numberOrNull, textAt, textOr } from './values.ts';
 
 describe('dagre graph', () => {
   it('lays out a plain graph and reports top-left corners', () => {
@@ -66,5 +66,17 @@ describe('numberOr', () => {
     expect(numberOr(undefined, 1)).toBe(1);
     expect(numberOrNull(0)).toBeNull();
     expect(numberOrNull(3)).toBe(3);
+  });
+});
+
+describe('list and text fallbacks', () => {
+  it('reads past the end as empty', () => {
+    expect(textAt(['a'], 0)).toBe('a');
+    expect(textAt(['a'], 3)).toBe('');
+    expect(numberAt([4], 0)).toBe(4);
+    expect(numberAt([], 0)).toBe(0);
+    expect(textOr('', 'x')).toBe('x');
+    expect(textOr(undefined, 'x')).toBe('x');
+    expect(textOr('y', 'x')).toBe('y');
   });
 });

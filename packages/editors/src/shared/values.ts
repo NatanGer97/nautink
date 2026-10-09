@@ -14,3 +14,13 @@ export function numberOrNull(value: number | null | undefined): number | null {
 export function textAt(list: ArrayLike<string | undefined>, index: number): string {
   return list[index] ?? '';
 }
+
+/** v1's `text || fallback` for strings: an empty or missing text takes the fallback. */
+export function textOr(text: string | undefined, fallback: string): string {
+  return text === undefined || text === '' ? fallback : text;
+}
+
+/** The number at `index` of a list, or 0 past its end. */
+export function numberAt(list: ArrayLike<number | undefined>, index: number): number {
+  return list[index] ?? 0;
+}
