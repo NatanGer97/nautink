@@ -1,0 +1,21 @@
+{
+  "name": "@nautink/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser persistence for Nautink: diagrams, versions and canvas positions in IndexedDB, plus backup import and export.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "idb": "^8.0.4",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5"
+  }
+}

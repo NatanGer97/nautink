@@ -26,6 +26,10 @@ const GATED: GatedPackage[] = [
     name: 'packages/contracts',
     root: path.join(import.meta.dirname, '..', 'packages', 'contracts'),
   },
+  {
+    name: 'packages/storage',
+    root: path.join(import.meta.dirname, '..', 'packages', 'storage'),
+  },
 ];
 
 // A noisy suite overruns `spawnSync`'s 1 MB default and would truncate away the very line this

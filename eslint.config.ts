@@ -41,6 +41,29 @@ const CONFIG_FILES = [
   '.claude/hooks/**',
 ];
 
+// Shared with the per-file override below, which only adds an exception to it.
+const NAMING_CONVENTION = [
+  { selector: 'default', format: ['camelCase'], leadingUnderscore: 'forbid' },
+  {
+    selector: 'variable',
+    format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+    leadingUnderscore: 'forbid',
+  },
+  { selector: 'parameter', format: ['camelCase'] },
+  { selector: 'function', format: ['camelCase', 'PascalCase'] },
+  { selector: 'typeLike', format: ['PascalCase'] },
+  { selector: 'enumMember', format: ['UPPER_CASE', 'PascalCase'] },
+  { selector: 'objectLiteralProperty', format: null },
+  { selector: 'typeProperty', format: ['camelCase'] },
+  { selector: 'import', format: ['camelCase', 'PascalCase'] },
+  {
+    selector: ['variable', 'parameter', 'classProperty', 'typeProperty', 'accessor'],
+    types: ['boolean'],
+    format: ['PascalCase'],
+    prefix: ['is', 'has', 'can', 'should', 'did', 'will', 'was', 'are'],
+  },
+];
+
 export default tseslint.config(
   {
     ignores: [
@@ -81,28 +104,7 @@ export default tseslint.config(
     },
     rules: {
       // -- naming ---------------------------------------------------------
-      '@typescript-eslint/naming-convention': [
-        'error',
-        { selector: 'default', format: ['camelCase'], leadingUnderscore: 'forbid' },
-        {
-          selector: 'variable',
-          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
-          leadingUnderscore: 'forbid',
-        },
-        { selector: 'parameter', format: ['camelCase'] },
-        { selector: 'function', format: ['camelCase', 'PascalCase'] },
-        { selector: 'typeLike', format: ['PascalCase'] },
-        { selector: 'enumMember', format: ['UPPER_CASE', 'PascalCase'] },
-        { selector: 'objectLiteralProperty', format: null },
-        { selector: 'typeProperty', format: ['camelCase'] },
-        { selector: 'import', format: ['camelCase', 'PascalCase'] },
-        {
-          selector: ['variable', 'parameter', 'classProperty', 'typeProperty', 'accessor'],
-          types: ['boolean'],
-          format: ['PascalCase'],
-          prefix: ['is', 'has', 'can', 'should', 'did', 'will', 'was', 'are'],
-        },
-      ],
+      '@typescript-eslint/naming-convention': ['error', ...NAMING_CONVENTION],
       'unicorn/filename-case': ['error', { case: 'kebabCase' }],
       'unicorn/prefer-node-protocol': 'error',
       'unicorn/catch-error-name': ['error', { name: 'err' }],
@@ -291,6 +293,23 @@ export default tseslint.config(
       'no-inline-comments': 'off',
       curly: 'off',
       'unicorn/filename-case': 'off',
+    },
+  },
+
+  // @nautink/storage keeps v1's boolean record fields so v1 backups import unchanged (PRD §7.3, §8).
+  // Only these four names, only in the file that declares the records, skip the boolean prefix.
+  {
+    files: ['packages/storage/src/records.ts'],
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'typeProperty',
+          filter: { regex: '^(pinned|titleAuto|auto|streaming)$', match: true },
+          format: ['camelCase'],
+        },
+        ...NAMING_CONVENTION,
+      ],
     },
   },
 
