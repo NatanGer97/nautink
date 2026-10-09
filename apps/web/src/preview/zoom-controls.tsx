@@ -4,16 +4,27 @@ import { Maximize2, Minimize2, Minus, Plus, Scan } from 'lucide-react';
 import { useFocusModeStore } from './focus-mode.ts';
 import { ZOOM_STEP, zoomLabel } from './view-math.ts';
 
-import type { ViewController } from './view-controller.ts';
 import type { ReactElement } from 'react';
 
+/** What the zoom bar drives: the preview's `ViewController`, or a visual editor's canvas. */
+export interface ZoomTarget {
+  zoomBy: (factor: number) => void;
+  fit: () => void;
+}
+
 export interface ZoomControlsProps {
-  controller: ViewController;
+  controller: ZoomTarget;
   zoom: number;
+  /** The gesture that also fits, shown in the Fit tooltip. */
+  fitShortcut?: string;
 }
 
 /** The floating zoom bar in the canvas's bottom-right corner (M1). */
-export function ZoomControls({ controller, zoom }: ZoomControlsProps): ReactElement {
+export function ZoomControls({
+  controller,
+  zoom,
+  fitShortcut = 'Double-click',
+}: ZoomControlsProps): ReactElement {
   const isFocusMode: boolean = useFocusModeStore((state) => state.isFocusMode);
   const toggleFocusMode: () => void = useFocusModeStore((state) => state.toggleFocusMode);
   return (
@@ -48,7 +59,7 @@ export function ZoomControls({ controller, zoom }: ZoomControlsProps): ReactElem
       />
       <IconButton
         label="Fit to view"
-        shortcut="Double-click"
+        shortcut={fitShortcut}
         icon={<Scan />}
         tooltipSide="top"
         className="size-7"

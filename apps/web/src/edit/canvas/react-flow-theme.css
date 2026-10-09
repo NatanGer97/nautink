@@ -1,0 +1,67 @@
+/*
+ * React Flow drawn with the app's tokens (PRD §6.1), in light and dark. The canvas area paints the
+ * dot grid, so React Flow's own background stays transparent.
+ */
+.nautink-flow .react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--edge);
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-stroke-selected: var(--accent-ink);
+  --xy-connectionline-stroke: var(--accent-ink);
+  --xy-connectionline-stroke-width: 1.5;
+  --xy-handle-background-color: var(--panel);
+  --xy-handle-border-color: var(--accent-ink);
+  --xy-selection-background-color: color-mix(in srgb, var(--accent-ink) 8%, transparent);
+  --xy-selection-border: 1px dashed var(--accent-ink);
+  --xy-edge-label-background-color: var(--background);
+  --xy-edge-label-color: var(--muted-foreground);
+  font-family: var(--font-sans);
+}
+
+.nautink-flow .react-flow__edge-textbg {
+  fill: var(--background);
+}
+
+.nautink-flow .react-flow__edge-text {
+  fill: var(--muted-foreground);
+  font-size: 11px;
+}
+
+.nautink-flow .react-flow__edge.selected .react-flow__edge-path,
+.nautink-flow .react-flow__edge:focus-visible .react-flow__edge-path {
+  stroke: var(--accent-ink);
+}
+
+/* Handles show on hover or selection only, so a quiet diagram stays quiet. */
+.nautink-flow .react-flow__handle {
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.nautink-flow .react-flow__node:hover .react-flow__handle,
+.nautink-flow .react-flow__node.selected .react-flow__handle,
+.nautink-flow .react-flow.connecting .react-flow__handle {
+  opacity: 1;
+}
+
+.nautink-flow .react-flow__node:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nautink-flow .react-flow__handle {
+    transition: none;
+  }
+}
+
+/* Flowchart link strokes: `-.->` dotted and `==>` thick. */
+.nautink-flow .flow-edge-dotted .react-flow__edge-path {
+  stroke-dasharray: 3 4;
+}
+
+.nautink-flow .flow-edge-thick .react-flow__edge-path {
+  stroke-width: 3;
+}

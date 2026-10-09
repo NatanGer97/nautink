@@ -7,6 +7,7 @@ import { readOnlyReason } from './read-only-reason.ts';
 import { useChatStore } from '../chat/chat-store.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
+import { useFocusModeEscape } from '../preview/focus-mode.ts';
 import { ViewedVersionBar } from '../preview/viewed-version-bar.tsx';
 import { useActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
@@ -79,6 +80,7 @@ export interface EditCanvasProps {
 export function EditCanvas({ isSplit }: EditCanvasProps): ReactElement {
   const diagram: Diagram | undefined = useActiveDiagram();
   const viewed: Version | null = useViewedVersion();
+  useFocusModeEscape();
   if (diagram === undefined) {
     return (
       <div className="grid h-full place-items-center p-6 text-muted-foreground">

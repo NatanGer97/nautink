@@ -16,6 +16,10 @@ import type { PositionMap } from '@nautink/visual-core/positions';
 export const SYNTAX_ERROR_REASON: string =
   'The code has a syntax error. The canvas is read-only until it parses.';
 
+/** Shown when Mermaid reads the code as another diagram type than this editor's. */
+export const UNSUPPORTED_REASON: string =
+  'The editor cannot read this code as this diagram type. Use code or chat.';
+
 /** The layout functions an editor brings; each is pure and comes from `@nautink/editors`. */
 export interface EditorLayout<Model> {
   /** After an outside change: keep known items, place new ones, or lay out again (`placeNodes`). */
@@ -58,7 +62,10 @@ function reasonOf<Model>(props: VisualEditorProps, sync: DiagramSyncState<Model>
   if (props.readOnlyReason !== null) {
     return props.readOnlyReason;
   }
-  return sync.failure?.kind === 'error' ? SYNTAX_ERROR_REASON : null;
+  if (sync.failure === null) {
+    return null;
+  }
+  return sync.failure.kind === 'error' ? SYNTAX_ERROR_REASON : UNSUPPORTED_REASON;
 }
 
 interface PlaceContext<Model> {

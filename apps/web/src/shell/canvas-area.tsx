@@ -1,5 +1,5 @@
+import { useIsPromptBarShown } from './prompt-bar-inset.ts';
 import { PromptBar } from '../chat/prompt-bar.tsx';
-import { useUiStore } from '../state/ui-store.ts';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -10,7 +10,7 @@ export interface CanvasAreaProps {
 
 /** The canvas region: the 20 px dot grid, the canvas slot, and the floating prompt bar. */
 export function CanvasArea({ children }: CanvasAreaProps): ReactElement {
-  const isChatOpen: boolean = useUiStore((state) => state.activePanel === 'chat');
+  const isPromptBarShown: boolean = useIsPromptBarShown();
   return (
     <main
       aria-label="Canvas"
@@ -25,7 +25,7 @@ export function CanvasArea({ children }: CanvasAreaProps): ReactElement {
           </div>
         )}
       </div>
-      {isChatOpen ? null : <PromptBar />}
+      {isPromptBarShown ? <PromptBar /> : null}
     </main>
   );
 }
