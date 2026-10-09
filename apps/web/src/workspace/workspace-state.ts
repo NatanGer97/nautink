@@ -100,8 +100,6 @@ export interface FieldActions {
   setView: (id: string, view: DiagramView) => void;
   /** Writes every queued change now. */
   flushSaves: () => Promise<void>;
-  /** The open database, for features that write their own stores (versions). Throws before `load`. */
-  getDb: () => NautinkDb;
   /**
    * The open database, for features that keep their own records there (versions). Call
    * `flushSaves` first when reading diagrams from it. Throws before `load` has finished.

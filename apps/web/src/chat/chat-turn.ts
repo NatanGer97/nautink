@@ -170,7 +170,13 @@ export async function finishTurn(turn: Turn, result: AttemptResult): Promise<str
   try {
     if (after !== null) {
       const { diagramId, before, prompt } = turn;
-      await saveTurnVersions({ db: turn.workspace().getDb(), diagramId, before, after, prompt });
+      await saveTurnVersions({
+        db: turn.workspace().requireDb(),
+        diagramId,
+        before,
+        after,
+        prompt,
+      });
     }
   } catch (err) {
     const message: string = err instanceof Error ? err.message : String(err);

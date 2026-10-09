@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { skipFirstRun } from './helpers.ts';
+
 import type { Page, Route } from '@playwright/test';
 
 // Claude is never called: `/api/chat` is answered with canned SSE bodies in the server's format.
@@ -52,6 +54,10 @@ async function send(page: Page, text: string): Promise<void> {
 }
 
 const VALID = 'flowchart TD\n  Cart --> Pay\n  Pay --> Done';
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
 
 test.describe('chat', () => {
   test.beforeEach(async ({ page }) => {

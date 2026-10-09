@@ -19,7 +19,7 @@ hooks below; call actions with `useWorkspaceStore.getState().<action>()` outside
 
 Everything is written through autosave: ~400 ms after the last change, and at once when the page is
 hidden or closed (`useWorkspaceLifecycle`, mounted by `App`). `flushSaves()` writes now; call it
-before anything that reads the database directly (version snapshots, export). `getDb()` hands out
+before anything that reads the database directly (version snapshots, export). `requireDb()` hands out
 the open database for stores the workspace does not own (versions); it throws before `load`.
 
 ## Changing a diagram

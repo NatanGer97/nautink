@@ -1,4 +1,4 @@
-import { applyPatch, findDiagram, requireDb } from './workspace-context.ts';
+import { applyPatch, findDiagram } from './workspace-context.ts';
 
 import type { FieldActions, RequestActions, StoreContext } from './workspace-state.ts';
 import type { NautinkDb } from '@nautink/storage/db';
@@ -21,7 +21,6 @@ export function fieldActions(ctx: StoreContext): FieldActions {
       applyPatch(ctx, id, { view });
     },
     flushSaves: async (): Promise<void> => ctx.runtime.autosaver.flush(),
-    getDb: (): NautinkDb => requireDb(ctx),
     requireDb: (): NautinkDb => ctx.runtime.requireDb(),
   };
 }
