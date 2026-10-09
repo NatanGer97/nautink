@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · library and code</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3451D1}a:hover{color:#2B44B0}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5E5C57;cursor:pointer;padding:0}
+.ib:hover{background:#F2F1EE;color:#1B1B19}
+.ib svg,.btn svg,.chip svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #D6D3CC;border-radius:6px;background:#FFFFFF;color:#1B1B19;font:500 13px Geist,system-ui,sans-serif;cursor:pointer}
+.btn:hover{background:#F7F7F5}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid #E6E4DF;border-radius:6px;background:#FFFFFF;color:#5E5C57;font:400 12px Geist,system-ui,sans-serif;cursor:pointer}
+.chip:hover{border-color:#D6D3CC;color:#1B1B19}
+.cls{position:absolute;box-sizing:border-box;background:#FFFFFF;border:1px solid #CFCCC4;border-radius:6px;font:400 12px 'Geist Mono',monospace;color:#1B1B19;overflow:hidden}
+.cls-h{padding:8px 10px;text-align:center;border-bottom:1px solid #E6E4DF;font:600 13px Geist,system-ui,sans-serif}
+.cls-s{padding:6px 10px;display:flex;flex-direction:column;gap:3px}
+.cls-s+.cls-s{border-top:1px solid #E6E4DF}
+.vis{color:#8C8A84;display:inline-block;width:12px}
+.dv{position:absolute;width:0;border-left:1.5px dashed #9A978F}
+.dh{position:absolute;height:0;border-top:1.5px dashed #9A978F}
+.sv{position:absolute;width:1.5px;background:#9A978F}
+.sh{position:absolute;height:1.5px;background:#9A978F}
+.lbl{position:absolute;font:400 11px Geist,system-ui,sans-serif;color:#5E5C57;background:#F7F7F5;padding:0 4px}
+.ln{display:flex;gap:14px;padding:0 14px;line-height:20px;white-space:pre}
+.ln b{font-weight:400;color:#B4B1AA;width:20px;text-align:right;flex:none}
+.k{color:#3451D1}.s{color:#1F7A52}.m{color:#8C8A84}
+input::placeholder{color:#8C8A84}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #F7F7F5; color: #1B1B19; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #FFFFFF; border-bottom: 1px solid #E6E4DF">
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 0; min-width: 0">
+      <div style="width: 22px; height: 22px; border-radius: 6px; background: #1B1B19; display: grid; place-items: center">
+        <div style="width: 8px; height: 8px; border: 1.5px solid #FFFFFF; transform: rotate(45deg)"></div>
+      </div>
+      <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+      <span style="color: #C5C2BA">/</span>
+      <button class="chip" style="border-color: transparent; font-size: 13px; color: #1B1B19; font-weight: 500">Payments domain
+        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+      <span style="font-size: 12px; color: #8C8A84">Saved</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <div style="display: flex; padding: 3px; gap: 2px; background: #F2F1EE; border-radius: 8px" role="group" aria-label="Canvas mode">
+        <button style="height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #5E5C57; font: 500 13px Geist, system-ui, sans-serif">Preview</button>
+        <button style="height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: #FFFFFF; color: #1B1B19; font: 500 13px Geist, system-ui, sans-serif; box-shadow: 0 1px 2px rgba(27,27,25,.08)">Edit</button>
+        <button style="height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #5E5C57; font: 500 13px Geist, system-ui, sans-serif">Split</button>
+      </div>
+      <button class="btn" style="background: #EEF1FD; border-color: #D5DCF8; color: #2B44B0"><svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"></path></svg>Code</button>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 1 1 0">
+      <button class="ib" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+      <button class="ib" aria-label="Redo"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+      <div style="width: 1px; height: 20px; background: #E6E4DF; margin: 0 6px"></div>
+      <button class="btn" style="color: #8C8A84; font-weight: 400; width: 200px; justify-content: space-between">
+        <span style="display: inline-flex; align-items: center; gap: 6px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>Search or run…</span>
+        <span style="font: 500 11px 'Geist Mono', monospace">⌘K</span>
+      </button>
+      <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>Export</button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Main">
+      <button class="ib" aria-label="Diagrams" style="background: #EEF1FD; color: #2B44B0"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg></button>
+      <button class="ib" aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg></button>
+      <button class="ib" aria-label="History"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+      <button class="ib" aria-label="Templates"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></button>
+    </nav>
+
+    <aside style="width: 296px; flex: none; display: flex; flex-direction: column; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Diagrams">
+      <div style="padding: 12px 12px 8px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-weight: 600">Diagrams</span>
+          <button class="btn" style="height: 28px; padding: 0 10px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>New</button>
+        </div>
+        <div style="position: relative">
+          <label for="lib-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search diagrams</label>
+          <input id="lib-search" placeholder="Search titles and content" style="width: 100%; box-sizing: border-box; height: 32px; border: 1px solid #E6E4DF; border-radius: 6px; padding: 0 10px; font: 400 13px Geist, system-ui, sans-serif; background: #FBFBFA; outline: none">
+        </div>
+        <div style="display: flex; gap: 4px; flex-wrap: wrap">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+            <button style="{{f.style}}" onClick="{{f.pick}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex: 1; overflow: auto; padding: 4px 8px 12px; display: flex; flex-direction: column; gap: 2px">
+        <sc-for list="{{items}}" as="d" hint-placeholder-count="6">
+          <button style="{{d.rowStyle}}">
+            <span style="width: 44px; height: 34px; flex: none; border: 1px solid #E6E4DF; border-radius: 5px; background: #FBFBFA; position: relative; overflow: hidden">
+              <span style="position: absolute; left: 7px; top: 6px; width: 14px; height: 7px; border: 1px solid #B9B6AE; border-radius: 2px"></span>
+              <span style="position: absolute; left: 23px; top: 19px; width: 14px; height: 7px; border: 1px solid #B9B6AE; border-radius: 2px"></span>
+              <span style="position: absolute; left: 14px; top: 13px; width: 1px; height: 9px; background: #B9B6AE"></span>
+              <span style="position: absolute; left: 14px; top: 22px; width: 9px; height: 1px; background: #B9B6AE"></span>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; text-align: left">
+              <span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.title}}</span>
+              <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8C8A84">
+                <span style="padding: 0 5px; border-radius: 4px; background: #F2F1EE; color: #5E5C57">{{d.type}}</span>{{d.when}}
+              </span>
+            </span>
+            <sc-if value="{{d.pinned}}" hint-placeholder-val="{{ false }}">
+              <svg viewBox="0 0 24 24" aria-label="Pinned" style="width: 14px; height: 14px; fill: none; stroke: #8C8A84; stroke-width: 1.6; flex: none"><path d="M12 17v4M8 3h8l-1 6 3 4H6l3-4z"></path></svg>
+            </sc-if>
+          </button>
+        </sc-for>
+        <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+          <p style="color: #8C8A84; padding: 16px 8px; margin: 0">No diagrams of this type yet.</p>
+        </sc-if>
+      </div>
+      <div style="padding: 10px 12px; border-top: 1px solid #F0EEEA; display: flex; justify-content: space-between; font-size: 12px; color: #8C8A84">
+        <span>24 diagrams</span>
+        <a href="#" style="color: #5E5C57">Import or back up</a>
+      </div>
+    </aside>
+
+    <main style="flex: 1; min-width: 0; position: relative; background-color: #F7F7F5; background-image: radial-gradient(#DAD7D0 1px, transparent 1px); background-size: 20px 20px; overflow: hidden">
+      <div class="cls" style="left: 210px; top: 70px; width: 210px">
+        <div class="cls-h"><div style="font: 400 11px Geist, system-ui, sans-serif; color: #8C8A84">«interface»</div>PaymentMethod</div>
+        <div class="cls-s" style="padding: 3px 10px"></div>
+        <div class="cls-s"><span><span class="vis">+</span>authorize(amount) Result</span><span><span class="vis">+</span>refund(id) void</span></div>
+      </div>
+      <svg viewBox="0 0 14 12" style="position: absolute; left: 308px; top: 176px; width: 14px; height: 12px; fill: #F7F7F5; stroke: #9A978F; stroke-width: 1.4"><path d="M7 1 13 11H1z"></path></svg>
+      <div class="dv" style="left: 314px; top: 188px; height: 62px"></div>
+      <div class="dh" style="left: 175px; top: 250px; width: 280px"></div>
+      <div class="dv" style="left: 175px; top: 250px; height: 66px"></div>
+      <div class="dv" style="left: 455px; top: 250px; height: 66px"></div>
+
+      <div class="cls" style="left: 85px; top: 316px; width: 180px; border: 1.5px solid #3451D1; box-shadow: 0 0 0 3px #E3E8FC">
+        <div class="cls-h">CardPayment</div>
+        <div class="cls-s"><span><span class="vis">-</span>String last4</span></div>
+        <div class="cls-s"><span><span class="vis">+</span>authorize(amount) Result</span></div>
+      </div>
+      <div class="cls" style="left: 365px; top: 316px; width: 180px">
+        <div class="cls-h">PayPalPayment</div>
+        <div class="cls-s"><span><span class="vis">-</span>String email</span></div>
+        <div class="cls-s"><span><span class="vis">+</span>authorize(amount) Result</span></div>
+      </div>
+
+      <div class="cls" style="left: 210px; top: 500px; width: 210px">
+        <div class="cls-h">Order</div>
+        <div class="cls-s"><span><span class="vis">+</span>UUID id</span><span><span class="vis">+</span>Money total</span><span><span class="vis">-</span>Status status</span></div>
+        <div class="cls-s"><span><span class="vis">+</span>pay(method) Result</span></div>
+      </div>
+      <div class="sh" style="left: 420px; top: 560px; width: 150px"></div>
+      <div class="sv" style="left: 569px; top: 128px; height: 433px"></div>
+      <div class="sh" style="left: 428px; top: 128px; width: 142px"></div>
+      <svg viewBox="0 0 10 12" style="position: absolute; left: 420px; top: 122px; width: 10px; height: 12px; fill: none; stroke: #9A978F; stroke-width: 1.5"><path d="M9 1 1 6l8 5"></path></svg>
+      <span class="lbl" style="left: 548px; top: 330px; transform: rotate(-90deg)">uses</span>
+      <span class="lbl" style="left: 428px; top: 542px">1</span>
+      <span class="lbl" style="left: 440px; top: 110px">1</span>
+
+      <div style="position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(460px, calc(100% - 32px)); display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; background: #FFFFFF; border: 1px solid #D6D3CC; border-radius: 12px; box-shadow: 0 8px 24px rgba(27,27,25,.10)">
+        <label for="lib-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ask Claude to change this diagram</label>
+        <input id="lib-ask" placeholder="Ask Claude to change this diagram…" style="flex: 1; min-width: 0; border: 0; outline: none; font: 400 13px Geist, system-ui, sans-serif; background: transparent">
+        <span class="chip" style="height: 24px; padding: 0 8px">Opus</span>
+        <button aria-label="Send" style="width: 30px; height: 30px; border: 0; border-radius: 8px; background: #1B1B19; color: #FFFFFF; display: grid; place-items: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+        </button>
+      </div>
+    </main>
+
+    <section style="width: 420px; flex: none; display: flex; flex-direction: column; background: #FFFFFF; border-left: 1px solid #E6E4DF" aria-label="Code">
+      <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 14px; border-bottom: 1px solid #F0EEEA">
+        <span style="display: flex; align-items: center; gap: 8px"><span style="font-weight: 600">Code</span><span style="font-size: 12px; color: #8C8A84">payments.mmd</span></span>
+        <div style="display: flex; align-items: center; gap: 2px">
+          <button class="chip" style="border-color: transparent">Copy</button>
+          <button class="ib" aria-label="Close code"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+        </div>
+      </div>
+      <div style="flex: 1; overflow: auto; padding: 10px 0; font: 400 12.5px 'Geist Mono', monospace; color: #1B1B19">
+        <div class="ln"><b>1</b><span class="k">classDiagram</span></div>
+        <div class="ln"><b>2</b>    <span class="k">direction</span> TB</div>
+        <div class="ln"><b>3</b>    <span class="k">class</span> PaymentMethod {</div>
+        <div class="ln"><b>4</b>        <span class="m">&lt;&lt;interface&gt;&gt;</span></div>
+        <div class="ln"><b>5</b>        +authorize(amount) Result</div>
+        <div class="ln"><b>6</b>        +refund(id) void</div>
+        <div class="ln"><b>7</b>    }</div>
+        <div class="ln" style="background: #EEF1FD"><b style="color: #3451D1">8</b>    <span class="k">class</span> CardPayment {</div>
+        <div class="ln" style="background: #EEF1FD"><b style="color: #3451D1">9</b>        -String last4</div>
+        <div class="ln" style="background: #EEF1FD"><b style="color: #3451D1">10</b>        +authorize(amount) Result</div>
+        <div class="ln" style="background: #EEF1FD"><b style="color: #3451D1">11</b>    }</div>
+        <div class="ln"><b>12</b>    <span class="k">class</span> PayPalPayment {</div>
+        <div class="ln"><b>13</b>        -String email</div>
+        <div class="ln"><b>14</b>        +authorize(amount) Result</div>
+        <div class="ln"><b>15</b>    }</div>
+        <div class="ln"><b>16</b>    <span class="k">class</span> Order {</div>
+        <div class="ln"><b>17</b>        +UUID id</div>
+        <div class="ln"><b>18</b>        +Money total</div>
+        <div class="ln"><b>19</b>        -Status status</div>
+        <div class="ln"><b>20</b>        +pay(method) Result</div>
+        <div class="ln"><b>21</b>    }</div>
+        <div class="ln"><b>22</b>    PaymentMethod <span class="k">&lt;|..</span> CardPayment</div>
+        <div class="ln"><b>23</b>    PaymentMethod <span class="k">&lt;|..</span> PayPalPayment</div>
+        <div class="ln"><b>24</b>    Order <span class="s">"1"</span> <span class="k">--&gt;</span> <span class="s">"1"</span> PaymentMethod : uses</div>
+      </div>
+      <div style="padding: 8px 14px; border-top: 1px solid #F0EEEA; font-size: 12px; color: #8C8A84; display: flex; justify-content: space-between">
+        <span>CardPayment is selected on the canvas</span>
+        <span>Ln 8</span>
+      </div>
+    </section>
+  </div>
+
+  <footer style="height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #FFFFFF; border-top: 1px solid #E6E4DF; font-size: 12px; color: #8C8A84">
+    <span style="color: #1B1B19; font-weight: 500">Class</span>
+    <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1F7A52"></span>Valid</span>
+    <span>Saved</span>
+    <span style="flex: 1"></span>
+    <span>24 lines</span>
+    <span>3 versions</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'All' };
+  }
+  renderVals() {
+    const all = [
+      { title: 'Payments domain', type: 'Class', when: '2 min ago', pinned: false, active: true },
+      { title: 'Checkout flow', type: 'Flowchart', when: '1 h ago', pinned: true },
+      { title: 'OAuth login with PKCE', type: 'Sequence', when: 'Yesterday', pinned: true },
+      { title: 'Orders schema', type: 'ER', when: 'Yesterday', pinned: false },
+      { title: 'Order lifecycle', type: 'State', when: 'Oct 2', pinned: false },
+      { title: 'Release plan', type: 'Gantt', when: 'Sep 28', pinned: false },
+      { title: 'Auth service map', type: 'Flowchart', when: 'Sep 21', pinned: false },
+    ];
+    const f = this.state.filter;
+    const shown = all.filter((d) => f === 'All' || (f === 'Pinned' ? d.pinned : d.type === f));
+    const chipOn = 'height: 24px; padding: 0 9px; border: 1px solid #1B1B19; border-radius: 6px; background: #1B1B19; color: #FFFFFF; font: 500 12px Geist, system-ui, sans-serif; cursor: pointer';
+    const chipOff = 'height: 24px; padding: 0 9px; border: 1px solid #E6E4DF; border-radius: 6px; background: #FFFFFF; color: #5E5C57; font: 400 12px Geist, system-ui, sans-serif; cursor: pointer';
+    const rowBase = 'display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px; font: 400 13px Geist, system-ui, sans-serif; color: #1B1B19; cursor: pointer; ';
+    return {
+      filters: ['All', 'Pinned', 'Flowchart', 'Class', 'Sequence', 'ER'].map((label) => ({
+        label,
+        style: label === f ? chipOn : chipOff,
+        pick: () => this.setState({ filter: label }),
+      })),
+      items: shown.map((d) => ({ ...d, rowStyle: rowBase + (d.active ? 'background: #F2F1EE' : 'background: transparent') })),
+      empty: shown.length === 0,
+    };
+  }
+}
+</script>
+</body>
+</html>

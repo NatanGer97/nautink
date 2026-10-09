@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · new diagram</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3451D1}a:hover{color:#2B44B0}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5E5C57;cursor:pointer;padding:0}
+.ib:hover{background:#F2F1EE;color:#1B1B19}
+.ib svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.card{display:flex;flex-direction:column;border:1px solid #E6E4DF;border-radius:10px;background:#FFFFFF;overflow:hidden;text-align:left;padding:0;cursor:pointer;font:inherit;color:inherit}
+.card:hover{border-color:#C5C2BA;box-shadow:0 4px 14px rgba(27,27,25,.06)}
+.blank{height:24px;padding:0 9px;border:1px solid #E6E4DF;border-radius:6px;background:#FFFFFF;color:#5E5C57;font:400 12px Geist,system-ui,sans-serif;cursor:pointer}
+.blank:hover{color:#1B1B19;border-color:#C5C2BA}
+input::placeholder{color:#8C8A84}
+</style>
+</helmet>
+<div style="height: 900px; position: relative; background: #F7F7F5; color: #1B1B19; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden">
+
+  <div style="height: 48px; background: #FFFFFF; border-bottom: 1px solid #E6E4DF"></div>
+  <div style="position: absolute; left: 0; top: 48px; bottom: 0; width: 52px; background: #FFFFFF; border-right: 1px solid #E6E4DF"></div>
+  <div style="position: absolute; inset: 0; background: rgba(27,27,25,.32)"></div>
+
+  <section style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(1040px, calc(100% - 48px)); height: 700px; background: #FFFFFF; border-radius: 14px; box-shadow: 0 24px 64px rgba(27,27,25,.24); display: flex; flex-direction: column; overflow: hidden" role="dialog" aria-label="New diagram">
+    <div style="display: flex; align-items: center; gap: 16px; padding: 16px 16px 16px 24px; border-bottom: 1px solid #F0EEEA">
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: none">
+        <span style="font-weight: 600; font-size: 16px">New diagram</span>
+        <span style="font-size: 12px; color: #8C8A84">Start from an example, or blank</span>
+      </div>
+      <label for="tpl-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search templates</label>
+      <input id="tpl-search" placeholder="Search templates" style="flex: 1; min-width: 0; height: 34px; border: 1px solid #E6E4DF; border-radius: 8px; padding: 0 12px; font: 400 13px Geist, system-ui, sans-serif; background: #FBFBFA; outline: none">
+      <button class="ib" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+
+    <div style="flex: 1; min-height: 0; display: flex">
+      <nav style="width: 200px; flex: none; padding: 12px; border-right: 1px solid #F0EEEA; display: flex; flex-direction: column; gap: 2px" aria-label="Categories">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="7">
+          <button style="{{c.style}}" onClick="{{c.pick}}"><span>{{c.label}}</span><span style="font-size: 12px; color: #8C8A84">{{c.count}}</span></button>
+        </sc-for>
+        <div style="flex: 1"></div>
+        <div style="padding: 12px; border: 1px dashed #D6D3CC; border-radius: 8px; font-size: 12px; color: #5E5C57; line-height: 1.5">Or describe it, and Claude drafts the first version.</div>
+      </nav>
+
+      <div style="flex: 1; min-width: 0; overflow: auto; padding: 16px 20px 24px">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+          <sc-for list="{{shown}}" as="t" hint-placeholder-count="9">
+            <div class="card">
+              <span style="height: 116px; position: relative; background: #FBFBFA; border-bottom: 1px solid #F0EEEA; display: block">
+                <sc-for list="{{t.shapes}}" as="s" hint-placeholder-count="4">
+                  <span style="{{s}}"></span>
+                </sc-for>
+              </span>
+              <span style="padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px">
+                <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                  <span style="font-weight: 500">{{t.name}}</span>
+                  <span style="{{t.badgeStyle}}">{{t.badge}}</span>
+                </span>
+                <span style="font-size: 12px; color: #5E5C57">{{t.desc}}</span>
+                <span style="display: flex; gap: 6px; margin-top: 2px">
+                  <button class="blank" style="color: #1B1B19">Use example</button>
+                  <sc-if value="{{t.visual}}" hint-placeholder-val="{{ true }}">
+                    <button class="blank">Blank</button>
+                  </sc-if>
+                </span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cat: 'All' };
+  }
+  renderVals() {
+    const B = (l, t, w, h, r) => 'position: absolute; left: ' + l + 'px; top: ' + t + 'px; width: ' + w + 'px; height: ' + h + 'px; border: 1px solid #B9B6AE; border-radius: ' + (r || 3) + 'px; background: #FFFFFF; box-sizing: border-box';
+    const L = (l, t, w, h) => 'position: absolute; left: ' + l + 'px; top: ' + t + 'px; width: ' + w + 'px; height: ' + h + 'px; background: #C5C2BA';
+    const F = (l, t, w, h, c) => 'position: absolute; left: ' + l + 'px; top: ' + t + 'px; width: ' + w + 'px; height: ' + h + 'px; background: ' + c + '; border-radius: 3px';
+    const T = [
+      { id: 'flow', name: 'Flowchart', desc: 'Processes, decisions, systems', cat: 'Process', visual: true,
+        shapes: [B(130, 12, 60, 18, 9), L(159, 30, 1.5, 14), B(130, 44, 60, 20), L(159, 64, 1.5, 12), B(140, 76, 40, 26, 3), L(180, 89, 40, 1.5), B(220, 80, 50, 18)] },
+      { id: 'class', name: 'UML class', desc: 'Classes, interfaces, relations', cat: 'Software design', visual: true,
+        shapes: [B(60, 16, 80, 44), L(60, 30, 80, 1), L(60, 44, 80, 1), B(180, 16, 80, 44), L(180, 30, 80, 1), L(140, 38, 40, 1.5), B(120, 72, 80, 34), L(120, 86, 80, 1)] },
+      { id: 'sequence', name: 'Sequence', desc: 'Messages between participants', cat: 'Software design', visual: true,
+        shapes: [B(60, 10, 50, 16), B(150, 10, 50, 16), B(240, 10, 50, 16), L(85, 26, 1, 84), L(175, 26, 1, 84), L(265, 26, 1, 84), L(86, 44, 89, 1.5), L(176, 62, 89, 1.5), L(86, 84, 179, 1.5)] },
+      { id: 'er', name: 'Entity relationship', desc: 'Tables, keys, cardinality', cat: 'Data', visual: true,
+        shapes: [B(50, 20, 90, 70), F(51, 21, 88, 14, '#EEF1FD'), L(56, 48, 60, 1), L(56, 62, 50, 1), B(200, 30, 90, 58), F(201, 31, 88, 14, '#EEF1FD'), L(140, 55, 60, 1.5)] },
+      { id: 'state', name: 'State machine', desc: 'States and transitions', cat: 'Software design', visual: true,
+        shapes: [F(80, 50, 12, 12, '#1B1B19'), L(92, 56, 28, 1.5), B(120, 44, 60, 24, 12), L(180, 56, 30, 1.5), B(210, 44, 60, 24, 12), B(150, 82, 60, 24, 12)] },
+      { id: 'gantt', name: 'Gantt', desc: 'Project schedule', cat: 'Planning',
+        shapes: [F(40, 20, 90, 12, '#DCE3FB'), F(100, 40, 110, 12, '#DCE3FB'), F(160, 60, 70, 12, '#D7EEDF'), F(190, 80, 100, 12, '#D7EEDF'), L(40, 100, 250, 1)] },
+      { id: 'mindmap', name: 'Mindmap', desc: 'Ideas around a topic', cat: 'Planning',
+        shapes: [B(130, 46, 60, 24, 12), L(90, 40, 40, 1.5), L(190, 40, 40, 1.5), L(90, 78, 40, 1.5), L(190, 78, 40, 1.5), B(40, 30, 50, 18, 9), B(230, 30, 50, 18, 9), B(40, 70, 50, 18, 9), B(230, 70, 50, 18, 9)] },
+      { id: 'timeline', name: 'Timeline', desc: 'Events over time', cat: 'Planning',
+        shapes: [L(30, 58, 260, 1.5), F(60, 53, 10, 10, '#3451D1'), F(130, 53, 10, 10, '#3451D1'), F(200, 53, 10, 10, '#3451D1'), F(270, 53, 10, 10, '#3451D1'), B(40, 22, 50, 18), B(110, 74, 50, 18), B(180, 22, 50, 18)] },
+      { id: 'pie', name: 'Pie chart', desc: 'Parts of a whole', cat: 'Charts',
+        shapes: ['position: absolute; left: 115px; top: 13px; width: 90px; height: 90px; border-radius: 50%; background: conic-gradient(#3451D1 0 45%, #9AAEFF 0 70%, #DCE3FB 0 90%, #EEECE7 0)'] },
+      { id: 'journey', name: 'User journey', desc: 'Steps and satisfaction', cat: 'Process',
+        shapes: [L(30, 92, 260, 1), F(50, 40, 40, 40, '#D7EEDF'), F(110, 60, 40, 20, '#F8E7C4'), F(170, 30, 40, 50, '#D7EEDF'), F(230, 70, 40, 10, '#F6DADA')] },
+      { id: 'git', name: 'Git graph', desc: 'Branches and merges', cat: 'Software design',
+        shapes: [L(30, 40, 260, 2), L(110, 76, 130, 2), F(50, 35, 12, 12, '#1B1B19'), F(100, 35, 12, 12, '#1B1B19'), F(150, 71, 12, 12, '#3451D1'), F(200, 71, 12, 12, '#3451D1'), F(250, 35, 12, 12, '#1B1B19')] },
+      { id: 'architecture', name: 'Architecture', desc: 'Services and infrastructure', cat: 'Software design',
+        shapes: ['position: absolute; left: 30px; top: 12px; width: 260px; height: 92px; border: 1px dashed #B9B6AE; border-radius: 8px', B(50, 44, 50, 34, 6), B(135, 44, 50, 34, 6), B(220, 44, 50, 34, 6), L(100, 61, 35, 1.5), L(185, 61, 35, 1.5)] },
+      { id: 'quadrant', name: 'Quadrant', desc: 'Two-axis prioritization', cat: 'Charts',
+        shapes: [B(80, 10, 160, 96, 2), L(160, 10, 1, 96), L(80, 58, 160, 1), F(110, 30, 8, 8, '#3451D1'), F(190, 24, 8, 8, '#3451D1'), F(200, 80, 8, 8, '#3451D1')] },
+      { id: 'kanban', name: 'Kanban', desc: 'Task board', cat: 'Planning',
+        shapes: [F(40, 14, 72, 90, '#F2F1EE'), F(124, 14, 72, 90, '#F2F1EE'), F(208, 14, 72, 90, '#F2F1EE'), B(46, 24, 60, 18), B(46, 48, 60, 18), B(130, 24, 60, 18), B(214, 24, 60, 18)] },
+    ];
+    const cats = ['All', 'Visual editor', 'Process', 'Software design', 'Data', 'Planning', 'Charts'];
+    const c = this.state.cat;
+    const match = (t) => c === 'All' || (c === 'Visual editor' ? t.visual : t.cat === c);
+    const on = 'display: flex; justify-content: space-between; align-items: center; width: 100%; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: #F2F1EE; color: #1B1B19; font: 500 13px Geist, system-ui, sans-serif; cursor: pointer';
+    const off = 'display: flex; justify-content: space-between; align-items: center; width: 100%; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: #5E5C57; font: 400 13px Geist, system-ui, sans-serif; cursor: pointer';
+    const vis = 'font: 500 11px Geist, system-ui, sans-serif; padding: 1px 6px; border-radius: 4px; background: #EEF1FD; color: #2B44B0';
+    const code = 'font: 500 11px Geist, system-ui, sans-serif; padding: 1px 6px; border-radius: 4px; background: #F2F1EE; color: #5E5C57';
+    return {
+      cats: cats.map((label) => ({
+        label,
+        count: T.filter((t) => label === 'All' || (label === 'Visual editor' ? t.visual : t.cat === label)).length,
+        style: label === c ? on : off,
+        pick: () => this.setState({ cat: label }),
+      })),
+      shown: T.filter(match).map((t) => ({
+        ...t,
+        visual: !!t.visual,
+        badge: t.visual ? 'Visual editor' : 'Code',
+        badgeStyle: t.visual ? vis : code,
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

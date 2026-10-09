@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · gantt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3451D1}a:hover{color:#2B44B0}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5E5C57;cursor:pointer;padding:0}
+.ib:hover{background:#F2F1EE;color:#1B1B19}
+.ib svg,.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #D6D3CC;border-radius:6px;background:#FFFFFF;color:#1B1B19;font:500 13px Geist,system-ui,sans-serif;cursor:pointer}
+.seg{height:26px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:#5E5C57;font:500 13px Geist,system-ui,sans-serif;display:inline-flex;align-items:center}
+.seg.on{background:#FFFFFF;color:#1B1B19;box-shadow:0 1px 2px rgba(27,27,25,.08)}
+.seg.off{color:#B4B1AA;cursor:not-allowed}
+.bar{position:absolute;height:20px;border-radius:4px;background:#DCE3FB;border:1px solid #9AAEFF;box-sizing:border-box;font:400 11.5px Geist,system-ui,sans-serif;color:#2B44B0;display:flex;align-items:center;padding:0 8px;white-space:nowrap}
+.ln{display:flex;gap:14px;padding:0 14px;line-height:20px;white-space:pre}
+.ln b{font-weight:400;color:#B4B1AA;width:20px;text-align:right;flex:none}
+.k{color:#3451D1}.s{color:#1F7A52}.m{color:#8C8A84}
+input::placeholder{color:#8C8A84}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #F7F7F5; color: #1B1B19; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden; position: relative">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #FFFFFF; border-bottom: 1px solid #E6E4DF">
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 0; min-width: 0">
+      <div style="width: 22px; height: 22px; border-radius: 6px; background: #1B1B19; display: grid; place-items: center"><div style="width: 8px; height: 8px; border: 1.5px solid #FFFFFF; transform: rotate(45deg)"></div></div>
+      <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+      <span style="color: #C5C2BA">/</span>
+      <span style="font-weight: 500">Release plan</span>
+      <span style="font-size: 12px; color: #8C8A84">Saving…</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; position: relative">
+      <div style="display: flex; padding: 3px; gap: 2px; background: #F2F1EE; border-radius: 8px" role="group" aria-label="Canvas mode">
+        <span class="seg on">Preview</span>
+        <span class="seg off" title="Visual editing isn't available for Gantt charts">Edit</span>
+        <span class="seg off">Split</span>
+      </div>
+      <button class="btn" style="background: #EEF1FD; border-color: #D5DCF8; color: #2B44B0"><svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"></path></svg>Code</button>
+      <div style="position: absolute; left: 60px; top: 42px; width: 250px; padding: 9px 11px; background: #1B1B19; color: #FFFFFF; border-radius: 8px; font-size: 12px; line-height: 1.45; z-index: 4">Visual editing isn't available for Gantt charts. Change it in code, or ask Claude.</div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 1 1 0">
+      <div style="display: flex; align-items: center; border-radius: 6px; background: {{undoBg}}">
+        <button class="ib" aria-label="Undo: typed in code"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+        <button class="ib" aria-label="Undo history" style="width: 20px" onClick="{{toggleUndo}}"><svg viewBox="0 0 24 24" style="width: 12px; height: 12px"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+      <button class="ib" aria-label="Redo"><svg viewBox="0 0 24 24" style="opacity: .4"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+      <div style="width: 1px; height: 20px; background: #E6E4DF; margin: 0 6px"></div>
+      <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>Export</button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Main">
+      <button class="ib" aria-label="Diagrams"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg></button>
+      <button class="ib" aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg></button>
+      <button class="ib" aria-label="History"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+      <button class="ib" aria-label="Templates"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></button>
+    </nav>
+
+    <main style="flex: 1; min-width: 0; position: relative; background: #FFFFFF; overflow: hidden">
+      <div style="position: absolute; left: 40px; right: 40px; top: 70px">
+        <div style="text-align: center; font-weight: 600; font-size: 15px; margin-bottom: 16px">Release plan</div>
+        <div style="position: relative; height: 260px; margin-left: 110px">
+          <div style="position: absolute; left: 0; top: 0; width: 133px; height: 100%; border-left: 1px solid #ECEAE5"></div>
+          <div style="position: absolute; left: 187px; top: 0; height: 100%; border-left: 1px solid #ECEAE5"></div>
+          <div style="position: absolute; left: 373px; top: 0; height: 100%; border-left: 1px solid #ECEAE5"></div>
+          <div style="position: absolute; left: 560px; top: 0; height: 100%; border-left: 1px solid #ECEAE5"></div>
+          <div style="position: absolute; left: 746px; top: 0; height: 100%; border-left: 1px solid #ECEAE5"></div>
+          <div style="position: absolute; left: -110px; right: 0; top: 0; height: 68px; background: #F8F7FF"></div>
+          <div style="position: absolute; left: -110px; right: 0; top: 136px; height: 68px; background: #F8F7FF"></div>
+          <span style="position: absolute; left: -104px; top: 26px; font-weight: 500; color: #5E5C57">Design</span>
+          <span style="position: absolute; left: -104px; top: 94px; font-weight: 500; color: #5E5C57">Build</span>
+          <span style="position: absolute; left: -104px; top: 162px; font-weight: 500; color: #5E5C57">Launch</span>
+          <div class="bar" style="left: 0; top: 10px; width: 187px">Research</div>
+          <div class="bar" style="left: 187px; top: 40px; width: 133px">Wireframes</div>
+          <div class="bar" style="left: 320px; top: 78px; width: 267px">Backend</div>
+          <div class="bar" style="left: 320px; top: 108px; width: 320px">Frontend</div>
+          <div class="bar" style="left: 640px; top: 146px; width: 133px; background: #D7EEDF; border-color: #8FD0AE; color: #1F7A52">QA</div>
+          <div style="position: absolute; left: 766px; top: 179px; width: 14px; height: 14px; transform: rotate(45deg); background: #1B1B19"></div>
+          <span style="position: absolute; left: 790px; top: 177px; font-size: 11.5px">Release</span>
+          <div style="position: absolute; left: 0; right: 0; top: 230px; border-top: 1px solid #C5C2BA"></div>
+          <span style="position: absolute; left: -14px; top: 238px; font-size: 11px; color: #8C8A84">Jan 5</span>
+          <span style="position: absolute; left: 172px; top: 238px; font-size: 11px; color: #8C8A84">Jan 12</span>
+          <span style="position: absolute; left: 358px; top: 238px; font-size: 11px; color: #8C8A84">Jan 19</span>
+          <span style="position: absolute; left: 545px; top: 238px; font-size: 11px; color: #8C8A84">Jan 26</span>
+          <span style="position: absolute; left: 734px; top: 238px; font-size: 11px; color: #8C8A84">Feb 2</span>
+        </div>
+      </div>
+
+      <div style="position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(480px, calc(100% - 32px)); display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; background: #FFFFFF; border: 1px solid #D6D3CC; border-radius: 12px; box-shadow: 0 8px 24px rgba(27,27,25,.10)">
+        <label for="go-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ask Claude to change this chart</label>
+        <input id="go-ask" placeholder="Move QA a week later and add a beta milestone…" style="flex: 1; min-width: 0; border: 0; outline: none; font: 400 13px Geist, system-ui, sans-serif; background: transparent">
+        <button aria-label="Send" style="width: 30px; height: 30px; border: 0; border-radius: 8px; background: #1B1B19; color: #FFFFFF; display: grid; place-items: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+        </button>
+      </div>
+    </main>
+
+    <section style="width: 400px; flex: none; display: flex; flex-direction: column; background: #FFFFFF; border-left: 1px solid #E6E4DF" aria-label="Code">
+      <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 14px; border-bottom: 1px solid #F0EEEA">
+        <span style="font-weight: 600">Code</span>
+        <button class="ib" aria-label="Close code"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <div style="flex: 1; overflow: auto; padding: 10px 0; font: 400 12.5px 'Geist Mono', monospace">
+        <div class="ln"><b>1</b><span class="k">gantt</span></div>
+        <div class="ln"><b>2</b>    <span class="k">title</span> Release plan</div>
+        <div class="ln"><b>3</b>    <span class="k">dateFormat</span> YYYY-MM-DD</div>
+        <div class="ln"><b>4</b>    <span class="k">section</span> Design</div>
+        <div class="ln"><b>5</b>        Research       :a1, <span class="s">2026-01-05</span>, 7d</div>
+        <div class="ln"><b>6</b>        Wireframes     :a2, <span class="k">after</span> a1, 5d</div>
+        <div class="ln"><b>7</b>    <span class="k">section</span> Build</div>
+        <div class="ln"><b>8</b>        Backend        :b1, <span class="k">after</span> a2, 10d</div>
+        <div class="ln" style="background: #EEF1FD"><b style="color: #3451D1">9</b>        Frontend       :b2, <span class="k">after</span> a2, 12d<span style="display: inline-block; width: 1.5px; height: 15px; background: #1B1B19; vertical-align: -3px"></span></div>
+        <div class="ln"><b>10</b>    <span class="k">section</span> Launch</div>
+        <div class="ln"><b>11</b>        QA             :c1, <span class="k">after</span> b2, 5d</div>
+        <div class="ln"><b>12</b>        Release        :<span class="k">milestone</span>, <span class="k">after</span> c1, 0d</div>
+      </div>
+      <div style="padding: 8px 14px; border-top: 1px solid #F0EEEA; font-size: 12px; color: #8C8A84; display: flex; justify-content: space-between"><span>Autocomplete: ⌃Space</span><span>Ln 9, Col 42</span></div>
+    </section>
+  </div>
+
+  <footer style="height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #FFFFFF; border-top: 1px solid #E6E4DF; font-size: 12px; color: #8C8A84">
+    <span style="color: #1B1B19; font-weight: 500">Gantt</span>
+    <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1F7A52"></span>Valid</span>
+    <span>Code and chat only</span>
+    <span style="flex: 1"></span>
+    <span>12 lines</span>
+    <span>4 versions</span>
+  </footer>
+
+  <sc-if value="{{undoOpen}}" hint-placeholder-val="{{ true }}">
+  <div style="position: absolute; right: 108px; top: 52px; width: 300px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 12px; box-shadow: 0 12px 32px rgba(27,27,25,.14); padding: 6px; z-index: 5" role="menu" aria-label="Undo history">
+    <div style="font: 500 11px Geist, system-ui, sans-serif; color: #8C8A84; padding: 8px 10px 4px">Undo history</div>
+    <sc-for list="{{steps}}" as="s" hint-placeholder-count="5">
+      <button style="{{s.style}}" onClick="{{s.pick}}" role="menuitem">
+        <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0; text-align: left">
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.label}}</span>
+          <span style="font-size: 11.5px; color: #8C8A84">{{s.meta}}</span>
+        </span>
+        <sc-if value="{{s.current}}" hint-placeholder-val="{{ false }}">
+          <span style="font: 500 11px Geist, system-ui, sans-serif; padding: 1px 6px; border-radius: 4px; background: #EEF1FD; color: #2B44B0">Now</span>
+        </sc-if>
+      </button>
+    </sc-for>
+    <div style="padding: 8px 10px 6px; font-size: 11.5px; color: #8C8A84; border-top: 1px solid #F0EEEA; margin-top: 4px">Go back to any step. Later steps stay as redo until you edit.</div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { undoOpen: true, at: 0 };
+  }
+  renderVals() {
+    const steps = [
+      { label: 'Typed in code', meta: 'Code · just now' },
+      { label: 'Claude: Move QA after frontend', meta: 'Claude · 2 min ago' },
+      { label: 'Pasted code', meta: 'Code · 5 min ago' },
+      { label: 'New Gantt from example', meta: 'Template · 8 min ago' },
+    ];
+    const base = 'display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 7px 10px; border: 0; border-radius: 6px; font: 400 13px Geist, system-ui, sans-serif; cursor: pointer; ';
+    return {
+      undoOpen: this.state.undoOpen,
+      toggleUndo: () => this.setState({ undoOpen: !this.state.undoOpen }),
+      undoBg: this.state.undoOpen ? '#F2F1EE' : 'transparent',
+      steps: steps.map((s, i) => ({
+        ...s,
+        current: i === this.state.at,
+        style: base + (i === this.state.at ? 'background: #F2F1EE; color: #1B1B19' : i < this.state.at ? 'background: transparent; color: #B4B1AA' : 'background: transparent; color: #1B1B19'),
+        pick: () => this.setState({ at: i }),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

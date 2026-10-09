@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · history</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9AAEFF}a:hover{color:#C2CEFF}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#A8A6A0;cursor:pointer;padding:0}
+.ib:hover{background:#232321;color:#EDEDEB}
+.ib svg,.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #3A3A37;border-radius:6px;background:#1A1A19;color:#EDEDEB;font:500 13px Geist,system-ui,sans-serif;cursor:pointer}
+.btn:hover{background:#232321}
+.seg{height:26px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:#A8A6A0;font:500 13px Geist,system-ui,sans-serif}
+.seg.on{background:#2E2E2B;color:#EDEDEB}
+.node{position:absolute;display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:#1E1E1C;border:1px solid #3F3E3A;color:#EDEDEB;font:500 13px Geist,system-ui,sans-serif}
+.ev{position:absolute;width:1.5px;background:#77756F}
+.eh{position:absolute;height:1.5px;background:#77756F}
+.ad{position:absolute;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #77756F}
+.ar{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #77756F}
+.lbl{position:absolute;font:400 11px Geist,system-ui,sans-serif;color:#A8A6A0;background:#121211;padding:0 4px}
+.dl{display:block;padding:0 14px;line-height:21px;white-space:pre}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #121211; color: #EDEDEB; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #1A1A19; border-bottom: 1px solid #2C2C2A">
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 0; min-width: 0">
+      <div style="width: 22px; height: 22px; border-radius: 6px; background: #EDEDEB; display: grid; place-items: center"><div style="width: 8px; height: 8px; border: 1.5px solid #121211; transform: rotate(45deg)"></div></div>
+      <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+      <span style="color: #4A4945">/</span>
+      <span style="font-weight: 500">Checkout flow</span>
+    </div>
+    <div style="display: flex; padding: 3px; gap: 2px; background: #232321; border-radius: 8px" role="group" aria-label="Canvas mode">
+      <span class="seg on" style="display: inline-flex; align-items: center">Preview</span>
+      <span class="seg" style="display: inline-flex; align-items: center">Edit</span>
+      <span class="seg" style="display: inline-flex; align-items: center">Split</span>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 1 1 0">
+      <button class="ib" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+      <button class="ib" aria-label="Redo"><svg viewBox="0 0 24 24" style="opacity: .4"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+      <div style="width: 1px; height: 20px; background: #2C2C2A; margin: 0 6px"></div>
+      <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>Export</button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #1A1A19; border-right: 1px solid #2C2C2A" aria-label="Main">
+      <button class="ib" aria-label="Diagrams"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg></button>
+      <button class="ib" aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg></button>
+      <button class="ib" aria-label="History" style="background: #1E2440; color: #9AAEFF"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+      <button class="ib" aria-label="Templates"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></button>
+    </nav>
+
+    <aside style="width: 320px; flex: none; display: flex; flex-direction: column; background: #1A1A19; border-right: 1px solid #2C2C2A" aria-label="History">
+      <div style="padding: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #232321">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-weight: 600">History</span>
+          <span style="font-size: 12px; color: #7A7873">12 versions · kept in this browser</span>
+        </div>
+        <button class="btn" style="height: 28px; padding: 0 10px">Save version <span style="font: 500 11px 'Geist Mono', monospace; color: #7A7873">⌘S</span></button>
+      </div>
+      <div style="flex: 1; overflow: auto; padding: 8px">
+        <div style="font: 500 11px Geist, system-ui, sans-serif; color: #7A7873; padding: 6px 6px 6px">Today</div>
+        <sc-for list="{{versions}}" as="v" hint-placeholder-count="6">
+          <button style="{{v.rowStyle}}" onClick="{{v.pick}}">
+            <span style="width: 54px; height: 40px; flex: none; border: 1px solid #2C2C2A; border-radius: 6px; background: #121211; position: relative; overflow: hidden">
+              <span style="position: absolute; left: 20px; top: 5px; width: 14px; height: 6px; border: 1px solid #5B5A55; border-radius: 3px"></span>
+              <span style="position: absolute; left: 26px; top: 11px; width: 1px; height: 6px; background: #5B5A55"></span>
+              <span style="position: absolute; left: 21px; top: 17px; width: 12px; height: 12px; border: 1px solid #5B5A55; transform: rotate(45deg) scale(.7)"></span>
+              <span style="position: absolute; left: 20px; top: 31px; width: 14px; height: 6px; border: 1px solid #5B5A55; border-radius: 1px"></span>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; text-align: left">
+              <span style="display: flex; align-items: center; gap: 6px">
+                <span style="{{v.badgeStyle}}">{{v.kind}}</span>
+                <span style="font-size: 12px; color: #7A7873">{{v.time}}</span>
+              </span>
+              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{v.label}}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </aside>
+
+    <main style="flex: 1; min-width: 0; position: relative; background-color: #121211; background-image: radial-gradient(#2A2A27 1px, transparent 1px); background-size: 20px 20px; overflow: hidden">
+      <div style="position: absolute; left: 16px; right: 16px; top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 14px; background: #1A1A19; border: 1px solid #3A3A37; border-radius: 12px">
+        <span style="min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="color: #A8A6A0">Viewing</span> {{selectedTitle}}</span>
+        <div style="display: flex; gap: 6px; flex: none">
+          <button class="btn" onClick="{{toggleCompare}}" style="{{compareBtn}}">Compare with current</button>
+          <button class="btn" style="background: #EDEDEB; color: #121211; border-color: #EDEDEB">Restore this version</button>
+        </div>
+      </div>
+
+      <div class="node" style="left: 150px; top: 120px; width: 150px; height: 40px; border-radius: 20px">Checkout</div>
+      <div class="ev" style="left: 224px; top: 160px; height: 24px"></div><div class="ad" style="left: 220px; top: 183px"></div>
+      <div class="node" style="left: 150px; top: 190px; width: 150px; height: 44px; border-radius: 6px">Validate cart</div>
+      <div class="ev" style="left: 224px; top: 234px; height: 26px"></div><div class="ad" style="left: 220px; top: 259px"></div>
+      <div style="position: absolute; left: 187px; top: 282px; width: 76px; height: 76px; transform: rotate(45deg); background: #1E1E1C; border: 1px solid #3F3E3A; box-sizing: border-box; border-radius: 4px"></div>
+      <div style="position: absolute; left: 165px; top: 311px; width: 120px; text-align: center; font-weight: 500">Payment ok?</div>
+      <div class="ev" style="left: 224px; top: 374px; height: 42px"></div><div class="ad" style="left: 220px; top: 415px"></div>
+      <span class="lbl" style="left: 231px; top: 386px">yes</span>
+      <div class="node" style="left: 150px; top: 422px; width: 150px; height: 48px; border-radius: 6px">Create order</div>
+      <div class="ev" style="left: 224px; top: 470px; height: 34px"></div><div class="ad" style="left: 220px; top: 503px"></div>
+      <div class="node" style="left: 150px; top: 510px; width: 150px; height: 40px; border-radius: 20px">Done</div>
+      <div class="eh" style="left: 279px; top: 319px; width: 110px"></div><div class="ar" style="left: 388px; top: 315px"></div>
+      <span class="lbl" style="left: 321px; top: 300px">no</span>
+      <div class="node" style="left: 395px; top: 298px; width: 150px; height: 44px; border-radius: 6px; border: 1.5px dashed #F07A72; background: #2E1716">Show error</div>
+    </main>
+
+    <sc-if value="{{compare}}" hint-placeholder-val="{{ true }}">
+    <section style="width: 400px; flex: none; display: flex; flex-direction: column; background: #1A1A19; border-left: 1px solid #2C2C2A" aria-label="Compare">
+      <div style="height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 14px; border-bottom: 1px solid #232321">
+        <span style="display: flex; flex-direction: column; gap: 1px">
+          <span style="font-weight: 600">Changes since this version</span>
+          <span style="font-size: 12px"><span style="color: #4CC38A">+3</span> <span style="color: #F07A72">−1</span> <span style="color: #7A7873">lines</span></span>
+        </span>
+        <button class="ib" aria-label="Close compare" onClick="{{toggleCompare}}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <div style="flex: 1; overflow: auto; padding: 10px 0; font: 400 12.5px 'Geist Mono', monospace; color: #A8A6A0">
+        <span class="dl">  flowchart TD</span>
+        <span class="dl">      start([Checkout]) --&gt; cart[Validate cart]</span>
+        <span class="dl">      cart --&gt; pay{Payment ok?}</span>
+        <span class="dl">      pay --&gt;|yes| order[(Create order)]</span>
+        <span class="dl" style="background: #2E1716; color: #F5B4AE">-     pay --&gt;|no| err[Show error]</span>
+        <span class="dl" style="background: #15291F; color: #A6E3C3">+     pay --&gt;|no| retry[Retry payment]</span>
+        <span class="dl" style="background: #15291F; color: #A6E3C3">+     retry --&gt;|after 3 tries| review[Manual review]</span>
+        <span class="dl" style="background: #15291F; color: #A6E3C3">+     review --&gt;|approved| order</span>
+        <span class="dl">      order --&gt; done([Done])</span>
+      </div>
+      <div style="padding: 10px 14px; border-top: 1px solid #232321; font-size: 12px; color: #7A7873">Restoring keeps the current version in history, so you can undo it.</div>
+    </section>
+    </sc-if>
+  </div>
+
+  <footer style="height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #1A1A19; border-top: 1px solid #2C2C2A; font-size: 12px; color: #7A7873">
+    <span style="color: #EDEDEB; font-weight: 500">Flowchart</span>
+    <span>Viewing an older version · read-only</span>
+    <span style="flex: 1"></span>
+    <span>12 versions</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 2, compare: true };
+  }
+  renderVals() {
+    const kinds = {
+      Current: 'background: #232321; color: #EDEDEB',
+      Claude: 'background: #1E2440; color: #9AAEFF',
+      Saved: 'background: #15291F; color: #4CC38A',
+      'Before restore': 'background: #2E2A1A; color: #E5C46B',
+    };
+    const list = [
+      { kind: 'Current', time: 'now', label: 'Current version' },
+      { kind: 'Claude', time: '10:42', label: 'Add a retry path when the payment fails' },
+      { kind: 'Saved', time: '10:31', label: 'Before retry logic' },
+      { kind: 'Before restore', time: '10:20', label: 'Automatic snapshot' },
+      { kind: 'Claude', time: '10:12', label: 'Validate the cart before payment' },
+      { kind: 'Saved', time: '09:58', label: 'First draft' },
+    ];
+    const base = 'display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px; color: #EDEDEB; font: 400 13px Geist, system-ui, sans-serif; cursor: pointer; ';
+    const sel = list[this.state.sel];
+    return {
+      versions: list.map((v, i) => ({
+        ...v,
+        badgeStyle: 'font: 500 11px Geist, system-ui, sans-serif; padding: 1px 6px; border-radius: 4px; ' + kinds[v.kind],
+        rowStyle: base + (i === this.state.sel ? 'background: #232321; box-shadow: inset 0 0 0 1px #3A3A37' : 'background: transparent'),
+        pick: () => this.setState({ sel: i }),
+      })),
+      selectedTitle: sel.time + ' · ' + sel.label,
+      compare: this.state.compare,
+      compareBtn: this.state.compare ? 'background: #232321' : '',
+      toggleCompare: () => this.setState({ compare: !this.state.compare }),
+    };
+  }
+}
+</script>
+</body>
+</html>

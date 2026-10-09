@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · review change</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#9AAEFF}a:hover{color:#C2CEFF}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#A8A6A0;cursor:pointer;padding:0}
+.ib:hover{background:#232321;color:#EDEDEB}
+.ib svg,.btn svg,.chip svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #3A3A37;border-radius:6px;background:#1A1A19;color:#EDEDEB;font:500 13px Geist,system-ui,sans-serif;cursor:pointer}
+.btn:hover{background:#232321}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid #2C2C2A;border-radius:6px;background:#1A1A19;color:#A8A6A0;font:400 12px Geist,system-ui,sans-serif;cursor:pointer}
+.chip:hover{border-color:#3A3A37;color:#EDEDEB}
+.node{position:absolute;display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;background:#1E1E1C;border:1px solid #3F3E3A;color:#EDEDEB;font:500 13px Geist,system-ui,sans-serif}
+.ev{position:absolute;width:1.5px;background:#77756F}
+.eh{position:absolute;height:1.5px;background:#77756F}
+.ad{position:absolute;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #77756F}
+.ar{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #77756F}
+.al{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:7px solid #77756F}
+.lbl{position:absolute;font:400 11px Geist,system-ui,sans-serif;color:#A8A6A0;background:#121211;padding:0 4px}
+.tag{position:absolute;font:500 10px 'Geist Mono',monospace;padding:1px 5px;border-radius:4px}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #121211; color: #EDEDEB; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #1A1A19; border-bottom: 1px solid #2C2C2A">
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 0; min-width: 0">
+      <div style="width: 22px; height: 22px; border-radius: 6px; background: #EDEDEB; display: grid; place-items: center">
+        <div style="width: 8px; height: 8px; border: 1.5px solid #121211; transform: rotate(45deg)"></div>
+      </div>
+      <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+      <span style="color: #4A4945">/</span>
+      <button class="chip" style="border-color: transparent; font-size: 13px; color: #EDEDEB; font-weight: 500">Checkout flow
+        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <div style="display: flex; padding: 3px; gap: 2px; background: #232321; border-radius: 8px" role="group" aria-label="Canvas mode">
+        <button style="height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #A8A6A0; font: 500 13px Geist, system-ui, sans-serif">Preview</button>
+        <button style="height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: #2E2E2B; color: #EDEDEB; font: 500 13px Geist, system-ui, sans-serif">Edit</button>
+        <button style="height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #A8A6A0; font: 500 13px Geist, system-ui, sans-serif">Split</button>
+      </div>
+      <button class="btn"><svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"></path></svg>Code</button>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 1 1 0">
+      <button class="ib" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+      <button class="ib" aria-label="Redo"><svg viewBox="0 0 24 24" style="opacity: .4"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+      <div style="width: 1px; height: 20px; background: #2C2C2A; margin: 0 6px"></div>
+      <button class="btn" style="color: #7A7873; font-weight: 400; width: 200px; justify-content: space-between">
+        <span style="display: inline-flex; align-items: center; gap: 6px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>Search or run…</span>
+        <span style="font: 500 11px 'Geist Mono', monospace">⌘K</span>
+      </button>
+      <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>Export</button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #1A1A19; border-right: 1px solid #2C2C2A" aria-label="Main">
+      <button class="ib" aria-label="Diagrams"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg></button>
+      <button class="ib" aria-label="Chat" style="background: #1E2440; color: #9AAEFF"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg></button>
+      <button class="ib" aria-label="History"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+      <button class="ib" aria-label="Templates"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></button>
+    </nav>
+
+    <aside style="width: 360px; flex: none; display: flex; flex-direction: column; background: #1A1A19; border-right: 1px solid #2C2C2A" aria-label="Chat">
+      <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 16px; border-bottom: 1px solid #232321">
+        <span style="font-weight: 600">Chat</span>
+        <button class="chip">Opus <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+
+      <div style="flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px">
+        <div style="align-self: flex-end; max-width: 85%; background: #232321; border-radius: 10px; padding: 9px 12px; line-height: 1.5">Wait 30 seconds before each retry, and only send it to manual review on the third failure</div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #7A7873">
+            <div style="width: 18px; height: 18px; border-radius: 5px; background: #EDEDEB; display: grid; place-items: center; color: #121211; font-size: 10px; font-weight: 600">C</div>
+            Claude
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #A8A6A0">
+            <span style="display: flex; align-items: center; gap: 8px"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: #4CC38A; stroke-width: 2"><path d="m5 12 5 5 9-10"></path></svg>Read the current diagram</span>
+            <span style="display: flex; align-items: center; gap: 8px"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: #4CC38A; stroke-width: 2"><path d="m5 12 5 5 9-10"></path></svg>Planned the change</span>
+            <span style="display: flex; align-items: center; gap: 8px"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: #4CC38A; stroke-width: 2"><path d="m5 12 5 5 9-10"></path></svg>Validated the Mermaid syntax</span>
+          </div>
+          <p style="margin: 0; line-height: 1.6">I added a 30 second wait after each failed payment that loops back to the payment check. The path to manual review now starts from the wait step, on the third failure.</p>
+          <sc-if value="{{pending}}" hint-placeholder-val="{{ true }}">
+          <div style="border: 1px solid #3A3A37; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; background: #1E1E1C">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 500">Waiting for your review</span>
+              <span style="font-size: 12px; color: #A8A6A0">Changes are shown on the canvas</span>
+            </div>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #9AAEFF"></span>
+          </div>
+          </sc-if>
+          <sc-if value="{{accepted}}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid #2C2C2A; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between">
+            <span><span style="color: #4CC38A">Applied</span> · 5 changes</span>
+            <button class="chip" onClick="{{reset}}">Undo</button>
+          </div>
+          </sc-if>
+          <sc-if value="{{rejected}}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid #2C2C2A; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between">
+            <span style="color: #A8A6A0">Rejected · diagram unchanged</span>
+            <button class="chip" onClick="{{reset}}">Show again</button>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="padding: 12px; border-top: 1px solid #232321">
+        <div style="border: 1px solid #3A3A37; border-radius: 10px; padding: 8px 8px 8px 10px; display: flex; flex-direction: column; gap: 8px">
+          <label for="rv-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Message Claude</label>
+          <textarea id="rv-ask" rows="2" placeholder="Reply, or ask for a different change…" style="border: 0; outline: none; resize: none; font: 400 13px Geist, system-ui, sans-serif; color: #EDEDEB; background: transparent; line-height: 1.5"></textarea>
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <span style="font-size: 11px; color: #7A7873">⌘↵ to send</span>
+            <button aria-label="Send" style="width: 30px; height: 30px; border: 0; border-radius: 8px; background: #EDEDEB; color: #121211; display: grid; place-items: center">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main style="flex: 1; min-width: 0; position: relative; background-color: #121211; background-image: radial-gradient(#2A2A27 1px, transparent 1px); background-size: 20px 20px; overflow: hidden">
+
+      <sc-if value="{{pending}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 50%; top: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 8px 8px 8px 14px; background: #1A1A19; border: 1px solid #3A3A37; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.4); white-space: nowrap">
+        <span style="font-weight: 500">Claude proposes 5 changes</span>
+        <span style="display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: #A8A6A0">
+          <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; border: 1.5px dashed #4CC38A"></span>Added</span>
+          <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; border: 1.5px solid #9AAEFF"></span>Changed</span>
+          <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 10px; height: 2px; background: #F07A72"></span>Removed</span>
+        </span>
+        <div style="display: flex; gap: 6px">
+          <button class="btn" onClick="{{reject}}">Reject</button>
+          <button class="btn" onClick="{{accept}}" style="background: #EDEDEB; color: #121211; border-color: #EDEDEB">Accept <span style="font: 500 11px 'Geist Mono', monospace; opacity: .6">⏎</span></button>
+        </div>
+      </div>
+      </sc-if>
+
+      <div class="node" style="left: 225px; top: 90px; width: 150px; height: 40px; border-radius: 20px">Checkout</div>
+      <div class="ev" style="left: 299px; top: 130px; height: 24px"></div>
+      <div class="ad" style="left: 295px; top: 153px"></div>
+      <div class="node" style="left: 225px; top: 160px; width: 150px; height: 44px; border-radius: 6px">Validate cart</div>
+      <div class="ev" style="left: 299px; top: 204px; height: 26px"></div>
+      <div class="ad" style="left: 295px; top: 229px"></div>
+      <div style="position: absolute; left: 262px; top: 252px; width: 76px; height: 76px; transform: rotate(45deg); background: #1E1E1C; border: 1px solid #3F3E3A; box-sizing: border-box; border-radius: 4px"></div>
+      <div style="position: absolute; left: 240px; top: 281px; width: 120px; text-align: center; font-weight: 500">Payment ok?</div>
+      <div class="ev" style="left: 299px; top: 344px; height: 42px"></div>
+      <div class="ad" style="left: 295px; top: 385px"></div>
+      <span class="lbl" style="left: 306px; top: 356px">yes</span>
+      <div class="node" style="left: 225px; top: 392px; width: 150px; height: 48px; border-radius: 6px">Create order</div>
+      <div class="ev" style="left: 299px; top: 440px; height: 34px"></div>
+      <div class="ad" style="left: 295px; top: 473px"></div>
+      <div class="node" style="left: 225px; top: 480px; width: 150px; height: 40px; border-radius: 20px">Done</div>
+
+      <div class="eh" style="left: 354px; top: 289px; width: 110px"></div>
+      <div class="ar" style="left: 463px; top: 285px"></div>
+      <span class="lbl" style="left: 396px; top: 270px">no</span>
+
+      <div class="node" style="{{retryStyle}}">Retry payment</div>
+      <sc-if value="{{pending}}" hint-placeholder-val="{{ true }}">
+      <span class="tag" style="left: 568px; top: 258px; background: #1E2440; color: #9AAEFF">edited</span>
+      </sc-if>
+
+      <sc-if value="{{showRemoved}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 544px; top: 312px; width: 0; height: 74px; border-left: 1.5px dashed #F07A72; opacity: .8"></div>
+      <span class="lbl" style="left: 551px; top: 340px; color: #F07A72; text-decoration: line-through">after 3 tries</span>
+      </sc-if>
+
+      <div class="node" style="left: 470px; top: 392px; width: 150px; height: 48px; border-radius: 6px">Manual review</div>
+      <div class="eh" style="left: 382px; top: 415px; width: 88px"></div>
+      <div class="al" style="left: 375px; top: 411px"></div>
+      <span class="lbl" style="left: 392px; top: 396px">approved</span>
+
+      <sc-if value="{{showAdded}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 620px; top: 289px; width: 60px; height: 0; border-top: 1.5px dashed {{addedColor}}"></div>
+      <div class="node" style="{{waitStyle}}">Wait 30 s</div>
+      <div style="position: absolute; left: 749px; top: 226px; width: 0; height: 42px; border-left: 1.5px dashed {{addedColor}}"></div>
+      <div style="position: absolute; left: 318px; top: 226px; width: 432px; height: 0; border-top: 1.5px dashed {{addedColor}}"></div>
+      <span class="lbl" style="left: 520px; top: 216px; color: {{addedColor}}">retry</span>
+      <div style="position: absolute; left: 749px; top: 312px; width: 0; height: 104px; border-left: 1.5px dashed {{addedColor}}"></div>
+      <div style="position: absolute; left: 627px; top: 415px; width: 122px; height: 0; border-top: 1.5px dashed {{addedColor}}"></div>
+      <div class="al" style="left: 620px; top: 411px; border-right-color: {{addedColor}}"></div>
+      <span class="lbl" style="left: 640px; top: 396px; color: {{addedColor}}">3rd failure</span>
+      </sc-if>
+      <sc-if value="{{pending}}" hint-placeholder-val="{{ true }}">
+      <span class="tag" style="left: 780px; top: 258px; background: #15291F; color: #4CC38A">added</span>
+      </sc-if>
+
+      <div style="position: absolute; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 2px; padding: 4px; background: #1A1A19; border: 1px solid #2C2C2A; border-radius: 10px">
+        <button class="ib" aria-label="Zoom out" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M5 12h14"></path></svg></button>
+        <span style="width: 44px; text-align: center; font: 500 12px 'Geist Mono', monospace; color: #A8A6A0">100%</span>
+        <button class="ib" aria-label="Zoom in" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+        <button class="ib" aria-label="Fit" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+      </div>
+    </main>
+  </div>
+
+  <footer style="height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #1A1A19; border-top: 1px solid #2C2C2A; font-size: 12px; color: #7A7873">
+    <span style="color: #EDEDEB; font-weight: 500">Flowchart</span>
+    <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #9AAEFF"></span>{{statusText}}</span>
+    <span style="flex: 1"></span>
+    <span>21 lines</span>
+    <span>12 versions</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { status: 'pending' };
+  }
+  renderVals() {
+    const s = this.state.status;
+    const pending = s === 'pending';
+    const base = 'left: 470px; top: 268px; width: 150px; height: 44px; border-radius: 6px';
+    const wait = 'left: 680px; top: 268px; width: 140px; height: 44px; border-radius: 6px';
+    return {
+      pending,
+      accepted: s === 'accepted',
+      rejected: s === 'rejected',
+      showRemoved: pending,
+      showAdded: s !== 'rejected',
+      addedColor: pending ? '#4CC38A' : '#77756F',
+      retryStyle: pending ? base + '; border: 1.5px solid #9AAEFF' : base,
+      waitStyle: pending ? wait + '; border: 1.5px dashed #4CC38A; background: #15291F' : wait,
+      statusText: pending ? 'Reviewing Claude’s change' : s === 'accepted' ? 'Change applied' : 'Change rejected',
+      accept: () => this.setState({ status: 'accepted' }),
+      reject: () => this.setState({ status: 'rejected' }),
+      reset: () => this.setState({ status: 'pending' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

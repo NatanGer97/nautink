@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · edit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3451D1}a:hover{color:#2B44B0}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5E5C57;cursor:pointer;padding:0}
+.ib:hover{background:#F2F1EE;color:#1B1B19}
+.ib svg,.btn svg,.chip svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #D6D3CC;border-radius:6px;background:#FFFFFF;color:#1B1B19;font:500 13px Geist,system-ui,sans-serif;cursor:pointer}
+.btn:hover{background:#F7F7F5}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid #E6E4DF;border-radius:6px;background:#FFFFFF;color:#5E5C57;font:400 12px Geist,system-ui,sans-serif;cursor:pointer}
+.chip:hover{border-color:#D6D3CC;color:#1B1B19}
+.node{position:absolute;display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;background:#FFFFFF;border:1px solid #CFCCC4;color:#1B1B19;font:500 13px Geist,system-ui,sans-serif}
+.ev{position:absolute;width:1.5px;background:#9A978F}
+.eh{position:absolute;height:1.5px;background:#9A978F}
+.ad{position:absolute;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #9A978F}
+.ar{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #9A978F}
+.al{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:7px solid #9A978F}
+.lbl{position:absolute;font:400 11px Geist,system-ui,sans-serif;color:#5E5C57;background:#F7F7F5;padding:0 4px}
+.sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:0}
+textarea::placeholder,input::placeholder{color:#8C8A84}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #F7F7F5; color: #1B1B19; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #FFFFFF; border-bottom: 1px solid #E6E4DF">
+    <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 0">
+      <div style="width: 22px; height: 22px; border-radius: 6px; background: #1B1B19; display: grid; place-items: center">
+        <div style="width: 8px; height: 8px; border: 1.5px solid #FFFFFF; transform: rotate(45deg)"></div>
+      </div>
+      <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+      <span style="color: #C5C2BA">/</span>
+      <button class="chip" style="border-color: transparent; font-size: 13px; color: #1B1B19; font-weight: 500">Checkout flow
+        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+      <span style="font-size: 12px; color: #8C8A84">Saved</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px">
+      <div style="display: flex; padding: 3px; gap: 2px; background: #F2F1EE; border-radius: 8px" role="group" aria-label="Canvas mode">
+        <button style="{{previewTab}}" onClick="{{setPreview}}">Preview</button>
+        <button style="{{editTab}}" onClick="{{setEdit}}">Edit</button>
+        <a href="Split.dc.html" style="{{splitTab}}">Split</a>
+      </div>
+      <button class="btn" style="height: 32px">
+        <svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"></path></svg>Code
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 1 1 0">
+      <button class="ib" aria-label="Undo: Claude added retry path">
+        <svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg>
+      </button>
+      <button class="ib" aria-label="Redo">
+        <svg viewBox="0 0 24 24" style="opacity: .4"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg>
+      </button>
+      <div style="width: 1px; height: 20px; background: #E6E4DF; margin: 0 6px"></div>
+      <button class="btn" style="color: #8C8A84; font-weight: 400; width: 200px; justify-content: space-between">
+        <span style="display: inline-flex; align-items: center; gap: 6px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>Search or run…</span>
+        <span style="font: 500 11px 'Geist Mono', monospace; color: #8C8A84">⌘K</span>
+      </button>
+      <button class="btn">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>Export
+      </button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Main">
+      <button class="ib" aria-label="Diagrams">
+        <svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg>
+      </button>
+      <button class="ib" aria-label="Chat" onClick="{{toggleChat}}" style="{{chatRail}}">
+        <svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg>
+      </button>
+      <button class="ib" aria-label="History">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      </button>
+      <button class="ib" aria-label="Templates">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg>
+      </button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings">
+        <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+      </button>
+    </nav>
+
+    <sc-if value="{{chatOpen}}" hint-placeholder-val="{{ true }}">
+    <aside style="width: 360px; flex: none; display: flex; flex-direction: column; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Chat">
+      <div style="height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 16px; border-bottom: 1px solid #F0EEEA">
+        <span style="font-weight: 600">Chat</span>
+        <div style="display: flex; align-items: center; gap: 4px">
+          <button class="chip">Opus
+            <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <button class="ib" aria-label="New chat">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <div style="flex: 1; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px">
+        <div style="align-self: flex-end; max-width: 85%; background: #F2F1EE; border-radius: 10px; padding: 9px 12px; line-height: 1.5">Add a retry path when the payment fails, and send it to manual review after 3 tries</div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8C8A84">
+            <div style="width: 18px; height: 18px; border-radius: 5px; background: #1B1B19; display: grid; place-items: center; color: #FFFFFF; font-size: 10px; font-weight: 600">C</div>
+            Claude · 6.2s
+          </div>
+          <p style="margin: 0; line-height: 1.6">I added a retry step after the payment check. After three failed attempts the order goes to manual review, and approved orders continue to Create order.</p>
+          <div style="border: 1px solid #E6E4DF; border-radius: 10px; overflow: hidden">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #FBFBFA">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <span style="font-weight: 500">4 changes applied</span>
+                <span style="font-size: 12px; color: #5E5C57"><span style="color: #1F7A52">+2 nodes</span> · <span style="color: #1F7A52">+3 links</span></span>
+              </div>
+              <div style="display: flex; gap: 4px">
+                <button class="chip">Diff</button>
+                <button class="chip">Undo</button>
+              </div>
+            </div>
+            <div style="padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; font: 400 12px 'Geist Mono', monospace; color: #5E5C57; border-top: 1px solid #F0EEEA">
+              <span><span style="color: #1F7A52">+</span> retry[Retry payment]</span>
+              <span><span style="color: #1F7A52">+</span> review[Manual review]</span>
+              <span><span style="color: #1F7A52">+</span> pay -- no --&gt; retry</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <button class="chip">Add timeouts</button>
+            <button class="chip">Explain this flow</button>
+            <button class="chip">Turn into a sequence diagram</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 12px; border-top: 1px solid #F0EEEA">
+        <div style="border: 1px solid #D6D3CC; border-radius: 10px; background: #FFFFFF; padding: 8px 8px 8px 10px; display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; gap: 6px">
+            <span class="chip" style="height: 22px; padding: 0 8px; background: #EEF1FD; border-color: #D5DCF8; color: #2B44B0">2 nodes selected</span>
+          </div>
+          <label for="main-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Message Claude</label>
+          <textarea id="main-ask" rows="2" placeholder="Describe a change…" style="border: 0; outline: none; resize: none; font: 400 13px Geist, system-ui, sans-serif; color: #1B1B19; background: transparent; line-height: 1.5"></textarea>
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <span style="font-size: 11px; color: #8C8A84">⌘↵ to send · ⌘/ to focus</span>
+            <button aria-label="Send" style="width: 30px; height: 30px; border: 0; border-radius: 8px; background: #1B1B19; color: #FFFFFF; display: grid; place-items: center; cursor: pointer">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+    </sc-if>
+
+    <main style="flex: 1; min-width: 0; position: relative; background-color: #F7F7F5; background-image: radial-gradient(#DAD7D0 1px, transparent 1px); background-size: 20px 20px; overflow: hidden">
+
+      <sc-if value="{{isEdit}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 16px; top: 16px; display: flex; align-items: center; gap: 2px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 10px; box-shadow: 0 4px 16px rgba(27,27,25,.06)">
+        <button class="ib" aria-label="Select" style="background: #EEF1FD; color: #2B44B0">
+          <svg viewBox="0 0 24 24"><path d="m5 4 6 16 2-7 7-2z"></path></svg>
+        </button>
+        <button class="ib" aria-label="Add shape">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"></rect><circle cx="17" cy="17" r="4"></circle></svg>
+        </button>
+        <button class="ib" aria-label="Connect">
+          <svg viewBox="0 0 24 24"><path d="M6 18 18 6"></path><circle cx="5" cy="19" r="2"></circle><circle cx="19" cy="5" r="2"></circle></svg>
+        </button>
+        <button class="ib" aria-label="Add icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9 10h.01M15 10h.01M9 15c1.5 1.3 4.5 1.3 6 0"></path></svg>
+        </button>
+        <div style="width: 1px; height: 18px; background: #E6E4DF; margin: 0 4px"></div>
+        <button class="btn" style="height: 28px; border-color: transparent; padding: 0 8px">Library</button>
+      </div>
+      </sc-if>
+
+      <div class="node" style="left: 225px; top: 90px; width: 150px; height: 40px; border-radius: 20px">Checkout</div>
+      <div class="ev" style="left: 299px; top: 130px; height: 24px"></div>
+      <div class="ad" style="left: 295px; top: 153px"></div>
+      <div class="node" style="left: 225px; top: 160px; width: 150px; height: 44px; border-radius: 6px">Validate cart</div>
+      <div class="ev" style="left: 299px; top: 204px; height: 26px"></div>
+      <div class="ad" style="left: 295px; top: 229px"></div>
+      <div style="position: absolute; left: 262px; top: 252px; width: 76px; height: 76px; transform: rotate(45deg); background: #FFFFFF; border: 1px solid #CFCCC4; box-sizing: border-box; border-radius: 4px"></div>
+      <div style="position: absolute; left: 240px; top: 281px; width: 120px; text-align: center; font-weight: 500">Payment ok?</div>
+      <div class="ev" style="left: 299px; top: 344px; height: 42px"></div>
+      <div class="ad" style="left: 295px; top: 385px"></div>
+      <span class="lbl" style="left: 306px; top: 356px">yes</span>
+      <div class="node" style="left: 225px; top: 392px; width: 150px; height: 48px; border-radius: 6px">
+        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: #5E5C57; stroke-width: 1.6"><ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path></svg>
+        Create order
+      </div>
+      <div class="ev" style="left: 299px; top: 440px; height: 34px"></div>
+      <div class="ad" style="left: 295px; top: 473px"></div>
+      <div class="node" style="left: 225px; top: 480px; width: 150px; height: 40px; border-radius: 20px">Done</div>
+
+      <div class="eh" style="left: 354px; top: 289px; width: 110px"></div>
+      <div class="ar" style="left: 463px; top: 285px"></div>
+      <span class="lbl" style="left: 396px; top: 270px">no</span>
+      <div class="node" style="left: 470px; top: 268px; width: 150px; height: 44px; border-radius: 6px; border: 1.5px solid #3451D1; box-shadow: 0 0 0 3px #E3E8FC">Retry payment</div>
+      <div class="ev" style="left: 544px; top: 312px; height: 74px"></div>
+      <div class="ad" style="left: 540px; top: 385px"></div>
+      <span class="lbl" style="left: 551px; top: 340px">after 3 tries</span>
+      <div class="node" style="left: 470px; top: 392px; width: 150px; height: 48px; border-radius: 6px; border: 1.5px solid #3451D1; box-shadow: 0 0 0 3px #E3E8FC">Manual review</div>
+      <div class="eh" style="left: 382px; top: 415px; width: 88px"></div>
+      <div class="al" style="left: 375px; top: 411px"></div>
+      <span class="lbl" style="left: 392px; top: 396px">approved</span>
+
+      <sc-if value="{{isEdit}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 460px; top: 258px; width: 170px; height: 192px; border: 1px dashed #3451D1; border-radius: 8px"></div>
+      <div style="position: absolute; left: 420px; top: 462px; width: 300px; display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 10px; background: #FFFFFF; border: 1px solid #D6D3CC; border-radius: 10px; box-shadow: 0 8px 24px rgba(27,27,25,.10)">
+        <label for="sel-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ask Claude about the selection</label>
+        <input id="sel-ask" placeholder="Ask Claude about these 2…" style="flex: 1; min-width: 0; border: 0; outline: none; font: 400 13px Geist, system-ui, sans-serif; background: transparent; color: #1B1B19">
+        <button class="ib" aria-label="Group selection" style="width: 28px; height: 28px">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="3 3"></rect></svg>
+        </button>
+        <button aria-label="Send" style="width: 28px; height: 28px; border: 0; border-radius: 7px; background: #1B1B19; color: #FFFFFF; display: grid; place-items: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+        </button>
+      </div>
+
+      <section style="position: absolute; right: 16px; top: 16px; width: 248px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 12px; box-shadow: 0 8px 24px rgba(27,27,25,.08); padding: 14px; display: flex; flex-direction: column; gap: 14px" aria-label="Inspector">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font-weight: 600">2 nodes</span>
+          <span style="font-size: 12px; color: #8C8A84">Retry payment, Manual review</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; color: #5E5C57">Shape</span>
+          <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+            <button class="ib" aria-label="Rectangle" style="width: 100%; border: 1px solid #3451D1; background: #EEF1FD"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="10" rx="1"></rect></svg></button>
+            <button class="ib" aria-label="Rounded" style="width: 100%; border: 1px solid #E6E4DF"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="10" rx="5"></rect></svg></button>
+            <button class="ib" aria-label="Decision" style="width: 100%; border: 1px solid #E6E4DF"><svg viewBox="0 0 24 24"><path d="m12 4 8 8-8 8-8-8z"></path></svg></button>
+            <button class="ib" aria-label="Database" style="width: 100%; border: 1px solid #E6E4DF"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path></svg></button>
+            <button class="ib" aria-label="More shapes" style="width: 100%; border: 1px solid #E6E4DF"><svg viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01"></path></svg></button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; color: #5E5C57">Fill</span>
+          <div style="display: flex; gap: 6px">
+            <button class="sw" aria-label="Default" style="background: #FFFFFF; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 3.5px #3451D1"></button>
+            <button class="sw" aria-label="Blue" style="background: #DCE3FB"></button>
+            <button class="sw" aria-label="Green" style="background: #D7EEDF"></button>
+            <button class="sw" aria-label="Amber" style="background: #F8E7C4"></button>
+            <button class="sw" aria-label="Rose" style="background: #F6DADA"></button>
+            <button class="sw" aria-label="Slate" style="background: #DEDDD8"></button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; color: #5E5C57">Group</span>
+          <button class="btn" style="justify-content: space-between; font-weight: 400">Payment recovery
+            <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; gap: 6px; padding-top: 4px; border-top: 1px solid #F0EEEA">
+          <button class="btn" style="flex: 1; justify-content: center; margin-top: 10px">Group</button>
+          <button class="btn" style="flex: 1; justify-content: center; margin-top: 10px; color: #B4362F">Delete</button>
+        </div>
+      </section>
+      </sc-if>
+
+      <sc-if value="{{isPreview}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 16px; top: 16px; display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 8px; font-size: 12px; color: #5E5C57">
+        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        Mermaid render · click a shape to find it in code
+      </div>
+      </sc-if>
+
+      <div style="position: absolute; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 2px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 10px">
+        <button class="ib" aria-label="Zoom out" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M5 12h14"></path></svg></button>
+        <span style="width: 44px; text-align: center; font: 500 12px 'Geist Mono', monospace; color: #5E5C57">100%</span>
+        <button class="ib" aria-label="Zoom in" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+        <button class="ib" aria-label="Fit" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+      </div>
+    </main>
+  </div>
+
+  <footer style="height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #FFFFFF; border-top: 1px solid #E6E4DF; font-size: 12px; color: #8C8A84">
+    <span style="color: #1B1B19; font-weight: 500">Flowchart</span>
+    <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1F7A52"></span>Valid</span>
+    <span>Saved</span>
+    <span style="flex: 1"></span>
+    <span>18 lines</span>
+    <span>12 versions</span>
+    <span>Rendered in 31 ms</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'edit', chatOpen: true };
+  }
+  renderVals() {
+    const on = 'height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: #FFFFFF; color: #1B1B19; font: 500 13px Geist, system-ui, sans-serif; box-shadow: 0 1px 2px rgba(27,27,25,.08); cursor: pointer';
+    const off = 'height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #5E5C57; font: 500 13px Geist, system-ui, sans-serif; cursor: pointer';
+    const isEdit = this.state.mode === 'edit';
+    return {
+      isEdit,
+      isPreview: !isEdit,
+      editTab: isEdit ? on : off,
+      splitTab: off + '; display: inline-flex; align-items: center; text-decoration: none',
+      previewTab: isEdit ? off : on,
+      setEdit: () => this.setState({ mode: 'edit' }),
+      setPreview: () => this.setState({ mode: 'preview' }),
+      chatOpen: this.state.chatOpen,
+      chatRail: this.state.chatOpen ? 'background: #EEF1FD; color: #2B44B0' : '',
+      toggleChat: () => this.setState({ chatOpen: !this.state.chatOpen }),
+    };
+  }
+}
+</script>
+</body>
+</html>

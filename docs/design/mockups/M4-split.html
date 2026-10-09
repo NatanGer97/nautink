@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · split view</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3451D1}a:hover{color:#2B44B0}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5E5C57;cursor:pointer;padding:0}
+.ib:hover{background:#F2F1EE;color:#1B1B19}
+.ib svg,.btn svg,.chip svg,.mi svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn{height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #D6D3CC;border-radius:6px;background:#FFFFFF;color:#1B1B19;font:500 13px Geist,system-ui,sans-serif;cursor:pointer}
+.btn:hover{background:#F7F7F5}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid #E6E4DF;border-radius:6px;background:#FFFFFF;color:#5E5C57;font:400 12px Geist,system-ui,sans-serif;cursor:pointer}
+.seg{height:26px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:#5E5C57;font:500 13px Geist,system-ui,sans-serif;cursor:pointer;display:inline-flex;align-items:center;text-decoration:none}
+.seg.on{background:#FFFFFF;color:#1B1B19;box-shadow:0 1px 2px rgba(27,27,25,.08)}
+.node{position:absolute;display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;background:#FFFFFF;border:1px solid #CFCCC4;color:#1B1B19;font:500 13px Geist,system-ui,sans-serif}
+.mm{position:absolute;display:flex;align-items:center;justify-content:center;box-sizing:border-box;background:#ECECFF;border:1px solid #9370DB;color:#333333;font:400 13px 'trebuchet ms',verdana,arial,sans-serif}
+.ev{position:absolute;width:1.5px;background:#9A978F}
+.eh{position:absolute;height:1.5px;background:#9A978F}
+.ad{position:absolute;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #9A978F}
+.ar{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #9A978F}
+.al{position:absolute;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:7px solid #9A978F}
+.mv{position:absolute;width:1px;background:#333333}
+.mh{position:absolute;height:1px;background:#333333}
+.mad{position:absolute;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #333333}
+.mar{position:absolute;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #333333}
+.mal{position:absolute;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:7px solid #333333}
+.lbl{position:absolute;font:400 11px Geist,system-ui,sans-serif;color:#5E5C57;background:#F7F7F5;padding:0 4px}
+.mlbl{position:absolute;font:400 12px 'trebuchet ms',verdana,arial,sans-serif;color:#333333;background:#E8E8E8;padding:0 3px}
+.ph{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:12px;color:#5E5C57;border-bottom:1px solid #E6E4DF;background:#FFFFFF}
+.mi{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:7px 10px;border:0;border-radius:6px;background:transparent;text-align:left;font:400 13px Geist,system-ui,sans-serif;color:#1B1B19;cursor:pointer}
+.mi:hover{background:#F2F1EE}
+.mi span small{display:block;font-size:11.5px;color:#8C8A84;margin-top:1px}
+.mh6{font:500 11px Geist,system-ui,sans-serif;color:#8C8A84;padding:8px 10px 4px}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #F7F7F5; color: #1B1B19; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden; position: relative">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #FFFFFF; border-bottom: 1px solid #E6E4DF">
+    <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 0; min-width: 0">
+      <div style="width: 22px; height: 22px; border-radius: 6px; background: #1B1B19; display: grid; place-items: center"><div style="width: 8px; height: 8px; border: 1.5px solid #FFFFFF; transform: rotate(45deg)"></div></div>
+      <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+      <span style="color: #C5C2BA">/</span>
+      <span style="font-weight: 500">Checkout flow</span>
+      <span style="font-size: 12px; color: #8C8A84">Saved</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <div style="display: flex; padding: 3px; gap: 2px; background: #F2F1EE; border-radius: 8px" role="group" aria-label="Canvas mode">
+        <a class="seg" href="Main.dc.html">Preview</a>
+        <a class="seg" href="Main.dc.html">Edit</a>
+        <span class="seg on">Split</span>
+      </div>
+      <button class="btn"><svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"></path></svg>Code</button>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex: 1 1 0">
+      <button class="ib" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+      <button class="ib" aria-label="Redo"><svg viewBox="0 0 24 24" style="opacity: .4"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+      <div style="width: 1px; height: 20px; background: #E6E4DF; margin: 0 6px"></div>
+      <button class="btn" style="color: #8C8A84; font-weight: 400; width: 200px; justify-content: space-between">
+        <span style="display: inline-flex; align-items: center; gap: 6px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>Search or run…</span>
+        <span style="font: 500 11px 'Geist Mono', monospace">⌘K</span>
+      </button>
+      <button class="btn" onClick="{{toggleExport}}" style="{{exportBtn}}"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>Export</button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Main">
+      <button class="ib" aria-label="Diagrams"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg></button>
+      <button class="ib" aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg></button>
+      <button class="ib" aria-label="History"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+      <button class="ib" aria-label="Templates"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></button>
+    </nav>
+
+    <section style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column" aria-label="Visual editor">
+      <div class="ph"><span style="display: inline-flex; align-items: center; gap: 6px; color: #1B1B19; font-weight: 500"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>Edit</span><span>Drag, connect and rename on this side</span></div>
+      <div style="flex: 1; position: relative; background-color: #F7F7F5; background-image: radial-gradient(#DAD7D0 1px, transparent 1px); background-size: 20px 20px; overflow: hidden">
+        <div style="position: absolute; left: 12px; top: 12px; display: flex; gap: 2px; padding: 4px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 10px">
+          <button class="ib" aria-label="Select" style="background: #EEF1FD; color: #2B44B0"><svg viewBox="0 0 24 24"><path d="m5 4 6 16 2-7 7-2z"></path></svg></button>
+          <button class="ib" aria-label="Add shape"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"></rect><circle cx="17" cy="17" r="4"></circle></svg></button>
+          <button class="ib" aria-label="Connect"><svg viewBox="0 0 24 24"><path d="M6 18 18 6"></path><circle cx="5" cy="19" r="2"></circle><circle cx="19" cy="5" r="2"></circle></svg></button>
+        </div>
+        <div class="node" style="left: 125px; top: 90px; width: 150px; height: 40px; border-radius: 20px">Checkout</div>
+        <div class="ev" style="left: 199px; top: 130px; height: 24px"></div><div class="ad" style="left: 195px; top: 153px"></div>
+        <div class="node" style="left: 125px; top: 160px; width: 150px; height: 44px; border-radius: 6px">Validate cart</div>
+        <div class="ev" style="left: 199px; top: 204px; height: 26px"></div><div class="ad" style="left: 195px; top: 229px"></div>
+        <div style="position: absolute; left: 162px; top: 252px; width: 76px; height: 76px; transform: rotate(45deg); background: #FFFFFF; border: 1px solid #CFCCC4; box-sizing: border-box; border-radius: 4px"></div>
+        <div style="position: absolute; left: 140px; top: 281px; width: 120px; text-align: center; font-weight: 500">Payment ok?</div>
+        <div class="ev" style="left: 199px; top: 344px; height: 42px"></div><div class="ad" style="left: 195px; top: 385px"></div>
+        <span class="lbl" style="left: 206px; top: 356px">yes</span>
+        <div class="node" style="left: 125px; top: 392px; width: 150px; height: 48px; border-radius: 6px">Create order</div>
+        <div class="ev" style="left: 199px; top: 440px; height: 34px"></div><div class="ad" style="left: 195px; top: 473px"></div>
+        <div class="node" style="left: 125px; top: 480px; width: 150px; height: 40px; border-radius: 20px">Done</div>
+        <div class="eh" style="left: 254px; top: 289px; width: 110px"></div><div class="ar" style="left: 363px; top: 285px"></div>
+        <span class="lbl" style="left: 296px; top: 270px">no</span>
+        <div class="node" style="left: 370px; top: 268px; width: 150px; height: 44px; border-radius: 6px; border: 1.5px solid #3451D1; box-shadow: 0 0 0 3px #E3E8FC">Retry payment</div>
+        <div class="ev" style="left: 444px; top: 312px; height: 74px"></div><div class="ad" style="left: 440px; top: 385px"></div>
+        <span class="lbl" style="left: 451px; top: 340px">after 3 tries</span>
+        <div class="node" style="left: 370px; top: 392px; width: 150px; height: 48px; border-radius: 6px">Manual review</div>
+        <div class="eh" style="left: 282px; top: 415px; width: 88px"></div><div class="al" style="left: 275px; top: 411px"></div>
+        <span class="lbl" style="left: 292px; top: 396px">approved</span>
+      </div>
+    </section>
+
+    <div style="width: 7px; flex: none; background: #FFFFFF; border-left: 1px solid #E6E4DF; border-right: 1px solid #E6E4DF; display: grid; place-items: center; cursor: col-resize" role="separator" aria-label="Resize split">
+      <div style="width: 2px; height: 32px; border-radius: 2px; background: #C5C2BA"></div>
+    </div>
+
+    <section style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column" aria-label="Mermaid render">
+      <div class="ph"><span style="display: inline-flex; align-items: center; gap: 6px; color: #1B1B19; font-weight: 500"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>Preview</span><span>Exactly what GitHub and docs will show</span></div>
+      <div style="flex: 1; position: relative; background: #FFFFFF; overflow: hidden">
+        <div class="mm" style="left: 140px; top: 70px; width: 120px; height: 38px; border-radius: 19px">Checkout</div>
+        <div class="mv" style="left: 199px; top: 108px; height: 32px"></div><div class="mad" style="left: 196px; top: 136px"></div>
+        <div class="mm" style="left: 135px; top: 143px; width: 130px; height: 40px; border-radius: 0">Validate cart</div>
+        <div class="mv" style="left: 199px; top: 183px; height: 30px"></div><div class="mad" style="left: 196px; top: 209px"></div>
+        <div style="position: absolute; left: 160px; top: 225px; width: 80px; height: 80px; transform: rotate(45deg); background: #ECECFF; border: 1px solid #9370DB; box-sizing: border-box"></div>
+        <div style="position: absolute; left: 140px; top: 256px; width: 120px; text-align: center; font: 400 13px 'trebuchet ms', verdana, arial, sans-serif; color: #333333">Payment ok?</div>
+        <div class="mv" style="left: 199px; top: 322px; height: 52px"></div><div class="mad" style="left: 196px; top: 370px"></div>
+        <span class="mlbl" style="left: 186px; top: 338px">yes</span>
+        <div class="mm" style="left: 135px; top: 378px; width: 130px; height: 44px; border-radius: 0">Create order</div>
+        <div class="mv" style="left: 199px; top: 422px; height: 36px"></div><div class="mad" style="left: 196px; top: 454px"></div>
+        <div class="mm" style="left: 145px; top: 462px; width: 110px; height: 38px; border-radius: 19px">Done</div>
+        <div class="mh" style="left: 256px; top: 265px; width: 108px"></div><div class="mar" style="left: 362px; top: 261px"></div>
+        <span class="mlbl" style="left: 296px; top: 256px">no</span>
+        <div class="mm" style="left: 370px; top: 245px; width: 130px; height: 40px; border-radius: 0; outline: 2px solid #3451D1; outline-offset: 3px">Retry payment</div>
+        <div class="mv" style="left: 434px; top: 285px; height: 89px"></div><div class="mad" style="left: 431px; top: 370px"></div>
+        <span class="mlbl" style="left: 397px; top: 320px">after 3 tries</span>
+        <div class="mm" style="left: 370px; top: 378px; width: 130px; height: 44px; border-radius: 0">Manual review</div>
+        <div class="mh" style="left: 272px; top: 400px; width: 98px"></div><div class="mal" style="left: 265px; top: 396px"></div>
+        <span class="mlbl" style="left: 288px; top: 391px">approved</span>
+        <div style="position: absolute; right: 12px; bottom: 12px; display: flex; gap: 6px">
+          <span class="chip">Fit</span>
+          <span class="chip">Mermaid theme: default</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer style="height: 28px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: #FFFFFF; border-top: 1px solid #E6E4DF; font-size: 12px; color: #8C8A84">
+    <span style="color: #1B1B19; font-weight: 500">Flowchart</span>
+    <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1F7A52"></span>Valid</span>
+    <span>Selection is mirrored in the preview</span>
+    <span style="flex: 1"></span>
+    <span>18 lines</span>
+    <span>Rendered in 31 ms</span>
+  </footer>
+
+  <sc-if value="{{exportOpen}}" hint-placeholder-val="{{ true }}">
+  <div style="position: absolute; right: 12px; top: 52px; width: 300px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 12px; box-shadow: 0 12px 32px rgba(27,27,25,.14); padding: 6px; z-index: 5" role="menu" aria-label="Export">
+    <div class="mh6">Download</div>
+    <button class="mi" role="menuitem"><span>SVG<small>Vector, sharp at any size</small></span><span style="font: 500 11px 'Geist Mono', monospace; color: #8C8A84">⇧⌘E</span></button>
+    <button class="mi" role="menuitem"><span>PNG<small>{{pngDesc}}</small></span></button>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 8px">
+      <div style="display: flex; padding: 2px; gap: 2px; background: #F2F1EE; border-radius: 6px" role="group" aria-label="PNG scale">
+        <sc-for list="{{scales}}" as="s" hint-placeholder-count="4">
+          <button style="{{s.style}}" onClick="{{s.pick}}">{{s.label}}</button>
+        </sc-for>
+      </div>
+      <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #5E5C57"><input type="checkbox" checked="{{transparent}}" onChange="{{toggleTransparent}}"> Transparent</label>
+    </div>
+    <div style="height: 1px; background: #F0EEEA; margin: 2px 6px"></div>
+    <div class="mh6">Copy</div>
+    <button class="mi" role="menuitem"><span>Image<small>PNG to the clipboard</small></span><span style="font: 500 11px 'Geist Mono', monospace; color: #8C8A84">⇧⌘C</span></button>
+    <button class="mi" role="menuitem"><span>Mermaid code</span></button>
+    <button class="mi" role="menuitem"><span>Markdown<small>Fenced block for GitHub, Notion, docs</small></span></button>
+    <button class="mi" role="menuitem"><span>HTML embed<small>Renders with Mermaid from a CDN</small></span></button>
+    <div style="height: 1px; background: #F0EEEA; margin: 2px 6px"></div>
+    <button class="mi" role="menuitem"><span>Open in mermaid.live</span><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></button>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { exportOpen: true, scale: 2, transparent: false };
+  }
+  renderVals() {
+    const on = 'height: 24px; padding: 0 9px; border: 0; border-radius: 5px; background: #FFFFFF; color: #1B1B19; font: 500 12px Geist, system-ui, sans-serif; box-shadow: 0 1px 2px rgba(27,27,25,.08); cursor: pointer';
+    const off = 'height: 24px; padding: 0 9px; border: 0; border-radius: 5px; background: transparent; color: #5E5C57; font: 500 12px Geist, system-ui, sans-serif; cursor: pointer';
+    return {
+      exportOpen: this.state.exportOpen,
+      toggleExport: () => this.setState({ exportOpen: !this.state.exportOpen }),
+      exportBtn: this.state.exportOpen ? 'background: #F2F1EE' : '',
+      scales: [1, 2, 3, 4].map((n) => ({
+        label: n + '×',
+        style: n === this.state.scale ? on : off,
+        pick: () => this.setState({ scale: n }),
+      })),
+      transparent: this.state.transparent,
+      toggleTransparent: () => this.setState({ transparent: !this.state.transparent }),
+      pngDesc: this.state.scale + '× resolution' + (this.state.transparent ? ', transparent background' : ''),
+    };
+  }
+}
+</script>
+</body>
+</html>

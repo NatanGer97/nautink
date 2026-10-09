@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mermaid Chat · first run</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3451D1}a:hover{color:#2B44B0}
+.ib{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#5E5C57;cursor:pointer;padding:0}
+.ib:hover{background:#F2F1EE;color:#1B1B19}
+.ib svg,.start svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid #E6E4DF;border-radius:999px;background:#FFFFFF;color:#5E5C57;font:400 12.5px Geist,system-ui,sans-serif;cursor:pointer}
+.chip:hover{border-color:#C5C2BA;color:#1B1B19}
+.start{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #E6E4DF;border-radius:10px;background:#FFFFFF;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.start:hover{border-color:#C5C2BA}
+.start .ico{width:30px;height:30px;border-radius:8px;background:#F2F1EE;display:grid;place-items:center;color:#1B1B19}
+.lab{font-size:12px;color:#5E5C57}
+textarea::placeholder{color:#8C8A84}
+</style>
+</helmet>
+<div style="height: 900px; display: flex; flex-direction: column; background: #F7F7F5; color: #1B1B19; font-family: Geist, system-ui, sans-serif; font-size: 13px; overflow: hidden; position: relative">
+
+  <header style="height: 48px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #FFFFFF; border-bottom: 1px solid #E6E4DF">
+    <div style="width: 22px; height: 22px; border-radius: 6px; background: #1B1B19; display: grid; place-items: center"><div style="width: 8px; height: 8px; border: 1.5px solid #FFFFFF; transform: rotate(45deg)"></div></div>
+    <span style="font-weight: 600; font-size: 14px">Mermaid Chat</span>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+    <nav style="width: 52px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; background: #FFFFFF; border-right: 1px solid #E6E4DF" aria-label="Main">
+      <button class="ib" aria-label="Diagrams"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 13 9 5 9-5"></path></svg></button>
+      <button class="ib" aria-label="Chat"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"></path></svg></button>
+      <button class="ib" aria-label="History"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+      <button class="ib" aria-label="Templates"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+      <div style="flex: 1"></div>
+      <button class="ib" aria-label="Settings" onClick="{{toggleSettings}}" style="{{settingsBtn}}"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg></button>
+    </nav>
+
+    <main style="flex: 1; min-width: 0; overflow: auto; display: flex; justify-content: center; padding: 96px 24px 40px">
+      <div style="width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 22px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em">What do you want to diagram?</h1>
+          <p style="margin: 0; color: #5E5C57; font-size: 14px; line-height: 1.55">Describe it and Claude drafts the first version. Then edit it on the canvas, in code, or by asking for changes.</p>
+        </div>
+
+        <div style="border: 1px solid #D6D3CC; border-radius: 14px; background: #FFFFFF; padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 6px 20px rgba(27,27,25,.05)">
+          <label for="first-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Describe your diagram</label>
+          <textarea id="first-ask" rows="3" placeholder="The checkout flow for an online store, with payment retries and manual review…" style="border: 0; outline: none; resize: none; font: 400 15px Geist, system-ui, sans-serif; line-height: 1.5; color: #1B1B19; background: transparent"></textarea>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+            <div style="display: flex; padding: 2px; gap: 2px; background: #F2F1EE; border-radius: 8px; flex-wrap: wrap" role="group" aria-label="Diagram type">
+              <sc-for list="{{types}}" as="t" hint-placeholder-count="6">
+                <button style="{{t.style}}" onClick="{{t.pick}}">{{t.label}}</button>
+              </sc-for>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex: none">
+              <span style="font-size: 12px; color: #8C8A84">Opus</span>
+              <button aria-label="Create" style="height: 32px; padding: 0 14px; border: 0; border-radius: 8px; background: #1B1B19; color: #FFFFFF; font: 500 13px Geist, system-ui, sans-serif; cursor: pointer">Create</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <button class="chip">OAuth login with PKCE</button>
+          <button class="chip">Database for a blog</button>
+          <button class="chip">CI pipeline with rollback</button>
+          <button class="chip">Order lifecycle states</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 18px">
+          <span style="font-size: 12px; font-weight: 500; color: #8C8A84">Or start from</span>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+            <a class="start" href="Main.dc.html" style="text-decoration: none">
+              <span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg></span>
+              <span style="font-weight: 500">Blank canvas</span>
+              <span class="lab">Pick a type, draw it yourself</span>
+            </a>
+            <a class="start" href="Templates.dc.html" style="text-decoration: none">
+              <span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></span>
+              <span style="font-weight: 500">Templates</span>
+              <span class="lab">14 examples to adapt</span>
+            </a>
+            <button class="start">
+              <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 10l5 5 5-5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg></span>
+              <span style="font-weight: 500">Import</span>
+              <span class="lab">.mmd, .md or a backup file</span>
+            </button>
+            <button class="start">
+              <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"></path></svg></span>
+              <span style="font-weight: 500">From a codebase</span>
+              <span class="lab">Claude reads a local folder</span>
+            </button>
+          </div>
+        </div>
+
+        <p style="margin: 16px 0 0; font-size: 12px; color: #8C8A84">Runs on your local Claude Code. Diagrams are stored in this browser; back them up from Settings.</p>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{settingsOpen}}" hint-placeholder-val="{{ true }}">
+  <section style="position: absolute; left: 60px; bottom: 14px; width: 320px; background: #FFFFFF; border: 1px solid #E6E4DF; border-radius: 12px; box-shadow: 0 12px 32px rgba(27,27,25,.14); padding: 14px; display: flex; flex-direction: column; gap: 14px; z-index: 5" aria-label="Settings">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-weight: 600">Settings</span>
+      <button class="ib" aria-label="Close settings" onClick="{{toggleSettings}}" style="width: 28px; height: 28px"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span class="lab">Appearance</span>
+      <div style="display: flex; padding: 2px; gap: 2px; background: #F2F1EE; border-radius: 8px" role="group" aria-label="Appearance">
+        <sc-for list="{{themes}}" as="t" hint-placeholder-count="3">
+          <button style="{{t.style}}" onClick="{{t.pick}}">{{t.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label class="lab" for="set-model">Default model</label>
+      <select id="set-model" style="height: 32px; border: 1px solid #D6D3CC; border-radius: 6px; padding: 0 8px; font: 400 13px Geist, system-ui, sans-serif; background: #FFFFFF">
+        <option>Opus</option>
+        <option>Sonnet</option>
+        <option>Haiku</option>
+      </select>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span class="lab">Claude Code</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border: 1px solid #E6E4DF; border-radius: 8px">
+        <span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 7px; height: 7px; border-radius: 50%; background: #1F7A52"></span>Connected</span>
+        <span style="font: 400 12px 'Geist Mono', monospace; color: #8C8A84">claude</span>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span class="lab">Codebase Claude can read</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border: 1px solid #E6E4DF; border-radius: 8px">
+        <span style="color: #8C8A84">None</span>
+        <a href="#">Choose folder</a>
+      </div>
+    </div>
+    <div style="display: flex; gap: 6px; padding-top: 12px; border-top: 1px solid #F0EEEA">
+      <button style="flex: 1; height: 30px; border: 1px solid #D6D3CC; border-radius: 6px; background: #FFFFFF; font: 500 12.5px Geist, system-ui, sans-serif; cursor: pointer">Back up all</button>
+      <button style="flex: 1; height: 30px; border: 1px solid #D6D3CC; border-radius: 6px; background: #FFFFFF; font: 500 12.5px Geist, system-ui, sans-serif; cursor: pointer">Restore backup</button>
+    </div>
+  </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { type: 'Auto', theme: 'System', settingsOpen: true };
+  }
+  renderVals() {
+    const on = 'height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: #FFFFFF; color: #1B1B19; font: 500 12.5px Geist, system-ui, sans-serif; box-shadow: 0 1px 2px rgba(27,27,25,.08); cursor: pointer';
+    const off = 'height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: #5E5C57; font: 500 12.5px Geist, system-ui, sans-serif; cursor: pointer';
+    const seg = (list, key) => list.map((label) => ({
+      label,
+      style: (key === 'theme' ? 'flex: 1; ' : '') + (this.state[key] === label ? on : off),
+      pick: () => this.setState({ [key]: label }),
+    }));
+    return {
+      types: seg(['Auto', 'Flowchart', 'Sequence', 'Class', 'ER', 'State'], 'type'),
+      themes: seg(['System', 'Light', 'Dark'], 'theme'),
+      settingsOpen: this.state.settingsOpen,
+      toggleSettings: () => this.setState({ settingsOpen: !this.state.settingsOpen }),
+      settingsBtn: this.state.settingsOpen ? 'background: #EEF1FD; color: #2B44B0' : '',
+    };
+  }
+}
+</script>
+</body>
+</html>
