@@ -1,11 +1,13 @@
 import js from '@eslint/js';
 import prettierConfig from 'eslint-config-prettier';
 import importX from 'eslint-plugin-import-x';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import reactHooks from 'eslint-plugin-react-hooks';
 import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-import local from './tools/eslint-plugin-local/index.js';
+import local from './tools/eslint-plugin-local/index.ts';
 
 const TS_FILES = ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'];
 const TEST_FILES = [
@@ -15,11 +17,27 @@ const TEST_FILES = [
   '**/*.spec.tsx',
   '**/tests/**',
 ];
+// Browser code: the web app and every package that renders React or touches the DOM.
+const BROWSER_FILES = [
+  '**/apps/web/**/*.{ts,tsx}',
+  '**/packages/ui/**/*.{ts,tsx}',
+  '**/packages/visual-core/**/*.{ts,tsx}',
+  '**/packages/editors/**/*.{ts,tsx}',
+  '**/packages/storage/**/*.{ts,tsx}',
+];
+// Stock shadcn/ui files, added by its CLI and kept identical to the registry so `shadcn add --diff`
+// stays readable. The repo's code-style rules do not apply to them.
+const VENDORED_UI_FILES = [
+  '**/packages/ui/src/components/**/*.{ts,tsx}',
+  '**/packages/ui/src/hooks/**/*.{ts,tsx}',
+  '**/packages/ui/src/lib/utils.ts',
+];
 const CONFIG_FILES = [
   '**/*.config.{js,ts,mjs,mts}',
-  'eslint.config.js',
+  'eslint.config.ts',
+  'vitest.shared.config.ts',
   'scripts/**',
-  'tools/**/*.js',
+  'tools/eslint-plugin-local/**',
   '.claude/hooks/**',
 ];
 
@@ -209,32 +227,70 @@ export default tseslint.config(
     },
   },
 
-  // ------------------------------------------------ plain JavaScript (tooling)
+  // ------------------------------------------------- no JavaScript (ADR-001)
+  // The repo is TypeScript only. Node runs the tooling scripts by stripping their types, so there is
+  // no reason left for a .js file.
   {
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-      globals: { ...globals.node, ...globals.es2022 },
-    },
-    plugins: { 'import-x': importX, unicorn, local },
+    files: ['**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
+    languageOptions: { ecmaVersion: 2022, sourceType: 'module' },
     rules: {
-      'no-console': 'error',
-      'no-debugger': 'error',
-      'no-var': 'error',
-      'prefer-const': 'error',
-      eqeqeq: ['error', 'always'],
-      curly: ['error', 'all'],
-      'max-lines-per-function': ['error', { max: 20, skipComments: true }],
-      'local/no-blank-lines-in-function': 'error',
-      'import-x/order': [
+      'no-restricted-syntax': [
         'error',
         {
-          groups: [['builtin', 'external'], 'internal', ['parent', 'sibling', 'index'], 'type'],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
+          selector: 'Program',
+          message: 'This repo is TypeScript only (ADR-001). Use .ts or .tsx.',
         },
       ],
+    },
+  },
+
+  // ---------------------------------------------------------- browser + React
+  {
+    files: BROWSER_FILES,
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.es2022 },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: { 'react-hooks': reactHooks, 'jsx-a11y': jsxA11y },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      ...jsxA11y.flatConfigs.recommended.rules,
+    },
+  },
+
+  // React components: markup reads badly when cut into 20-line pieces, so .tsx files get 60 lines
+  // per function. Logic in .ts files keeps the full rule (ADR-001).
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      'max-lines-per-function': ['error', { max: 60, skipBlankLines: false, skipComments: true }],
+    },
+  },
+
+  // Vendored shadcn/ui: kept as the CLI writes it, so only the accessibility rules apply.
+  {
+    files: VENDORED_UI_FILES,
+    ...tseslint.configs.disableTypeChecked,
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/typedef': 'off',
+      '@typescript-eslint/no-magic-numbers': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      complexity: 'off',
+      'local/no-blank-lines-in-function': 'off',
+      'local/no-barrel-file': 'off',
+      'import-x/no-default-export': 'off',
+      'import-x/order': 'off',
+      'no-restricted-syntax': 'off',
+      'no-nested-ternary': 'off',
+      'no-inline-comments': 'off',
+      curly: 'off',
+      'unicorn/filename-case': 'off',
     },
   },
 
@@ -268,6 +324,10 @@ export default tseslint.config(
       'max-lines-per-function': 'off',
       'local/no-blank-lines-in-function': 'off',
       'unicorn/filename-case': 'off',
+      // ESLint rule visitors are named after AST node types (`ExportAllDeclaration`).
+      '@typescript-eslint/naming-convention': 'off',
+      '@typescript-eslint/no-magic-numbers': 'off',
+      'no-inline-comments': 'off',
     },
   },
 

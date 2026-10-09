@@ -7,18 +7,22 @@
  */
 import process from 'node:process';
 
-import { BLOCKING_EXIT_CODE, checkFile } from '../../scripts/lint-file.mjs';
+import { BLOCKING_EXIT_CODE, checkFile } from '../../scripts/lint-file.ts';
 
-async function readHookPayload() {
-  const chunks = [];
+interface HookPayload {
+  tool_input?: { file_path?: unknown };
+}
+
+async function readHookPayload(): Promise<HookPayload> {
+  const chunks: Buffer[] = [];
   for await (const chunk of process.stdin) {
     chunks.push(chunk);
   }
   const raw = Buffer.concat(chunks).toString('utf8').trim();
-  return raw === '' ? {} : JSON.parse(raw);
+  return raw === '' ? {} : (JSON.parse(raw) as HookPayload);
 }
 
-async function main() {
+async function main(): Promise<void> {
   const payload = await readHookPayload();
   const report = await checkFile(payload.tool_input?.file_path);
   if (report !== '') {

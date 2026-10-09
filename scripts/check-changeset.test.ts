@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { HOW_TO_ADD_ONE, decide } from './check-changeset.mjs';
+import { HOW_TO_ADD_ONE, decide } from './check-changeset.ts';
 
 test('a source change with no changeset fails and says how to add one', () => {
   const result = decide(['packages/core/src/diagram.ts', 'packages/core/src/diagram.test.ts']);

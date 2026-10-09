@@ -11,15 +11,15 @@ import process from 'node:process';
 
 const FIXTURE_ROOT = path.join(import.meta.dirname, '..', 'tools', 'lint-fixtures');
 
-function expectedRules(file) {
-  const header = readFileSync(file, 'utf8').split('\n')[0];
+function expectedRules(file: string): string[] {
+  const header = readFileSync(file, 'utf8').split('\n')[0] ?? '';
   const match = /EXPECT:\s*(.+)$/.exec(header);
-  return match === null ? [] : match[1].split(',').map((rule) => rule.trim());
+  return match?.[1] === undefined ? [] : match[1].split(',').map((rule) => rule.trim());
 }
 
 const eslint = new ESLint({ ignore: false, errorOnUnmatchedPattern: false });
-const results = await eslint.lintFiles([`${FIXTURE_ROOT}/**/*.{ts,tsx}`]);
-const failures = [];
+const results = await eslint.lintFiles([`${FIXTURE_ROOT}/**/*.{ts,tsx,js}`]);
+const failures: string[] = [];
 
 for (const result of results) {
   const relative = path.relative(FIXTURE_ROOT, result.filePath);

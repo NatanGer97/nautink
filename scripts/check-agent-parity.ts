@@ -17,21 +17,21 @@ const COMMANDS_DIR = path.join(REPO_ROOT, '.claude', 'commands');
 const PROMPTS_DIR = path.join(REPO_ROOT, '.codex', 'prompts');
 const write = process.argv.includes('--write');
 
-function markdownIn(directory) {
+function markdownIn(directory: string): string[] {
   return readdirSync(directory)
     .filter((entry) => entry.endsWith('.md'))
     .sort();
 }
 
 /** The Codex prompt a Claude command implies: the same text, with skill names resolved to paths. */
-function derivePrompt(commandText) {
+function derivePrompt(commandText: string): string {
   return commandText.replaceAll(
     /[Uu]se the `([a-z-]+)` skill/g,
-    (_match, skill) => `Follow \`docs/agents/skills/${skill}.md\``,
+    (_match: string, skill: string) => `Follow \`docs/agents/skills/${skill}.md\``,
   );
 }
 
-function checkMemorySymlink(failures) {
+function checkMemorySymlink(failures: string[]): void {
   const link = path.join(REPO_ROOT, 'CLAUDE.md');
   const stats = lstatSync(link, { throwIfNoEntry: false });
   if (stats?.isSymbolicLink() !== true) {
@@ -46,7 +46,7 @@ function checkMemorySymlink(failures) {
   }
 }
 
-function checkSkillStubs(failures) {
+function checkSkillStubs(failures: string[]): void {
   const procedures = markdownIn(SKILLS_DIR).map((entry) => entry.replace(/\.md$/, ''));
   const stubs = readdirSync(CLAUDE_SKILLS_DIR, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -69,7 +69,7 @@ function checkSkillStubs(failures) {
   }
 }
 
-function checkPrompts(failures) {
+function checkPrompts(failures: string[]): void {
   const prompts = markdownIn(PROMPTS_DIR);
   for (const name of markdownIn(COMMANDS_DIR)) {
     const expected = derivePrompt(readFileSync(path.join(COMMANDS_DIR, name), 'utf8'));
@@ -97,7 +97,7 @@ function checkPrompts(failures) {
   }
 }
 
-const failures = [];
+const failures: string[] = [];
 checkMemorySymlink(failures);
 checkSkillStubs(failures);
 checkPrompts(failures);

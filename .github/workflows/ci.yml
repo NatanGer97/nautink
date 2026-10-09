@@ -47,7 +47,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
 
-      - run: pnpm turbo run lint typecheck test build
+      - run: pnpm check
 
       # `!cancelled()` on every assertion: a pull request that fails the graph above is exactly the
       # one most likely to have weakened a gate, so the assertions still have to report.

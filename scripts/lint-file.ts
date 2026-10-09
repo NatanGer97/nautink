@@ -18,7 +18,7 @@ const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx
 const IGNORE_FILES = [path.join(REPO_ROOT, '.gitignore'), path.join(REPO_ROOT, '.prettierignore')];
 
 /** The absolute path to check, or undefined when there is nothing this script can check. */
-export function resolveTargetPath(filePath) {
+export function resolveTargetPath(filePath: unknown): string | undefined {
   if (typeof filePath !== 'string' || filePath === '') {
     return undefined;
   }
@@ -30,7 +30,7 @@ export function resolveTargetPath(filePath) {
   return absolutePath;
 }
 
-async function format(filePath) {
+async function format(filePath: string): Promise<void> {
   const info = await prettier.getFileInfo(filePath, {
     resolveConfig: true,
     ignorePath: IGNORE_FILES,
@@ -47,7 +47,7 @@ async function format(filePath) {
 }
 
 /** The ESLint report for the file, or an empty string when it is clean or not linted. */
-async function lint(filePath) {
+async function lint(filePath: string): Promise<string> {
   const eslint = new ESLint({ cwd: REPO_ROOT, fix: true });
   if (await eslint.isPathIgnored(filePath)) {
     return '';
@@ -66,7 +66,7 @@ async function lint(filePath) {
  * Formats the file, then lints it.
  * Returns the ESLint report when the file still has problems, and an empty string otherwise.
  */
-export async function checkFile(rawPath) {
+export async function checkFile(rawPath: unknown): Promise<string> {
   const filePath = resolveTargetPath(rawPath);
   if (filePath === undefined) {
     return '';
@@ -78,13 +78,13 @@ export async function checkFile(rawPath) {
   return await lint(filePath);
 }
 
-async function main() {
+async function main(): Promise<void> {
   const targets = process.argv.slice(2);
   if (targets.length === 0) {
     console.error('usage: pnpm lint:file <path> [...paths]');
     process.exit(1);
   }
-  const reports = [];
+  const reports: string[] = [];
   for (const target of targets) {
     const report = await checkFile(target);
     if (report !== '') {

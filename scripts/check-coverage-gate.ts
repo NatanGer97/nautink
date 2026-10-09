@@ -9,18 +9,25 @@ import { rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
+import type { SpawnSyncReturns } from 'node:child_process';
+
 const PROBE_SOURCE = 'export const probe = (value: number): number => {\n  return value + 1;\n};\n';
 const THRESHOLD_ERROR = 'does not meet global threshold';
 
 // Add a package here as soon as its Vitest config sets a coverage threshold, e.g.
 // { name: 'packages/core', root: path.join(import.meta.dirname, '..', 'packages', 'core') }.
-const GATED = [];
+interface GatedPackage {
+  name: string;
+  root: string;
+}
+
+const GATED: GatedPackage[] = [];
 
 // A noisy suite overruns `spawnSync`'s 1 MB default and would truncate away the very line this
 // script looks for.
 const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
 
-function runTests(root) {
+function runTests(root: string): SpawnSyncReturns<string> {
   return spawnSync('pnpm', ['exec', 'vitest', 'run'], {
     cwd: root,
     encoding: 'utf8',
@@ -28,8 +35,8 @@ function runTests(root) {
   });
 }
 
-function collectFailures(name, result) {
-  const failures = [];
+function collectFailures(name: string, result: SpawnSyncReturns<string>): string[] {
+  const failures: string[] = [];
   const output = `${result.stdout ?? ''}${result.stderr ?? ''}`;
   if (result.status === 0) {
     failures.push(`uncovered source in ${name} did not fail the run`);
@@ -40,7 +47,7 @@ function collectFailures(name, result) {
   return failures;
 }
 
-function probe({ name, root }) {
+function probe({ name, root }: GatedPackage): string[] {
   const probePath = path.join(root, 'src', 'coverage-gate-probe.ts');
   writeFileSync(probePath, PROBE_SOURCE);
   try {
@@ -50,7 +57,7 @@ function probe({ name, root }) {
   }
 }
 
-function main() {
+function main(): void {
   if (GATED.length === 0) {
     console.log('Coverage gate check skipped: no package sets a coverage threshold yet.');
     return;

@@ -1,0 +1,25 @@
+{
+  // Type-checks the repo's own tooling: the gate scripts, the local ESLint plugin, the agent hook,
+  // and the shared configs. Node runs these files directly by stripping their types, so only
+  // erasable TypeScript is allowed and nothing is emitted.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "tools/eslint-plugin-local/**/*.ts",
+    ".claude/hooks/**/*.ts",
+    "eslint.config.ts",
+    "vitest.shared.config.ts",
+    // Scratch files `pnpm check:agents` writes to prove the agent hook lints a TypeScript file.
+    "tmp-agent-hook-check-*/*.ts"
+  ]
+}

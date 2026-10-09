@@ -6,21 +6,23 @@
  * a harness without hooks relies on the CLI alone.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 
+import type { SpawnSyncReturns } from 'node:child_process';
+
 const REPO_ROOT = path.join(import.meta.dirname, '..');
-const HOOK = path.join(REPO_ROOT, '.claude', 'hooks', 'lint-edited-file.mjs');
-const CLI = path.join(REPO_ROOT, 'scripts', 'lint-file.mjs');
+const HOOK = path.join(REPO_ROOT, '.claude', 'hooks', 'lint-edited-file.ts');
+const CLI = path.join(REPO_ROOT, 'scripts', 'lint-file.ts');
 const DIRTY_SOURCE = "export function report() {\n  console.log('debris')\n}\n";
-const UNFORMATTED_SOURCE = "export const value =    'quoted'\n";
-const FORMATTED_SOURCE = "export const value = 'quoted';\n";
+const UNFORMATTED_SOURCE = "export const value: string =    'quoted'\n";
+const FORMATTED_SOURCE = "export const value: string = 'quoted';\n";
 const IGNORED_SOURCE = '|  a  |  hand-wrapped  table  |\n';
 const BLOCKING_EXIT_CODE = 2;
 
-function runHook(filePath) {
+function runHook(filePath: string): SpawnSyncReturns<string> {
   const payload = JSON.stringify({
     tool_name: 'Write',
     tool_input: { file_path: filePath },
@@ -33,15 +35,15 @@ function runHook(filePath) {
   });
 }
 
-function runCli(filePath) {
+function runCli(filePath: string): SpawnSyncReturns<string> {
   return spawnSync(process.execPath, [CLI, filePath], { cwd: REPO_ROOT, encoding: 'utf8' });
 }
 
 /** Every case the hook is checked on must get the same verdict from the CLI. */
-function checkCliParity(directory, failures) {
+function checkCliParity(directory: string, failures: string[]): void {
   const cases = {
-    'dirty file': { source: DIRTY_SOURCE, name: 'cli-dirty.mjs', status: BLOCKING_EXIT_CODE },
-    'clean file': { source: UNFORMATTED_SOURCE, name: 'cli-clean.mjs', status: 0 },
+    'dirty file': { source: DIRTY_SOURCE, name: 'cli-dirty.ts', status: BLOCKING_EXIT_CODE },
+    'clean file': { source: UNFORMATTED_SOURCE, name: 'cli-clean.ts', status: 0 },
     'ignored file': { source: IGNORED_SOURCE, name: 'cli-prose.md', status: 0 },
   };
   for (const [label, { source, name, status }] of Object.entries(cases)) {
@@ -54,14 +56,14 @@ function checkCliParity(directory, failures) {
       );
     }
   }
-  const missing = runCli(path.join(directory, 'cli-gone.mjs'));
+  const missing = runCli(path.join(directory, 'cli-gone.ts'));
   if (missing.status !== 0) {
     failures.push(`a deleted file via CLI: expected exit 0, got ${missing.status}`);
   }
 }
 
-function checkDirtyFile(directory, failures) {
-  const filePath = path.join(directory, 'dirty.mjs');
+function checkDirtyFile(directory: string, failures: string[]): void {
+  const filePath = path.join(directory, 'dirty.ts');
   writeFileSync(filePath, DIRTY_SOURCE);
   const result = runHook(filePath);
   if (result.status !== BLOCKING_EXIT_CODE) {
@@ -74,8 +76,8 @@ function checkDirtyFile(directory, failures) {
   }
 }
 
-function checkCleanFile(directory, failures) {
-  const filePath = path.join(directory, 'clean.mjs');
+function checkCleanFile(directory: string, failures: string[]): void {
+  const filePath = path.join(directory, 'clean.ts');
   writeFileSync(filePath, UNFORMATTED_SOURCE);
   const result = runHook(filePath);
   if (result.status !== 0) {
@@ -87,7 +89,7 @@ function checkCleanFile(directory, failures) {
   }
 }
 
-function checkIgnoredFile(directory, failures) {
+function checkIgnoredFile(directory: string, failures: string[]): void {
   const filePath = path.join(directory, 'prose.md');
   writeFileSync(filePath, IGNORED_SOURCE);
   const result = runHook(filePath);
@@ -99,10 +101,10 @@ function checkIgnoredFile(directory, failures) {
   }
 }
 
-function checkUncheckableFile(directory, failures) {
+function checkUncheckableFile(directory: string, failures: string[]): void {
   const cases = {
-    'a deleted file': path.join(directory, 'gone.mjs'),
-    'a file outside the repo': path.join(os.tmpdir(), 'outside-the-repo.mjs'),
+    'a deleted file': path.join(directory, 'gone.ts'),
+    'a file outside the repo': path.join(os.tmpdir(), 'outside-the-repo.ts'),
   };
   for (const [label, filePath] of Object.entries(cases)) {
     const result = runHook(filePath);
@@ -112,8 +114,10 @@ function checkUncheckableFile(directory, failures) {
   }
 }
 
-const directory = mkdtempSync(path.join(REPO_ROOT, 'tmp-agent-hook-check-'));
-const failures = [];
+// A lowercase name: the lint rules check directory names for kebab case too.
+const directory = path.join(REPO_ROOT, `tmp-agent-hook-check-${process.pid}`);
+mkdirSync(directory);
+const failures: string[] = [];
 try {
   checkDirtyFile(directory, failures);
   checkCleanFile(directory, failures);

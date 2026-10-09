@@ -1,10 +1,11 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
+  "agentGuidance": false,
   "globalDependencies": [
     "tsconfig.base.json",
     "vitest.shared.config.ts",
-    "eslint.config.js",
+    "eslint.config.ts",
     ".prettierrc.json",
     ".prettierignore",
     ".npmrc",
@@ -32,6 +33,10 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
+    },
+    "//#typecheck:tooling": {
+      "inputs": ["scripts/**", "tools/**", ".claude/hooks/**", "*.ts", "tsconfig*.json"],
+      "outputs": []
     },
     "//#lint": {
       "inputs": ["**/*.{ts,tsx,mts,cts,js,mjs,cjs,jsx}", "scripts/**", "tools/**"],

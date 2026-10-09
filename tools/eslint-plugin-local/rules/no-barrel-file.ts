@@ -2,7 +2,9 @@
  * Convention: no barrel files. Import from the module that owns the symbol so the
  * dependency graph stays honest (and tree-shaking stays predictable).
  */
-export default {
+import type { Rule } from 'eslint';
+
+const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
@@ -13,15 +15,15 @@ export default {
       barrel: 'Barrel re-export is banned. Import from the module that defines the symbol.',
     },
   },
-  create(context) {
+  create(context: Rule.RuleContext): Rule.RuleListener {
     const filename = context.filename.replaceAll('\\', '/');
     const isIndexFile = /\/index\.(?:ts|tsx|js|jsx|mts|cts)$/.test(filename);
 
     return {
-      ExportAllDeclaration(node) {
+      ExportAllDeclaration(node): void {
         context.report({ node, messageId: 'barrel' });
       },
-      ExportNamedDeclaration(node) {
+      ExportNamedDeclaration(node): void {
         if (node.source !== null && node.source !== undefined && isIndexFile) {
           context.report({ node, messageId: 'barrel' });
         }
@@ -29,3 +31,5 @@ export default {
     };
   },
 };
+
+export default rule;

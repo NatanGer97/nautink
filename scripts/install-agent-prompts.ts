@@ -22,7 +22,7 @@ const TARGET_DIR = path.join(os.homedir(), '.codex', 'prompts');
 const force = process.argv.includes('--force');
 
 /** Where an existing entry points, or undefined when it is not a symlink. */
-function linkTarget(entryPath) {
+function linkTarget(entryPath: string): string | undefined {
   if (!existsSync(entryPath) && !lstatSync(entryPath, { throwIfNoEntry: false })) {
     return undefined;
   }
@@ -32,8 +32,8 @@ function linkTarget(entryPath) {
 
 mkdirSync(TARGET_DIR, { recursive: true });
 
-const skipped = [];
-const installed = [];
+const skipped: string[] = [];
+const installed: string[] = [];
 
 for (const name of readdirSync(SOURCE_DIR).filter((entry) => entry.endsWith('.md'))) {
   const source = path.join(SOURCE_DIR, name);

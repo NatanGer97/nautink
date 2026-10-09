@@ -7,25 +7,25 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 
 | File | What it holds |
 |---|---|
-| `eslint.config.js` | Flat config: base TypeScript rules, then overrides for JS tooling, tests, and config files |
+| `eslint.config.ts` | Flat config: base TypeScript rules, then overrides for React, tests, tooling, and the ban on JavaScript files |
 | `.prettierrc.json` | Formatting mechanics: semicolons, single quotes, width 100, trailing commas |
 | `.prettierignore` / `.editorconfig` | What Prettier skips; editor defaults |
 | `tools/eslint-plugin-local/` | Local rules no off-the-shelf plugin covers |
 | `tools/lint-fixtures/` | One fixture pair per custom rule, asserted by `pnpm lint:fixtures` |
-| `scripts/check-lint-fixtures.mjs` | Runs ESLint over the fixtures and fails if a custom rule stops firing |
-| `scripts/check-agent-hook.mjs` | Proves the agent hook still blocks a bad file and formats a clean one |
-| `scripts/check-agent-parity.mjs` | Proves `CLAUDE.md` → `AGENTS.md`, skill stubs, and Codex prompts are in sync |
-| `scripts/check-coverage-gate.mjs` | Proves an uncovered file still fails each gated package's coverage threshold |
-| `scripts/check-changeset.mjs` | Fails a pull request that changes `apps/` or `packages/` source without a changeset |
+| `scripts/check-lint-fixtures.ts` | Runs ESLint over the fixtures and fails if a custom rule stops firing |
+| `scripts/check-agent-hook.ts` | Proves the agent hook still blocks a bad file and formats a clean one |
+| `scripts/check-agent-parity.ts` | Proves `CLAUDE.md` → `AGENTS.md`, skill stubs, and Codex prompts are in sync |
+| `scripts/check-coverage-gate.ts` | Proves an uncovered file still fails each gated package's coverage threshold |
+| `scripts/check-changeset.ts` | Fails a pull request that changes `apps/` or `packages/` source without a changeset |
 | `.github/workflows/ci.yml` | Install, the full check graph, then the gate assertions, the changeset check, and `format:check` |
 | `.github/workflows/release.yml` | Turns landed changesets into a "Version Packages" pull request, then tags and releases |
 | `.husky/pre-commit` / `.husky/pre-push` | The two local git gates; installed by `prepare` on `pnpm install` |
-| `.claude/hooks/lint-edited-file.mjs` | The Claude Code `PostToolUse` hook, registered in `.claude/settings.json` |
+| `.claude/hooks/lint-edited-file.ts` | The Claude Code `PostToolUse` hook, registered in `.claude/settings.json` |
 | `tsconfig.base.json` | Shared compiler options: ES2022, `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` |
 | `vitest.shared.config.ts` | The Vitest base every package config merges into: test layout, timeout, v8 coverage |
 | `turbo.json` / `pnpm-workspace.yaml` | The task graph and the workspace members (`apps/*`, `packages/*`) |
 
-Commands: `pnpm check` (lint, typecheck, test, build), and individually `pnpm lint`,
+Commands: `pnpm check` (lint, typecheck of the tooling and every package, test, build), and individually `pnpm lint`,
 `lint:fix`, `lint:file`, `lint:fixtures`, `lint:agent-hook`, `check:agents`, `test:coverage-gate`,
 `test:changeset-gate`, `typecheck`, `test`, `build`, `format`, `format:check`.
 

@@ -54,7 +54,7 @@ pnpm format:check       # Prettier
 pnpm lint:file <path>   # format + lint one file, exits 2 with the report when it is not clean
 ```
 
-**After writing or editing any `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, or `.cjs` file,
+**After writing or editing any `.ts`, `.tsx`, `.mts`, or `.cts` file,
 run `pnpm lint:file <path>` and fix what it reports before moving on.** Claude Code does this
 automatically through the `PostToolUse` hook in `.claude/settings.json`; every other harness must run
 the command. The husky hooks and CI enforce the same rules at commit and push time, so skipping the
@@ -91,14 +91,3 @@ pnpm agents:install-prompts
 
 `gh issue create`, `git push`, and `gh pr create` are outward-facing: show what you are about to do and
 wait for confirmation. This holds in every harness, whatever its permission settings allow.
-
-<!-- BEGIN:turborepo-agent-rules -->
-
-# This is NOT the Turborepo you know
-
-Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
-
-Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
-
-This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
-<!-- END:turborepo-agent-rules -->

@@ -14,20 +14,25 @@ const LISTED_SOURCE_LIMIT = 10;
 
 export const HOW_TO_ADD_ONE = 'pnpm changeset';
 
-function isSourceFile(file) {
+function isSourceFile(file: string): boolean {
   return SOURCE_PREFIXES.some((prefix) => file.startsWith(prefix));
 }
 
-function isChangesetEntry(file) {
+function isChangesetEntry(file: string): boolean {
   return (
     file.startsWith(CHANGESET_DIRECTORY) && file.endsWith('.md') && !CHANGESET_NON_ENTRIES.has(file)
   );
 }
 
+export interface Decision {
+  exitCode: number;
+  message: string;
+}
+
 /**
  * Decides from a list of changed files whether a changeset is missing.
  */
-export function decide(changedFiles) {
+export function decide(changedFiles: string[]): Decision {
   const sourceFiles = changedFiles.filter(isSourceFile);
   if (sourceFiles.length === 0) {
     return { exitCode: 0, message: 'No workspace source changed, so no changeset is needed.' };
@@ -51,7 +56,7 @@ export function decide(changedFiles) {
   };
 }
 
-function readChangedFiles(baseRef) {
+function readChangedFiles(baseRef: string): string[] {
   const result = spawnSync('git', ['diff', '--name-only', `${baseRef}...HEAD`], {
     encoding: 'utf8',
   });
@@ -63,7 +68,7 @@ function readChangedFiles(baseRef) {
   return result.stdout.split('\n').filter((line) => line.length > 0);
 }
 
-function main() {
+function main(): void {
   const baseRef = process.argv[2] ?? process.env.BASE_REF;
   if (baseRef === undefined) {
     console.error('Usage: node scripts/check-changeset.mjs <base-ref>  (or set BASE_REF)');
@@ -78,6 +83,6 @@ function main() {
   process.exit(exitCode);
 }
 
-if (process.argv[1]?.endsWith('check-changeset.mjs')) {
+if (process.argv[1]?.endsWith('check-changeset.ts')) {
   main();
 }
