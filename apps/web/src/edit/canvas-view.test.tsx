@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '../app.tsx';
-import { useWorkspaceStore } from '../workspace/use-workspace.ts';
+import { selectActiveStack, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { DiagramView } from '@nautink/storage/records';
 
@@ -76,5 +76,32 @@ describe('canvas views for a type without a visual editor', () => {
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Browse templates' }));
     expect(await screen.findByRole('dialog', { name: 'New diagram' })).toBeTruthy();
+  });
+});
+
+describe('canvas views for a flowchart', () => {
+  it('switches to Edit and Split from the toggle and saves the view on the diagram', async () => {
+    const id = await openDiagram('flowchart TD\n  A[Start] --> B[Done]\n', 'preview');
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('radio', { name: 'Edit' }));
+    expect(viewOf(id)).toBe('edit');
+    expect(await screen.findByTestId('flow-node-A', {}, { timeout: 5000 })).toBeTruthy();
+    expect(screen.queryByRole('group', { name: 'Diagram preview' })).toBeNull();
+    await user.click(screen.getByRole('radio', { name: 'Split' }));
+    expect(viewOf(id)).toBe('split');
+    expect(screen.getByRole('region', { name: 'Visual editor' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Mermaid render' })).toBeTruthy();
+    expect(await screen.findByTestId('flow-node-B', {}, { timeout: 5000 })).toBeTruthy();
+    await user.click(screen.getByRole('radio', { name: 'Preview' }));
+    expect(viewOf(id)).toBe('preview');
+  });
+
+  it('records canvas edits as visual steps in the undo history', async () => {
+    await openDiagram('flowchart TD\n  A[Start]\n', 'edit');
+    const user = userEvent.setup();
+    await screen.findByTestId('flow-node-A', {}, { timeout: 5000 });
+    await user.click(screen.getByRole('button', { name: 'Add shape' }));
+    const stack = selectActiveStack(useWorkspaceStore.getState());
+    expect(stack?.entries.at(-1)).toMatchObject({ label: 'Added node Process', source: 'visual' });
   });
 });

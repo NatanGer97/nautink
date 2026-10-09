@@ -20,7 +20,9 @@ export function lazyEditor(load: () => Promise<VisualEditorComponent>): LazyVisu
  * The visual editors the app has, by editor id. Adding an editor is one line here plus its folder
  * (`./<id>/`); see this folder's README. A type without a line shows "No visual editor" in Edit.
  */
-export const VISUAL_EDITORS: EditorRegistry = {};
+export const VISUAL_EDITORS: EditorRegistry = {
+  flow: lazyEditor(async () => (await import('./flow/flow-editor.tsx')).FlowEditor),
+};
 
 /** The editor id for `code` when the app has that editor, else null. */
 export function editorIdFor(

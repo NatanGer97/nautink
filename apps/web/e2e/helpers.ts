@@ -82,3 +82,42 @@ export async function replaceCodeInEditor(page: Page, code: string): Promise<voi
   await pressInEditor(page, 'a');
   await page.keyboard.insertText(code);
 }
+
+/** Switches the open diagram to Preview, Edit or Split with the top bar's segmented control. */
+export async function switchView(page: Page, view: 'Preview' | 'Edit' | 'Split'): Promise<void> {
+  await page.getByRole('radio', { name: view, exact: true }).click();
+  await expect(page.getByRole('radio', { name: view, exact: true })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+}
+
+/** A node on the visual editor's canvas, by its Mermaid id. */
+export function canvasNode(page: Page, id: string): Locator {
+  return page.getByTestId(`flow-node-${id}`);
+}
+
+/** The middle of an element on screen. Throws when it is not on screen. */
+export async function centerOf(locator: Locator): Promise<{ x: number; y: number }> {
+  const box: { x: number; y: number; width: number; height: number } | null =
+    await locator.boundingBox();
+  if (box === null) {
+    throw new Error('Cannot find the middle of an element that is not on screen.');
+  }
+  const half: number = 0.5;
+  return { x: box.x + box.width * half, y: box.y + box.height * half };
+}
+
+/** Drags `from` by (dx, dy) with the mouse, in small steps so React Flow sees a drag. */
+export async function dragBy(
+  page: Page,
+  from: Locator,
+  delta: { x: number; y: number },
+): Promise<void> {
+  const start: { x: number; y: number } = await centerOf(from);
+  const steps: number = 8;
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move(start.x + delta.x, start.y + delta.y, { steps });
+  await page.mouse.up();
+}
