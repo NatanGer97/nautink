@@ -116,8 +116,14 @@ export class FakeEditor {
     this.container = container;
   }
 
+  options: Record<string, unknown> = {};
+
   getModel(): FakeModel | null {
     return this.model;
+  }
+
+  updateOptions(options: Record<string, unknown>): void {
+    this.options = { ...this.options, ...options };
   }
 
   setModel(model: FakeModel | null): void {

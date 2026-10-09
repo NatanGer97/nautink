@@ -5,6 +5,7 @@ import { askClaudeToFix } from './ask-claude-to-fix.ts';
 import { useRevealRequests } from './code-reveal.ts';
 import { useCursorPosition } from './use-cursor-position.ts';
 import { useEditRecording } from './use-edit-recording.ts';
+import { useEditorReadOnly } from './use-editor-read-only.ts';
 import { useErrorMarkers } from './use-error-markers.ts';
 import { useDiagramModel, useDisposeDeletedModels } from './use-model-sync.ts';
 import { useEditorTheme, useMonacoEditor } from './use-monaco-editor.ts';
@@ -21,6 +22,8 @@ import type { ReactElement, RefObject } from 'react';
 export interface CodeEditorProps {
   diagramId: string;
   code: string;
+  /** Why the code cannot be edited right now ("Claude is editing…"), or null when it can. */
+  readOnlyReason?: string | null;
 }
 
 interface FooterProps {
@@ -77,9 +80,10 @@ function LoadNotice({ load }: { load: EditorLoad }): ReactElement | null {
 
 function useEditorBindings(
   handle: EditorHandle | null,
-  { diagramId, code }: CodeEditorProps,
+  { diagramId, code, readOnlyReason = null }: CodeEditorProps,
 ): void {
   useEditorTheme(handle, useIsDarkTheme());
+  useEditorReadOnly(handle, readOnlyReason);
   useDiagramModel(handle, diagramId, code);
   useEditRecording(handle);
   useErrorMarkers(handle, diagramId);
@@ -99,6 +103,14 @@ export function CodeEditor(props: CodeEditorProps): ReactElement {
   useEditorBindings(handle, props);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      {props.readOnlyReason ? (
+        <p
+          role="status"
+          className="shrink-0 border-b border-border-subtle bg-subtle px-3.5 py-1.5 text-xs text-muted-foreground"
+        >
+          {props.readOnlyReason}
+        </p>
+      ) : null}
       <div className="relative min-h-0 flex-1">
         <div
           ref={containerRef}
