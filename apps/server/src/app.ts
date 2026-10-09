@@ -6,6 +6,7 @@ import { NOT_FOUND, sendError } from './http-errors.ts';
 import { createInfoRouter } from './info-routes.ts';
 import { parseJsonBody } from './json-body.ts';
 import { RepoSelection } from './repo-selection.ts';
+import { serveWebApp } from './web-app.ts';
 
 import type { Express, Request, Response } from 'express';
 
@@ -16,10 +17,12 @@ export interface AppOptions {
   homeDir: string;
   /** The CLI's working directory when no codebase is selected. */
   workDir: string;
+  /** The built web app to serve, or `null` to serve the API only. */
+  webDistDir: string | null;
   healthTimeoutMs: number;
 }
 
-/** The Express app: the API of PRD §7.4. */
+/** The Express app: the API of PRD §7.4, plus the built web app in production. */
 export function createApp(options: AppOptions): Express {
   const app: Express = express();
   const repoSelection: RepoSelection = new RepoSelection(options.repoDir);
@@ -30,5 +33,8 @@ export function createApp(options: AppOptions): Express {
   app.use('/api', (req: Request, res: Response) => {
     sendError(res, NOT_FOUND, `Not found: ${req.method} ${req.originalUrl}`);
   });
+  if (options.webDistDir !== null) {
+    serveWebApp(app, options.webDistDir);
+  }
   return app;
 }

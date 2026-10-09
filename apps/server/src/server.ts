@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createApp } from './app.ts';
 import { loadConfig } from './config.ts';
 import { HEALTH_TIMEOUT_MS } from './health.ts';
+import { findWebDist } from './web-app.ts';
 
 import type { ServerConfig } from './config.ts';
 import type { Logger } from './logger.ts';
@@ -52,6 +53,7 @@ function createAppFromConfig(config: ServerConfig, homeDir: string): Express {
     repoDir: config.repoDir,
     homeDir,
     workDir: REPO_ROOT,
+    webDistDir: findWebDist(REPO_ROOT, config.isProduction),
     healthTimeoutMs: HEALTH_TIMEOUT_MS,
   });
 }

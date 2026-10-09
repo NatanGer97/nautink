@@ -28,6 +28,7 @@ export async function startTestServer(overrides: Partial<AppOptions> = {}): Prom
     repoDir: null,
     homeDir: os.tmpdir(),
     workDir: process.cwd(),
+    webDistDir: null,
     healthTimeoutMs: 5000,
     ...overrides,
   });

@@ -81,6 +81,7 @@ describe('listen', () => {
       repoDir: null,
       homeDir: '/',
       workDir: REPO_ROOT,
+      webDistDir: null,
       healthTimeoutMs: 1000,
     });
     await expect(listen(app, 70_000)).rejects.toThrow(/^Cannot listen on 127\.0\.0\.1:70000: /);

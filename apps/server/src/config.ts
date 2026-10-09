@@ -10,6 +10,7 @@ export interface ServerConfig {
   claudeBin: string;
   /** The codebase Claude may read at startup (`REPO_DIR`); `null` means repo-aware mode is off. */
   repoDir: string | null;
+  isProduction: boolean;
 }
 
 export const DEFAULT_PORT: number = 8791;
@@ -53,11 +54,13 @@ function createEnvSchema(homeDir: string): z.ZodType<ServerConfig, Record<string
       API_PORT: portSchema,
       CLAUDE_BIN: z.string().min(1, 'CLAUDE_BIN must not be empty').default(DEFAULT_CLAUDE_BIN),
       REPO_DIR: createRepoDirSchema(homeDir),
+      NODE_ENV: z.string().optional(),
     })
     .transform((env) => ({
       port: env.API_PORT,
       claudeBin: env.CLAUDE_BIN,
       repoDir: env.REPO_DIR ?? null,
+      isProduction: env.NODE_ENV === 'production',
     }));
 }
 

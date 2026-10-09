@@ -19,6 +19,7 @@ describe('loadConfig', () => {
       port: DEFAULT_PORT,
       claudeBin: DEFAULT_CLAUDE_BIN,
       repoDir: null,
+      isProduction: false,
     });
     expect(DEFAULT_PORT).toBe(8791);
   });
@@ -28,11 +29,13 @@ describe('loadConfig', () => {
       API_PORT: '9000',
       CLAUDE_BIN: '/opt/claude',
       REPO_DIR: '~/app',
+      NODE_ENV: 'production',
     };
     expect(loadConfig(env, home)).toEqual({
       port: 9000,
       claudeBin: '/opt/claude',
       repoDir: path.join(home, 'app'),
+      isProduction: true,
     });
   });
 
