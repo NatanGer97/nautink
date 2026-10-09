@@ -5,6 +5,7 @@ import { decodeText } from '@nautink/visual-core/text';
 
 import { attrSource, idSource, methodSource, nsLeaf, nsParent, quoteSafe } from './text.ts';
 import { hasMethods, parseWithMermaid } from '../shared/mermaid-parse.ts';
+import { textAt } from '../shared/values.ts';
 
 import type {
   ClassAttr,
@@ -221,7 +222,7 @@ function isOpenAccDescr(line: string): boolean {
 function keptLines(lines: readonly string[]): string[] {
   const extra: string[] = [];
   for (let index: number = 0; index < lines.length; index++) {
-    const line: string = lines[index] ?? '';
+    const line: string = textAt(lines, index);
     if (!KEEP_RE.test(line)) {
       continue;
     }

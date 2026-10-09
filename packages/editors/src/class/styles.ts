@@ -1,5 +1,7 @@
 // Reads `style`, `classDef`, `cssClass` and `:::` from the model so the canvas can tint classes
 // like Mermaid does. Only colors and stroke width are applied.
+import { textAt } from '../shared/values.ts';
+
 import type { ClassItem, ClassModel } from './types.ts';
 
 /** CSS declarations for one class box (custom properties and style keys). */
@@ -7,6 +9,7 @@ export type ClassStyle = Record<string, string>;
 
 type Props = Record<string, string>;
 
+const VALUE_GROUP: number = 2;
 const DARK_TEXT: string = '#1c1f24';
 const LIGHT_TEXT: string = '#f2f3f5';
 const LIGHT_BACKGROUND: number = 0.55;
@@ -68,14 +71,14 @@ function readClassDef(sources: StyleSources, line: string): void {
     return;
   }
   for (const name of match[1].split(',')) {
-    merge(sources.defs, name, props(match[2] ?? ''));
+    merge(sources.defs, name, props(textAt(match, VALUE_GROUP)));
   }
 }
 
 function readStyle(sources: StyleSources, line: string): void {
   const match: RegExpExecArray | null = /^style\s+(\S+)\s+(.+)$/.exec(line);
   if (match?.[1] !== undefined) {
-    merge(sources.byId, match[1], props(match[2] ?? ''));
+    merge(sources.byId, match[1], props(textAt(match, VALUE_GROUP)));
   }
 }
 
@@ -85,7 +88,7 @@ function readCssClass(sources: StyleSources, line: string): void {
     return;
   }
   for (const id of match[1].split(',')) {
-    sources.cssOf.get(id.trim())?.push(match[2] ?? '');
+    sources.cssOf.get(id.trim())?.push(textAt(match, VALUE_GROUP));
   }
 }
 

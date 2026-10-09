@@ -9,3 +9,8 @@ export function numberOrNull(value: number | null | undefined): number | null {
   const number: number = numberOr(value, 0);
   return number === 0 ? null : number;
 }
+
+/** The text at `index` of a list (regex match groups, lines), or '' past its end. */
+export function textAt(list: ArrayLike<string | undefined>, index: number): string {
+  return list[index] ?? '';
+}

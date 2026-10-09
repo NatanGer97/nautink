@@ -5,6 +5,7 @@ import { decodeText } from '@nautink/visual-core/text';
 
 import { hasMethods, parseWithMermaid } from '../shared/mermaid-parse.ts';
 import { parentMap } from '../shared/subgraphs.ts';
+import { textAt } from '../shared/values.ts';
 
 import type {
   DiagramLoader,
@@ -78,6 +79,7 @@ export const KEYS: readonly ErKey[] = ['PK', 'FK', 'UK'];
 export const DIRECTIONS: readonly ErDirection[] = ['TB', 'LR', 'BT', 'RL'];
 export const DEFAULT_LABEL: string = 'relates';
 
+const GENERIC_GROUP: number = 2;
 const INDENT: string = '    ';
 const FIRST_SUFFIX: number = 2;
 const ALL_CARDS: readonly Cardinality[] = [...CARDS, 'MD_PARENT'];
@@ -328,7 +330,7 @@ function cleanWordPart(text: string): string {
 function cleanWordBody(text: string): string {
   const generic: RegExpExecArray | null = /^([^~]*)~([^~]*)~$/.exec(text);
   if (generic) {
-    return `${cleanWordPart(generic[1] ?? '')}~${cleanWordPart(generic[2] ?? '')}~`;
+    return `${cleanWordPart(textAt(generic, 1))}~${cleanWordPart(textAt(generic, GENERIC_GROUP))}~`;
   }
   return cleanWordPart(text) + (text.endsWith('?') ? '?' : '');
 }

@@ -15,6 +15,6 @@ export async function parseOk<Model>(
 }
 
 /** A loader that returns a hand-made db, for testing what parsing does with fields Mermaid omits. */
-export function fakeLoader(type: string, db: object): DiagramLoader {
+export function fakeLoader(type: string, db: unknown): DiagramLoader {
   return async () => Promise.resolve({ type, db });
 }
