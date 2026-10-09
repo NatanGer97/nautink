@@ -1,4 +1,7 @@
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
+
+/** The `localStorage` flag that says the first-run screen was left (`first-run-store.ts`). */
+const FIRST_RUN_DONE_KEY: string = 'nautink.firstRunDone';
 
 interface StoreModule {
   useWorkspaceStore: {
@@ -19,4 +22,11 @@ export async function editCode(page: Page, code: string): Promise<void> {
       .getState()
       .applyEdit(next, { label: 'Typed in code', source: 'code' });
   }, code);
+}
+
+/** Opens every page of the context straight into the workspace, past the first-run screen. */
+export async function skipFirstRun(context: BrowserContext): Promise<void> {
+  await context.addInitScript((key: string) => {
+    window.localStorage.setItem(key, '1');
+  }, FIRST_RUN_DONE_KEY);
 }

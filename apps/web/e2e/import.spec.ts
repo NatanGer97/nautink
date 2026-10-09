@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-import { editCode } from './helpers.ts';
+import { editCode, skipFirstRun } from './helpers.ts';
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
 
 const TWO_BLOCKS = [
   '# Notes',
@@ -42,7 +46,7 @@ test('imports a Markdown file with two mermaid blocks as two diagrams', async ({
   await expect(page.getByLabel('Diagram code')).toHaveText(/flowchart LR/);
 });
 
-test('backs up every diagram and restores the file into a fresh profile', async ({
+test('backs up every diagram and restores it from the first-run hint of a fresh profile', async ({
   page,
   browser,
 }) => {
@@ -59,10 +63,9 @@ test('backs up every diagram and restores the file into a fresh profile', async 
   const fresh = await browser.newContext(baseURL === undefined ? {} : { baseURL });
   const other = await fresh.newPage();
   await other.goto('/');
-  await expect(other.getByLabel('Diagram code')).toHaveText('flowchart TD');
-  await other.getByRole('button', { name: 'Settings' }).click();
+  await expect(other.getByRole('heading', { name: 'What do you want to diagram?' })).toBeVisible();
   const chooser = other.waitForEvent('filechooser');
-  await other.getByRole('button', { name: 'Restore backup' }).click();
+  await other.getByRole('button', { name: 'Restore its backup.' }).click();
   await (await chooser).setFiles(backupPath);
   await expect(other.getByText('Restored 1 diagram and 0 versions')).toBeVisible();
   await expect(other.getByLabel('Diagram code')).toHaveText(/pie title Kept/);

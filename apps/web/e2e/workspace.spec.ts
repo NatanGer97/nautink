@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+import { skipFirstRun } from './helpers.ts';
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
+
 test.describe('workspace', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');

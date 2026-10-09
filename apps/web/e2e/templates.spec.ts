@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+import { skipFirstRun } from './helpers.ts';
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
+
 test('creates a diagram from a template in the gallery', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByLabel('Diagram code')).toBeVisible();

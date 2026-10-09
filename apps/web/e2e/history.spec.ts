@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-import { editCode } from './helpers.ts';
+import { editCode, skipFirstRun } from './helpers.ts';
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
 
 test('saves a version with ⌘S, restores it, and undoes the restore', async ({ page }) => {
   await page.goto('/');

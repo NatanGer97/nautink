@@ -4,7 +4,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import { afterEach, beforeEach } from 'vitest';
 
 import { installLocalBroadcastChannel } from './broadcast.ts';
-import { resetHistoryState } from './history-fixtures.ts';
+import { resetHistoryState, skipFirstRun } from './history-fixtures.ts';
 import { installMatchMedia, resetMediaQueries } from './media.ts';
 import { resetChatState } from '../src/chat/chat-store.ts';
 import { resetRepoState } from '../src/settings/repo-store.ts';
@@ -50,6 +50,8 @@ beforeEach(() => {
   // A fresh, empty IndexedDB per test, so the app's `nautink` database never leaks between tests.
   globalThis.indexedDB = new IDBFactory();
   window.localStorage.clear();
+  // Most tests start in the workspace; the first-run tests clear this flag themselves.
+  skipFirstRun();
   resetMediaQueries();
   resetUiState();
   resetChatState();
