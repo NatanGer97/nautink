@@ -22,6 +22,7 @@ export function fieldActions(ctx: StoreContext): FieldActions {
     },
     flushSaves: async (): Promise<void> => ctx.runtime.autosaver.flush(),
     getDb: (): NautinkDb => requireDb(ctx),
+    requireDb: (): NautinkDb => ctx.runtime.requireDb(),
   };
 }
 

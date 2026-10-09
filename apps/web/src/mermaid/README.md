@@ -9,3 +9,5 @@ global state and fails when two calls run at once).
 - `enqueueMermaid(job)`: runs `job` after every earlier job. Wrap every `parse` and `render` call in it.
   A job must never enqueue another job and wait for it.
 - `validateMermaid(code)`: `null` when the code parses, otherwise `{ message, line }`.
+- `renderThumbnail(code, isDark)`: a small picture as a data URL, rendered once per code and theme
+  through the queue. `<DiagramThumbnail code={…} />` draws one lazily (history rows, the gallery).

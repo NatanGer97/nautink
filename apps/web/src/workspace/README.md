@@ -33,6 +33,7 @@ the open database for stores the workspace does not own (versions); it throws be
 | Preview / Edit / Split | `setView(id, view)` |
 | Title, pin, duplicate, delete, download | `renameDiagram`, `togglePin`, `duplicateDiagram`, `deleteDiagram` (Undo notice), `downloadDiagram` |
 | New / open | `createDiagram()`, `selectDiagram(id)` |
+| Versions and other records of your own | `requireDb()` gives the open database; call `flushSaves()` first |
 
 Messages and session id are typed with `ChatMessage` and `Diagram['sessionId']` from
 `@nautink/storage/records`. A content change (code, chat, title) moves the diagram up the list.

@@ -6,6 +6,7 @@ import { useChatFeature } from './chat/use-chat-feature.ts';
 import { CommandPalette } from './commands/command-palette.tsx';
 import { buildShellCommands } from './commands/shell-commands.ts';
 import { useRegisterCommands } from './commands/use-commands.ts';
+import { FeatureHost } from './feature-host.tsx';
 import { AppShell } from './shell/app-shell.tsx';
 import { TemplatesDialog } from './shell/templates-dialog.tsx';
 import { useAppliedTheme } from './shell/use-applied-theme.ts';
@@ -42,6 +43,7 @@ export function App(): ReactElement {
       <AppShell />
       <CommandPalette />
       <TemplatesDialog />
+      <FeatureHost />
       <Toaster theme={theme} />
       <ChatAnnouncer />
     </TooltipProvider>
