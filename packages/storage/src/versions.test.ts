@@ -7,6 +7,7 @@ import {
   deleteVersion,
   listVersions,
   MAX_VERSIONS,
+  putVersion,
   renameVersion,
   selectPruned,
 } from './versions.ts';
@@ -141,6 +142,14 @@ describe('renameVersion and deleteVersion', () => {
     expect((await renameVersion(db, id, '')).label).toBe('');
     await deleteVersion(db, id);
     expect(await listVersions(db, 'd1')).toEqual([]);
+  });
+
+  it('puts a deleted version back unchanged', async () => {
+    const added = await addVersion(db, { diagramId: 'd1', code: 'a', kind: 'manual', label: 'v1' });
+    const version = added.status === 'added' ? added.version : undefined;
+    await deleteVersion(db, version?.id ?? '');
+    await putVersion(db, version!);
+    expect(await listVersions(db, 'd1')).toEqual([version]);
   });
 
   it('throws for an unknown version', async () => {

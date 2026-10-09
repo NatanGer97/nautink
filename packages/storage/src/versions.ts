@@ -89,6 +89,11 @@ export async function renameVersion(db: NautinkDb, id: string, label: string): P
   return renamed;
 }
 
+/** Saves a version record as it is, such as one put back after a delete is undone. */
+export async function putVersion(db: NautinkDb, version: Version): Promise<void> {
+  await db.put('versions', version);
+}
+
 /** Deletes one version. Throws for an unknown id. */
 export async function deleteVersion(db: NautinkDb, id: string): Promise<void> {
   const tx: NautinkTx<['versions']> = db.transaction('versions', 'readwrite');
