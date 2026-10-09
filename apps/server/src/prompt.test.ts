@@ -11,7 +11,7 @@ import {
 
 describe('buildSystemPrompt', () => {
   it('is versioned and carries v1 rules', () => {
-    expect(SYSTEM_PROMPT_VERSION).toBe(1);
+    expect(SYSTEM_PROMPT_VERSION).toBe(2);
     expect(BASE_SYSTEM_PROMPT).toContain('exactly ONE fenced ```mermaid block');
     expect(BASE_SYSTEM_PROMPT).toContain('logos:aws-lambda');
   });

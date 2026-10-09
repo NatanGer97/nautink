@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import type { z } from 'zod';
 
 export const BAD_REQUEST: number = 400;
+export const FORBIDDEN: number = 403;
 export const NOT_FOUND: number = 404;
 
 /** Every 4xx/5xx answer is JSON `{ error }`, so the web app can show the message. */

@@ -1,4 +1,6 @@
+import { mkdirSync } from 'node:fs';
 import { createServer } from 'node:http';
+import os from 'node:os';
 import path from 'node:path';
 
 import { createApp } from './app.ts';
@@ -15,8 +17,18 @@ import type { AddressInfo } from 'node:net';
 /** Localhost only: this server drives the user's personal Claude Code login. */
 export const HOST: string = '127.0.0.1';
 
-/** The monorepo root: the CLI's working directory when no codebase is selected. */
+/** The monorepo root, where the built web app lives. */
 export const REPO_ROOT: string = path.resolve(import.meta.dirname, '..', '..', '..');
+
+/**
+ * The CLI's working directory when no codebase is selected: an empty folder, so a chat never picks
+ * up a project's `AGENTS.md`, `CLAUDE.md` or hooks (`--setting-sources project` reads them from cwd).
+ */
+export function prepareNeutralWorkDir(): string {
+  const workDir: string = path.join(os.tmpdir(), 'nautink-claude');
+  mkdirSync(workDir, { recursive: true });
+  return workDir;
+}
 
 function describeListenError(port: number, err: unknown): string {
   // `listen` fails with a system error (EADDRINUSE, EACCES) or a RangeError for a bad port.
@@ -52,7 +64,7 @@ function createAppFromConfig(config: ServerConfig, homeDir: string): Express {
     claudeBin: config.claudeBin,
     repoDir: config.repoDir,
     homeDir,
-    workDir: REPO_ROOT,
+    workDir: prepareNeutralWorkDir(),
     webDistDir: findWebDist(REPO_ROOT, config.isProduction),
     healthTimeoutMs: HEALTH_TIMEOUT_MS,
   });

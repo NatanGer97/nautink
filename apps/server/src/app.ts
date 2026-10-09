@@ -2,6 +2,7 @@ import { API_ROUTES } from '@nautink/contracts/routes';
 import express from 'express';
 
 import { createChatHandler } from './chat-route.ts';
+import { guardHost } from './host-guard.ts';
 import { NOT_FOUND, sendError } from './http-errors.ts';
 import { createInfoRouter } from './info-routes.ts';
 import { parseJsonBody } from './json-body.ts';
@@ -27,6 +28,7 @@ export function createApp(options: AppOptions): Express {
   const app: Express = express();
   const repoSelection: RepoSelection = new RepoSelection(options.repoDir);
   app.disable('x-powered-by');
+  app.use(guardHost);
   app.use(parseJsonBody);
   app.use(createInfoRouter({ ...options, repoSelection }));
   app.post(API_ROUTES.chat, createChatHandler({ ...options, repoSelection }));
