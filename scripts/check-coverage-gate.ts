@@ -12,7 +12,9 @@ import process from 'node:process';
 import type { SpawnSyncReturns } from 'node:child_process';
 
 const PROBE_SOURCE = 'export const probe = (value: number): number => {\n  return value + 1;\n};\n';
-const THRESHOLD_ERROR = 'does not meet global threshold';
+// A package gates either its total (`global`) or every file (`per-file`, used when a single
+// uncovered file would not move a large package's total below the bar).
+const THRESHOLD_ERROR = /does not meet (?:global|per-file) threshold/;
 
 // Add a package here as soon as its Vitest config sets a coverage threshold, e.g.
 // { name: 'packages/core', root: path.join(import.meta.dirname, '..', 'packages', 'core') }.
@@ -38,6 +40,10 @@ const GATED: GatedPackage[] = [
     name: 'packages/ui',
     root: path.join(import.meta.dirname, '..', 'packages', 'ui'),
   },
+  {
+    name: 'packages/visual-core',
+    root: path.join(import.meta.dirname, '..', 'packages', 'visual-core'),
+  },
 ];
 
 // A noisy suite overruns `spawnSync`'s 1 MB default and would truncate away the very line this
@@ -58,8 +64,8 @@ function collectFailures(name: string, result: SpawnSyncReturns<string>): string
   if (result.status === 0) {
     failures.push(`uncovered source in ${name} did not fail the run`);
   }
-  if (!output.includes(THRESHOLD_ERROR)) {
-    failures.push(`expected "${THRESHOLD_ERROR}" in ${name}'s output, got none`);
+  if (!THRESHOLD_ERROR.test(output)) {
+    failures.push(`expected ${String(THRESHOLD_ERROR)} in ${name}'s output, got none`);
   }
   return failures;
 }
