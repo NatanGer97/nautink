@@ -9,6 +9,7 @@ import { OUTLINE_BUTTON_CLASS } from './button-styles.ts';
 import { CanvasModeToggle } from './canvas-mode-toggle.tsx';
 import { LogoMark } from './logo-mark.tsx';
 import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
+import { RepoBadge } from '../settings/repo-badge.tsx';
 import { useUiStore } from '../state/ui-store.ts';
 import { DiagramTitle, SaveStatus } from '../workspace/diagram-title.tsx';
 import { UndoRedoControls } from '../workspace/undo-redo-controls.tsx';
@@ -61,6 +62,7 @@ export function TopBar(): ReactElement {
         </span>
         <DiagramTitle />
         <SaveStatus className="shrink-0 text-xs text-muted-foreground max-md:hidden" />
+        <RepoBadge />
       </div>
       <div className="flex items-center gap-2">
         <CanvasModeToggle />

@@ -10,6 +10,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@nautink/ui/components/toggle-group';
 import { isThemePreference, THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/theme';
 
+import { CodebaseSetting } from './codebase-setting.tsx';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
@@ -96,19 +97,9 @@ export function DefaultModelField(): ReactElement {
   );
 }
 
-/** The codebase Claude can read. Placeholder until repo-aware mode lands. */
+/** The codebase Claude can read (M8). */
 export function CodebaseField(): ReactElement {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-xs text-muted-foreground">Codebase Claude can read</span>
-      <div className="flex items-center justify-between rounded-track border px-2.5 py-2">
-        <span className="text-muted-foreground">None</span>
-        <Button variant="link" size="xs" className="h-auto p-0" disabled>
-          Choose folder
-        </Button>
-      </div>
-    </div>
-  );
+  return <CodebaseSetting />;
 }
 
 /** Back up and restore every diagram. Placeholder until storage lands. */
