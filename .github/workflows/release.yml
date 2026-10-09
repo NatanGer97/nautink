@@ -46,7 +46,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
-      - run: ppnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       # v2 is the line built for Changesets v3: it reads the tags from `CHANGESETS_OUTPUT`, which
       # `changeset git-tag` writes. v1 looks for output v3 no longer prints.
