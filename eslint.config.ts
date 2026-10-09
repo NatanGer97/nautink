@@ -281,6 +281,8 @@ export default tseslint.config(
       '@typescript-eslint/typedef': 'off',
       '@typescript-eslint/no-magic-numbers': 'off',
       '@typescript-eslint/consistent-type-imports': 'off',
+      // shadcn passes CSS custom properties as `{ '--x': … } as React.CSSProperties`.
+      '@typescript-eslint/consistent-type-assertions': 'off',
       'max-lines-per-function': 'off',
       'max-params': 'off',
       complexity: 'off',

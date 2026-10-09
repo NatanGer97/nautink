@@ -1,0 +1,261 @@
+/*
+ * Nautink design tokens (docs/PRD.md §6). The PRD names are the source of truth; shadcn/ui's theme
+ * variables are mapped onto them so the vendored components pick the tokens up without edits.
+ * Dark mode is the `dark` class on <html>.
+ */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* The vendored components live in this package, outside the app that imports this file. */
+@source '../';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Geist and Geist Mono, self-hosted from the `geist` package (ADR-001). Its exports map hides the
+ * font files, so they are reached by path through this package's own node_modules. */
+@font-face {
+  font-family: 'Geist';
+  src: url('../../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../../node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2')
+    format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------ §6.1 color tokens, light */
+:root {
+  color-scheme: light;
+
+  --background: #f7f7f5;
+  --panel: #ffffff;
+  --muted: #f2f1ee;
+  --subtle: #fbfbfa;
+  --border: #e6e4df;
+  --border-subtle: #f0eeea;
+  --border-strong: #d6d3cc;
+  --foreground: #1b1b19;
+  --muted-foreground: #5e5c57;
+  --faint: #8c8a84;
+  --accent-ink: #3451d1;
+  --accent-ink-strong: #2b44b0;
+  --accent-wash: #eef1fd;
+  --selection-ring: #e3e8fc;
+  --success: #1f7a52;
+  --success-bg: #e7f4ec;
+  --destructive: #b4362f;
+  --destructive-bg: #fbeae8;
+  --warning: #8a6a1c;
+  --warning-bg: #fbf2dc;
+  --node-fill: #ffffff;
+  --node-stroke: #cfccc4;
+  --edge: #9a978f;
+  --grid-dot: #dad7d0;
+  /* Text on the ink fill of primary buttons. */
+  --ink-foreground: #ffffff;
+
+  /* §6.3 elevation: only floating things get a shadow. */
+  --elevation-segment: 0 1px 2px rgb(27 27 25 / 0.08);
+  --elevation-float: 0 4px 16px rgb(27 27 25 / 0.06);
+  --elevation-menu: 0 12px 32px rgb(27 27 25 / 0.14);
+  --elevation-dialog: 0 24px 64px rgb(27 27 25 / 0.24);
+
+  /* shadcn/ui theme variables, mapped onto the tokens above. */
+  --card: var(--panel);
+  --card-foreground: var(--foreground);
+  --popover: var(--panel);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--ink-foreground);
+  --secondary: var(--muted);
+  --secondary-foreground: var(--foreground);
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --input: var(--border-strong);
+  --ring: var(--accent-ink);
+  --radius: 10px;
+}
+
+/* ------------------------------------------------------------------- §6.1 color tokens, dark */
+.dark {
+  color-scheme: dark;
+
+  --background: #121211;
+  --panel: #1a1a19;
+  --muted: #232321;
+  --subtle: #1e1e1c;
+  --border: #2c2c2a;
+  --border-subtle: #232321;
+  --border-strong: #3a3a37;
+  --foreground: #ededeb;
+  --muted-foreground: #a8a6a0;
+  --faint: #7a7873;
+  --accent-ink: #9aaeff;
+  --accent-ink-strong: #c2ceff;
+  --accent-wash: #1e2440;
+  --selection-ring: #2a3366;
+  --success: #4cc38a;
+  --success-bg: #15291f;
+  --destructive: #f07a72;
+  --destructive-bg: #2e1716;
+  --warning: #e5c46b;
+  --warning-bg: #2e2a1a;
+  --node-fill: #1e1e1c;
+  --node-stroke: #3f3e3a;
+  --edge: #77756f;
+  --grid-dot: #2a2a27;
+  --ink-foreground: #121211;
+
+  --elevation-segment: 0 1px 2px rgb(0 0 0 / 0.4);
+  --elevation-float: 0 4px 16px rgb(0 0 0 / 0.3);
+  --elevation-menu: 0 12px 32px rgb(0 0 0 / 0.45);
+  --elevation-dialog: 0 24px 64px rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  /* §6.2 typography */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --text-2xs: 11px;
+  --text-2xs--line-height: 16px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 20px;
+  --text-base: 14px;
+  --text-base--line-height: 20px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  --text-display: 28px;
+  --text-display--line-height: 36px;
+  --text-code: 12.5px;
+  --text-code--line-height: 20px;
+
+  /* §6.1 colors as Tailwind utilities (bg-panel, text-faint, border-border-strong, …) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-ink-strong: var(--accent-ink-strong);
+  --color-accent-wash: var(--accent-wash);
+  --color-selection-ring: var(--selection-ring);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-destructive: var(--destructive);
+  --color-destructive-bg: var(--destructive-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-node-fill: var(--node-fill);
+  --color-node-stroke: var(--node-stroke);
+  --color-edge: var(--edge);
+  --color-grid-dot: var(--grid-dot);
+
+  /* §6.3 radius: controls 6, tracks 8, cards and menus 10, floating panels 12, dialogs 14 */
+  --radius-xs: 4px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-control: 6px;
+  --radius-track: 8px;
+  --radius-card: 10px;
+  --radius-float: 12px;
+  --radius-dialog: 14px;
+
+  /* §6.3 elevation: in-flow surfaces are flat, so the small shadcn shadows are removed. */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: var(--elevation-menu);
+  --shadow-lg: var(--elevation-dialog);
+  /* The selected item of a segmented track sits a hair above the track. */
+  --shadow-segment: var(--elevation-segment);
+  --shadow-float: var(--elevation-float);
+  --shadow-menu: var(--elevation-menu);
+  --shadow-dialog: var(--elevation-dialog);
+
+  /* §6.4 motion */
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-sm text-foreground antialiased;
+  }
+
+  /* §6.5: lucide icons at 1.6 stroke. A per-icon class still wins. */
+  svg.lucide {
+    stroke-width: 1.6;
+  }
+}
+
+/*
+ * §9: one visible focus ring in the accent for every control. Unlayered, so it wins over the
+ * `outline-none` the vendored components set, and it replaces their 50% halo, which is too faint
+ * for the 3:1 non-text contrast WCAG asks for.
+ */
+:where(
+  button,
+  a[href],
+  [role='button'],
+  [role='tab'],
+  [role='radio'],
+  [role='switch'],
+  [role='slider'],
+  [role='checkbox'],
+  [role='separator'][tabindex]
+):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/* §6.4: respect the user's motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

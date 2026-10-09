@@ -19,3 +19,7 @@ tools/lint-fixtures/invalid
 
 # Machine-local agent settings, never committed.
 .claude/settings.local.json
+
+# Vendored shadcn/ui files stay as the CLI writes them (see eslint.config.ts).
+packages/ui/src/components
+packages/ui/src/lib/utils.ts

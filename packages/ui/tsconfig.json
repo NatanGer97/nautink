@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.library.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    // Lets the shadcn CLI and the vendored components import this package by its own name.
+    "paths": { "@nautink/ui/*": ["./src/*"] }
+  },
+  "include": ["src", "tests", "vitest.config.ts"]
+}
