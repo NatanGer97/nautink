@@ -52,4 +52,16 @@ test.describe('code drawer', () => {
     await drawer.getByRole('button', { name: 'Ask Claude to fix' }).click();
     await expect(page.locator('body')).toHaveAttribute('data-asked-fix-line', '2');
   });
+
+  test('clicking a shape on the canvas selects its line in the code', async ({ page }) => {
+    await openCodeAtEnd(page);
+    await page.keyboard.type('  A[Start] --- B[Retry]\n  C[Other]');
+    const drawer = page.getByRole('region', { name: 'Code' });
+    await drawer.getByRole('button', { name: 'Close code' }).click();
+    await expect(drawer).toHaveCount(0);
+    const preview = page.getByRole('group', { name: 'Diagram preview' });
+    await preview.getByText('Other', { exact: true }).click();
+    await expect(drawer.getByText(/^Ln 3, Col \d+$/)).toBeVisible();
+    await expect(page.locator('.monaco-editor .selected-text')).not.toHaveCount(0);
+  });
 });

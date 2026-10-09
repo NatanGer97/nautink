@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useFocusModeStore } from './focus-mode.ts';
 import { PreviewCanvas } from './preview-canvas.tsx';
 import { usePreviewStatusStore } from './preview-status.ts';
+import { useCodeRevealStore } from '../code/code-reveal.ts';
 import { commandRegistry } from '../commands/command-registry.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
@@ -15,7 +16,8 @@ const renderDiagram = vi.hoisted(() => vi.fn<() => Promise<RenderOutcome>>());
 
 vi.mock('./render-diagram.ts', () => ({ renderDiagram }));
 
-const SVG = '<svg viewBox="0 0 120 60"><g class="node" id="flowchart-A-0"><rect></rect></g></svg>';
+const SVG =
+  '<svg viewBox="0 0 120 60"><g class="node" id="nautink-render-1-flowchart-A-0"><rect></rect></g></svg>';
 
 beforeEach(() => {
   renderDiagram.mockResolvedValue({ kind: 'rendered', svg: SVG, renderMs: 7 });
@@ -129,5 +131,24 @@ describe('PreviewCanvas', () => {
     fireEvent.pointerMove(rect, { clientX: 60, clientY: 10 });
     fireEvent.pointerUp(rect, { clientX: 60, clientY: 10 });
     expect(onShapeClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('by default selects the line of the clicked shape in the code drawer, leaving focus mode', async () => {
+    await renderLoaded('flowchart TD\n  B --- A\n  A[Start]');
+    await waitFor(() => {
+      expect(stageSvg()).not.toBeNull();
+    });
+    useFocusModeStore.getState().setFocusMode(true);
+    const rect = document.querySelector('rect');
+    if (rect === null) {
+      throw new Error('The test SVG has no rect.');
+    }
+    fireEvent.pointerDown(rect, { button: 0, clientX: 10, clientY: 10 });
+    fireEvent.pointerUp(rect, { clientX: 10, clientY: 10 });
+    const diagramId = useWorkspaceStore.getState().activeId;
+    expect(useCodeRevealStore.getState().request).toEqual({ diagramId, line: 3 });
+    expect(useUiStore.getState().isCodeDrawerOpen).toBe(true);
+    expect(useFocusModeStore.getState().isFocusMode).toBe(false);
+    useCodeRevealStore.setState({ request: null });
   });
 });

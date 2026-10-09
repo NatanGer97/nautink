@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ASK_CLAUDE_TO_FIX_EVENT } from './ask-claude-to-fix.ts';
+import { revealLineInCode, useCodeRevealStore } from './code-reveal.ts';
 import { fakeMonaco, fakeMonacoState, resetFakeMonaco } from '../../tests/fake-monaco.ts';
 import { usePreviewStatusStore } from '../preview/preview-status.ts';
 import { CodeDrawer } from '../shell/code-drawer.tsx';
@@ -153,5 +154,28 @@ describe('the code drawer', () => {
     await renderDrawer();
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
     expect(writeText).toHaveBeenCalledWith('flowchart TD\n');
+  });
+
+  it('selects a line asked for from the canvas, once the editor is up', async () => {
+    await useWorkspaceStore.getState().load();
+    act(() => {
+      useWorkspaceStore.getState().applyEdit('flowchart TD\n  a --> b\n  b', {
+        label: 'Pasted code',
+        source: 'code',
+      });
+      revealLineInCode({ diagramId: useWorkspaceStore.getState().activeId ?? '', line: 2 });
+    });
+    const editor = await renderDrawer();
+    await waitFor(() => {
+      expect(editor.getSelection()).toEqual({
+        selectionStartLineNumber: 2,
+        selectionStartColumn: 1,
+        positionLineNumber: 2,
+        positionColumn: 10,
+      });
+    });
+    expect(editor.hasTextFocus()).toBe(true);
+    expect(useCodeRevealStore.getState().request).toBeNull();
+    expect(screen.getByText('Ln 2, Col 10')).toBeTruthy();
   });
 });

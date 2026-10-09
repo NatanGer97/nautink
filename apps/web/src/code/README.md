@@ -11,6 +11,8 @@ autocomplete per diagram type, the parse error marker, and one model per diagram
   container has `data-edit-history="app"`, so ⌘Z is the app's history, never Monaco's.
 - **External changes** (undo, Claude, visual edits) reach the model as one minimal edit
   (`syncModel`), so the cursor and scroll outside the change stay put.
+- **Reveal a line:** `revealLineInCode({ diagramId, line })` opens the drawer (leaving focus mode)
+  and selects the line once Monaco is up (`code-reveal.ts`). Click-to-line in the preview uses it.
 - **Ask Claude to fix:** the drawer dispatches `window` event `nautink:ask-claude-to-fix` with
   `{ message, line }` (`ask-claude-to-fix.ts`); the chat listens for it.
 

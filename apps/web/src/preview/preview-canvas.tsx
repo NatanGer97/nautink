@@ -1,6 +1,7 @@
 import { Button } from '@nautink/ui/components/button';
 
 import { useFocusModeEscape } from './focus-mode.ts';
+import { hitFromElement, locateLine } from './locate.ts';
 import { ParseErrorNotice, parseErrorAnnouncement } from './parse-error-notice.tsx';
 import { usePreviewCommands } from './preview-commands.ts';
 import { usePreviewStatus } from './preview-status.ts';
@@ -8,19 +9,20 @@ import { useDiagramRender } from './use-diagram-render.ts';
 import { STAGE_ATTRIBUTE, usePanZoom } from './use-pan-zoom.ts';
 import { viewTransformCss } from './view-math.ts';
 import { ZoomControls } from './zoom-controls.tsx';
+import { revealLineInCode } from '../code/code-reveal.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
 import type { PreviewStatus } from './preview-status.ts';
-import type { PanZoom, PanZoomOptions, PointerHandlers } from './use-pan-zoom.ts';
+import type { PanZoom, PointerHandlers } from './use-pan-zoom.ts';
 import type { ViewController } from './view-controller.ts';
 import type { ViewTransform } from './view-math.ts';
 import type { Diagram } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
 export interface PreviewCanvasProps {
-  /** A click (not a drag) on something inside the rendered diagram. */
+  /** A click (not a drag) on something inside the rendered diagram. Default: select its code line. */
   onShapeClick?: (target: Element) => void;
 }
 
@@ -84,7 +86,7 @@ function Stage({
       <div
         ref={stageRef}
         {...{ [STAGE_ATTRIBUTE]: '' }}
-        className="absolute top-0 left-0 origin-top-left"
+        className="absolute top-0 left-0 origin-top-left [&_.edgeLabel]:cursor-pointer [&_.node]:cursor-pointer"
         style={{ transform: viewTransformCss(view) }}
         // Mermaid's own output, sanitized by Mermaid under `securityLevel: 'strict'`.
         dangerouslySetInnerHTML={{ __html: svg }}
@@ -93,17 +95,30 @@ function Stage({
   );
 }
 
+/** The default click on a shape: select the line that defines it in the code drawer (v1's `locate.js`). */
+export function revealShapeInCode(diagramId: string, code: string, target: Element): void {
+  const stage: Element | null = target.closest(`[${STAGE_ATTRIBUTE}]`);
+  const line: number | null =
+    stage === null ? null : locateLine(code, hitFromElement(target, stage));
+  if (line !== null) {
+    revealLineInCode({ diagramId, line });
+  }
+}
+
 function PreviewSurface({ diagramId, code, onShapeClick }: PreviewSurfaceProps): ReactElement {
   const isDark: boolean = useIsDarkTheme();
   useDiagramRender({ diagramId, code, isDark });
   const status: PreviewStatus = usePreviewStatus();
   const isCurrent: boolean = status.diagramId === diagramId;
   const svg: string = isCurrent ? status.svg : '';
-  const clickOption: Pick<PanZoomOptions, 'onShapeClick'> = onShapeClick ? { onShapeClick } : {};
   const { viewportRef, stageRef, view, controller, handlers } = usePanZoom({
     svg,
     fitKey: diagramId,
-    ...clickOption,
+    onShapeClick:
+      onShapeClick ??
+      ((target: Element): void => {
+        revealShapeInCode(diagramId, code, target);
+      }),
   });
   usePreviewCommands(controller);
   useFocusModeEscape();

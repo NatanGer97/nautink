@@ -2,6 +2,7 @@ import { Button } from '@nautink/ui/components/button';
 import { useRef } from 'react';
 
 import { askClaudeToFix } from './ask-claude-to-fix.ts';
+import { useRevealRequests } from './code-reveal.ts';
 import { useCursorPosition } from './use-cursor-position.ts';
 import { useEditRecording } from './use-edit-recording.ts';
 import { useErrorMarkers } from './use-error-markers.ts';
@@ -83,6 +84,7 @@ function useEditorBindings(
   useEditRecording(handle);
   useErrorMarkers(handle, diagramId);
   useDisposeDeletedModels(handle);
+  useRevealRequests(handle, diagramId);
 }
 
 /**
@@ -93,8 +95,8 @@ export function CodeEditor(props: CodeEditorProps): ReactElement {
   const containerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const load: EditorLoad = useMonacoEditor(containerRef);
   const handle: EditorHandle | null = load.status === 'ready' ? load.handle : null;
-  useEditorBindings(handle, props);
   const cursor: CursorPosition = useCursorPosition(handle);
+  useEditorBindings(handle, props);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="relative min-h-0 flex-1">

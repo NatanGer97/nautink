@@ -162,6 +162,10 @@ export class FakeEditor {
 
   setSelection(selection: FakeSelection): void {
     this.selection = selection;
+    const position = { lineNumber: selection.positionLineNumber, column: selection.positionColumn };
+    for (const listener of this.positionListeners) {
+      (listener as Listener<unknown>)({ position });
+    }
   }
 
   setPosition(position: Position): void {

@@ -9,7 +9,7 @@ and focus mode. Mermaid runs only through `../mermaid/` (the shared queue).
 |---|---|
 | Validity (`valid` / `invalid` / `empty`), the `MermaidError`, render time, the last good SVG | `usePreviewStatus()`; outside React `usePreviewStatusStore.getState()` |
 | Focus mode (rail and panels hidden) | `useIsFocusMode()`, `useFocusModeStore.getState().setFocusMode(on)` |
-| A click on a rendered shape | `<PreviewCanvas onShapeClick={(element) => …} />` |
+| A click on a rendered shape | `<PreviewCanvas onShapeClick={(element) => …} />`; the default selects its code line (`locate.ts`, `revealLineInCode`) |
 
 `svg` in the status belongs to `diagramId`; it is kept while the code does not parse, and dropped when
 another diagram fails before it ever rendered.
@@ -24,3 +24,4 @@ another diagram fails before it ever rendered.
 | `view-math.ts`, `view-controller.ts`, `use-pan-zoom.ts` | Pan, zoom and fit; the view stays fitted until the user pans or zooms |
 | `preview-canvas.tsx`, `zoom-controls.tsx`, `parse-error-notice.tsx` | The UI |
 | `preview-commands.ts`, `focus-mode.ts` | ⌘K commands, focus mode and its Esc |
+| `locate.ts` | Click-to-line: the clicked SVG element → the source line (v1's `locate.js`) |
