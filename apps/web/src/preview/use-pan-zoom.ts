@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { ViewController } from './view-controller.ts';
+import { viewBoxSize } from './view-math.ts';
 
 import type { Point, Size, ViewTransform } from './view-math.ts';
 import type { PointerEvent, RefObject } from 'react';
@@ -26,19 +27,6 @@ export interface PanZoom {
   view: ViewTransform;
   controller: ViewController;
   handlers: PointerHandlers;
-}
-
-const VIEW_BOX_PARTS: number = 4;
-
-/** The width and height in a `viewBox` attribute; zero when there is none. */
-export function viewBoxSize(viewBox: string | null): Size {
-  const parts: number[] = (viewBox ?? '')
-    .trim()
-    .split(/[\s,]+/)
-    .map(Number);
-  const [, , width = 0, height = 0] = parts;
-  const isValid: boolean = parts.length === VIEW_BOX_PARTS && width > 0 && height > 0;
-  return isValid ? { width, height } : { width: 0, height: 0 };
 }
 
 /** The SVG's own size: its view box, or its box on the page when it has none. */

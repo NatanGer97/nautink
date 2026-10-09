@@ -81,3 +81,16 @@ export function zoomLabel(k: number): string {
 export function viewTransformCss(view: ViewTransform): string {
   return `translate(${String(view.x)}px, ${String(view.y)}px) scale(${String(view.k)})`;
 }
+
+const VIEW_BOX_PARTS: number = 4;
+
+/** The width and height in a `viewBox` attribute; zero when there is none. */
+export function viewBoxSize(viewBox: string | null): Size {
+  const parts: number[] = (viewBox ?? '')
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  const [, , width = 0, height = 0] = parts;
+  const isValid: boolean = parts.length === VIEW_BOX_PARTS && width > 0 && height > 0;
+  return isValid ? { width, height } : { width: 0, height: 0 };
+}

@@ -3,11 +3,12 @@ import { Kbd } from '@nautink/ui/components/kbd';
 import { Separator } from '@nautink/ui/components/separator';
 import { IconButton } from '@nautink/ui/icon-button';
 import { cn } from '@nautink/ui/lib/utils';
-import { Code, Search, Upload } from 'lucide-react';
+import { Code, Search } from 'lucide-react';
 
 import { OUTLINE_BUTTON_CLASS } from './button-styles.ts';
 import { CanvasModeToggle } from './canvas-mode-toggle.tsx';
 import { LogoMark } from './logo-mark.tsx';
+import { ExportMenu } from '../export/export-menu.tsx';
 import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
 import { RepoBadge } from '../settings/repo-badge.tsx';
 import { useUiStore } from '../state/ui-store.ts';
@@ -84,10 +85,7 @@ export function TopBar(): ReactElement {
         <UndoRedoControls />
         <Separator orientation="vertical" className="mx-1.5 data-[orientation=vertical]:h-5" />
         <PaletteButton />
-        <Button variant="outline" size="sm" className={OUTLINE_BUTTON_CLASS} disabled>
-          <Upload aria-hidden="true" />
-          Export
-        </Button>
+        <ExportMenu />
       </div>
     </header>
   );
