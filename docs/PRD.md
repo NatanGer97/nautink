@@ -189,7 +189,7 @@ Source of truth: the mockup values below, expressed as CSS variables mapped to s
 | `--input` / `--border-strong` | `#D6D3CC` | `#3A3A37` | Buttons, fields, composer |
 | `--foreground` | `#1B1B19` | `#EDEDEB` | Text, ink fill for primary buttons |
 | `--muted-foreground` | `#5E5C57` | `#A8A6A0` | Secondary text |
-| `--faint` | `#8C8A84` | `#7A7873` | Meta, placeholders |
+| `--faint` | `#6F6D67` | `#8E8C86` | Meta, placeholders (darkened 2026-10-09 to pass 4.5:1 on every surface) |
 | `--accent-ink` (`--ring`) | `#3451D1` | `#9AAEFF` | Selection, focus, active |
 | `--accent-ink-strong` | `#2B44B0` | `#C2CEFF` | Accent text on accent backgrounds |
 | `--accent-wash` | `#EEF1FD` | `#1E2440` | Selected rail item, chips |

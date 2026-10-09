@@ -36,8 +36,20 @@ test.describe('app shell smoke', () => {
     const settings = page.getByRole('dialog', { name: 'Settings' });
     await settings.getByRole('radio', { name: 'Dark' }).click();
     await expect(html).toHaveClass(/dark/);
-    await expect(settings).toContainText('Not connected');
     await page.reload({ waitUntil: 'commit' });
     await expect(html).toHaveClass(/dark/);
+  });
+
+  test('shows the Claude connection from the health check', async ({ page }) => {
+    // Answered here, so the result does not depend on whether the API server is running.
+    await page.route('**/api/health', async (route) => {
+      await route.fulfill({
+        json: { claude: { isFound: false, version: null, error: 'claude: command not found' } },
+      });
+    });
+    await page.getByRole('button', { name: 'Settings' }).click();
+    const settings = page.getByRole('dialog', { name: 'Settings' });
+    await expect(settings).toContainText('Not connected');
+    await expect(settings).toContainText('claude: command not found');
   });
 });
