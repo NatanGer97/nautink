@@ -167,6 +167,18 @@ describe('POST /api/chat', () => {
     ]);
   });
 
+  it('survives a CLI that exits without reading a prompt larger than the pipe buffer', async () => {
+    useScenario('silent-exit');
+    const url = await start();
+    // ~260 KB: far over the 64 KB pipe buffer, so writing stdin always breaks the pipe, and well
+    // under the 2 MB body limit.
+    const response = await chat(url, { code: 'flowchart TD\n'.repeat(20_000) });
+    expect(response.status).toBe(200);
+    expect(await readEvents(response)).toEqual([
+      { type: 'error', message: 'claude exited with code 3' },
+    ]);
+  });
+
   it('sends an error when the CLI cannot start', async () => {
     const url = await start({ claudeBin: path.join(scratch, 'no-such-claude') });
     const events = await readEvents(await chat(url));

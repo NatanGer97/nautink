@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 import type { HealthResponse } from '@nautink/contracts/server-info';
+import type { ExecFileException } from 'node:child_process';
 
 const execFileAsync: (
   file: string,
@@ -15,20 +16,20 @@ const VERSION_PATTERN: RegExp = /\d+\.\d+\.\d+\S*/;
 
 /** `2.1.0 (Claude Code)` → `2.1.0`; any other output is reported as its first line. */
 export function parseVersion(output: string): string {
-  const firstLine: string = output.trim().split('\n')[0] ?? '';
+  const firstLine: string = output.trim().split('\n', 1).join('');
   return VERSION_PATTERN.exec(firstLine)?.[0] ?? firstLine;
 }
 
 function describeFailure(claudeBin: string, err: unknown): string {
-  const failure: { code?: unknown; killed?: unknown; message?: unknown } =
-    typeof err === 'object' && err !== null ? err : {};
+  // `execFile` always rejects with an ExecFileException.
+  const failure: ExecFileException = err as ExecFileException;
   if (failure.code === 'ENOENT') {
     return `"${claudeBin}" was not found. Install Claude Code or set CLAUDE_BIN.`;
   }
   if (failure.killed === true) {
     return `"${claudeBin} --version" did not answer in time.`;
   }
-  return `"${claudeBin} --version" failed: ${String(failure.message)}`;
+  return `"${claudeBin} --version" failed: ${failure.message}`;
 }
 
 /** Runs `<claudeBin> --version` without a shell. Never throws: a failure is part of the answer. */

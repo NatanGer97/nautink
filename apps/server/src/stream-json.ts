@@ -160,8 +160,12 @@ export function createLineSplitter(): LineSplitter {
   return {
     push(chunk: string): string[] {
       buffer += chunk;
-      const lines: string[] = buffer.split('\n');
-      buffer = lines.pop() ?? '';
+      const end: number = buffer.lastIndexOf('\n');
+      if (end === -1) {
+        return [];
+      }
+      const lines: string[] = buffer.slice(0, end).split('\n');
+      buffer = buffer.slice(end + 1);
       return lines;
     },
   };

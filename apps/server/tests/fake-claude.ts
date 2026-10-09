@@ -116,8 +116,6 @@ async function run(scenario: string): Promise<void> {
   } else if (scenario === 'crash') {
     process.stderr.write('Invalid API key · Please run /login\n');
     process.exit(1);
-  } else if (scenario === 'silent-exit') {
-    process.exit(3);
   } else if (scenario === 'hang') {
     write(init);
     await sleep(HANG_MS);
@@ -129,5 +127,9 @@ async function run(scenario: string): Promise<void> {
 }
 
 const scenario = process.env.FAKE_CLAUDE_SCENARIO ?? 'reply';
+if (scenario === 'silent-exit') {
+  // Exits without reading stdin, so a large prompt breaks the pipe.
+  process.exit(3);
+}
 record();
 await (process.argv.includes('--version') ? version(scenario) : run(scenario));

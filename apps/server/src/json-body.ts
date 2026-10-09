@@ -1,15 +1,15 @@
 import express from 'express';
 
-import { BAD_REQUEST, sendError } from './http-errors.ts';
+import { sendError } from './http-errors.ts';
 
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
 const MAX_BODY_SIZE: string = '2mb';
 
-function statusOf(err: unknown): number {
-  const status: unknown =
-    typeof err === 'object' && err !== null && 'status' in err ? err.status : null;
-  return typeof status === 'number' ? status : BAD_REQUEST;
+/** What `express.json` passes to `next` on failure: an http-errors error with a 4xx status. */
+interface BodyParserError {
+  status: number;
+  message: string;
 }
 
 const jsonParser: RequestHandler = express.json({ limit: MAX_BODY_SIZE });
@@ -17,11 +17,11 @@ const jsonParser: RequestHandler = express.json({ limit: MAX_BODY_SIZE });
 /** `express.json`, but a malformed or oversized body gets a JSON error instead of an HTML page. */
 export function parseJsonBody(req: Request, res: Response, next: NextFunction): void {
   void jsonParser(req, res, (err?: unknown) => {
-    if (err === undefined || err === null) {
+    if (err === undefined) {
       next();
       return;
     }
-    const reason: string = err instanceof Error ? err.message : 'unreadable body';
-    sendError(res, statusOf(err), `Invalid request body: ${reason}`);
+    const failure: BodyParserError = err as BodyParserError;
+    sendError(res, failure.status, `Invalid request body: ${failure.message}`);
   });
 }

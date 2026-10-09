@@ -19,12 +19,12 @@ export const HOST: string = '127.0.0.1';
 export const REPO_ROOT: string = path.resolve(import.meta.dirname, '..', '..', '..');
 
 function describeListenError(port: number, err: unknown): string {
-  const code: unknown = typeof err === 'object' && err !== null && 'code' in err ? err.code : null;
-  if (code === 'EADDRINUSE') {
+  // `listen` fails with a system error (EADDRINUSE, EACCES) or a RangeError for a bad port.
+  const failure: NodeJS.ErrnoException = err as NodeJS.ErrnoException;
+  if (failure.code === 'EADDRINUSE') {
     return `Port ${String(port)} on ${HOST} is already in use. Set API_PORT to use another port.`;
   }
-  const reason: string = err instanceof Error ? err.message : 'unknown error';
-  return `Cannot listen on ${HOST}:${String(port)}: ${reason}`;
+  return `Cannot listen on ${HOST}:${String(port)}: ${failure.message}`;
 }
 
 /** Starts listening on 127.0.0.1. Rejects with a readable message when the port is taken. */
