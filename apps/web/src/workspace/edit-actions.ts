@@ -85,8 +85,8 @@ function applyEditAction(ctx: StoreContext): EditActions['applyEdit'] {
 }
 
 function amendEditAction(ctx: StoreContext): EditActions['amendEdit'] {
-  return (entryId: number, code: string): boolean => {
-    const id: string = requireActiveId(ctx);
+  return (entryId: number, code: string, diagramId?: string): boolean => {
+    const id: string = diagramId ?? requireActiveId(ctx);
     const { diagram, stack } = stackOf(ctx, id);
     if (!canAmend(stack, entryId)) {
       return false;

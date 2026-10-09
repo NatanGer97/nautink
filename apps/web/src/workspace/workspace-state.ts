@@ -2,6 +2,7 @@ import type { SaveState } from './autosave.ts';
 import type { EditEntry, EditMeta, EditStack } from './edit-history.ts';
 import type { WorkspaceDeps } from './workspace-deps.ts';
 import type { WorkspaceRuntime } from './workspace-runtime.ts';
+import type { NautinkDb } from '@nautink/storage/db';
 import type { DeletedDiagram } from '@nautink/storage/diagram-delete';
 import type { ChatMessage, Diagram, DiagramView } from '@nautink/storage/records';
 import type { StoreApi, UseBoundStore } from 'zustand';
@@ -48,8 +49,11 @@ export interface LibraryActions {
 export interface EditActions {
   /** Records `code` as a labelled step and saves it. Returns the step that now holds the code. */
   applyEdit: (code: string, request: EditRequest) => EditEntry;
-  /** Replaces the code of the newest step if it still is one (a Claude auto-fix retry). */
-  amendEdit: (entryId: number, code: string) => boolean;
+  /**
+   * Replaces the code of the newest step if it still is one (a Claude auto-fix retry).
+   * `diagramId` defaults to the open diagram.
+   */
+  amendEdit: (entryId: number, code: string, diagramId?: string) => boolean;
   /** Ends the typing group: call on a cursor jump, a paste or when the editor loses focus. */
   closeEditGroup: () => void;
   undo: () => void;
@@ -66,6 +70,8 @@ export interface FieldActions {
   setView: (id: string, view: DiagramView) => void;
   /** Writes every queued change now. */
   flushSaves: () => Promise<void>;
+  /** The open database, for features that write their own stores (versions). Throws before `load`. */
+  getDb: () => NautinkDb;
 }
 
 /** Requests from ⌘K to the diagrams panel, and teardown. */

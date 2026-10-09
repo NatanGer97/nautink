@@ -19,7 +19,8 @@ hooks below; call actions with `useWorkspaceStore.getState().<action>()` outside
 
 Everything is written through autosave: ~400 ms after the last change, and at once when the page is
 hidden or closed (`useWorkspaceLifecycle`, mounted by `App`). `flushSaves()` writes now; call it
-before anything that reads the database directly (version snapshots, export).
+before anything that reads the database directly (version snapshots, export). `getDb()` hands out
+the open database for stores the workspace does not own (versions); it throws before `load`.
 
 ## Changing a diagram
 
@@ -51,7 +52,9 @@ undo/redo stack (`edit-history.ts`, 200 steps, session only) and queues the save
   focus. A paste, cut or drop is its own step: no `group`. Pass `sel` so redo can restore the cursor.
 - **One Claude turn = one step:** `applyEdit(result, { label: 'Claude: …', source: 'claude' })`,
   keep the returned `entry.id`, and send auto-fix retries through `amendEdit(entry.id, code)`; if it
-  returns `false` (the user edited in between), record a new step instead.
+  returns `false` (the user edited in between), record a new step instead. Both take the diagram's
+  id (`diagramId` in the request, third argument of `amendEdit`) so a reply keeps landing in the
+  diagram that asked even after the user opens another one.
 - **Undo/redo:** `undo()`, `redo()`, `jumpTo(index)`. They change `code` in the store; an editor
   showing the code must follow the store, not keep its own undo stack.
 - **Keyboard:** ⌘Z / ⌘⇧Z / ⌘Y run the history everywhere except text fields. A code editor that

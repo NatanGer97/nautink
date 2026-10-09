@@ -1,6 +1,8 @@
 import { Toaster } from '@nautink/ui/components/sonner';
 import { TooltipProvider } from '@nautink/ui/components/tooltip';
 
+import { ChatAnnouncer } from './chat/chat-announcer.tsx';
+import { useChatFeature } from './chat/use-chat-feature.ts';
 import { CommandPalette } from './commands/command-palette.tsx';
 import { buildShellCommands } from './commands/shell-commands.ts';
 import { useRegisterCommands } from './commands/use-commands.ts';
@@ -33,6 +35,7 @@ export function App(): ReactElement {
   useHistoryShortcuts();
   useWorkspaceCommands();
   useTwoTabNotice();
+  useChatFeature();
   useRegisterCommands(SHELL_COMMANDS);
   return (
     <TooltipProvider delayDuration={TOOLTIP_DELAY_MS}>
@@ -40,6 +43,7 @@ export function App(): ReactElement {
       <CommandPalette />
       <TemplatesDialog />
       <Toaster theme={theme} />
+      <ChatAnnouncer />
     </TooltipProvider>
   );
 }

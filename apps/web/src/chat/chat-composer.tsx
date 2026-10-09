@@ -1,0 +1,86 @@
+import { useEffect, useRef } from 'react';
+
+import { useChatStore } from './chat-store.ts';
+import { SendButton } from './send-button.tsx';
+import { submitDraft } from './submit-draft.ts';
+import { matchesShortcut, SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
+import { useUiStore } from '../state/ui-store.ts';
+import { useWorkspaceStore } from '../workspace/use-workspace.ts';
+
+import type { Diagram } from '@nautink/storage/records';
+import type { KeyboardEvent, ReactElement, RefObject } from 'react';
+
+export interface ChatComposerProps {
+  /** The open diagram, whose `draft` the composer edits; undefined while the workspace loads. */
+  diagram: Diagram | undefined;
+}
+
+function placeholder(busyId: string | null, diagramId: string | undefined): string {
+  if (busyId === null) {
+    return 'Describe a change…';
+  }
+  return busyId === diagramId ? 'Claude is replying…' : 'Claude is replying in another diagram…';
+}
+
+/** Takes focus each time ⌘/ asks for it. */
+function useComposerFocus(textareaRef: RefObject<HTMLTextAreaElement | null>): void {
+  const focusRequest: number = useUiStore((state) => state.composerFocusRequest);
+  useEffect(() => {
+    if (focusRequest > 0) {
+      textareaRef.current?.focus();
+    }
+  }, [focusRequest, textareaRef]);
+}
+
+/** The message box (M1). Its text is the diagram's draft, so it survives switching diagrams. */
+export function ChatComposer({ diagram }: ChatComposerProps): ReactElement {
+  const textareaRef: RefObject<HTMLTextAreaElement | null> = useRef<HTMLTextAreaElement>(null);
+  const busyId: string | null = useChatStore((state) => state.busyDiagramId);
+  useComposerFocus(textareaRef);
+  const draft: string = diagram?.draft ?? '';
+  const send = (): void => {
+    if (diagram !== undefined) {
+      submitDraft(diagram.id, draft);
+    }
+  };
+  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (!event.nativeEvent.isComposing && matchesShortcut(event, SHORTCUTS.send)) {
+      event.preventDefault();
+      send();
+    }
+  };
+  return (
+    <div className="shrink-0 border-t border-border-subtle p-3">
+      <div className="flex flex-col gap-2 rounded-card border border-input bg-panel p-2 pl-2.5 focus-within:border-ring">
+        <label htmlFor="chat-composer" className="sr-only">
+          Message Claude
+        </label>
+        <textarea
+          id="chat-composer"
+          ref={textareaRef}
+          rows={2}
+          value={draft}
+          placeholder={placeholder(busyId, diagram?.id)}
+          className="resize-none border-0 bg-transparent leading-normal outline-none placeholder:text-faint"
+          onChange={(event) => {
+            if (diagram !== undefined) {
+              useWorkspaceStore.getState().setDraft(diagram.id, event.target.value);
+            }
+          }}
+          onKeyDown={onKeyDown}
+        />
+        <div className="flex items-center justify-between">
+          <span className="text-2xs text-faint">
+            {shortcutLabel(SHORTCUTS.send)} to send · {shortcutLabel(SHORTCUTS.focusComposer)} to
+            focus
+          </span>
+          <SendButton
+            isStreaming={busyId !== null && busyId === diagram?.id}
+            isDisabled={busyId !== null || draft.trim() === ''}
+            onSend={send}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
