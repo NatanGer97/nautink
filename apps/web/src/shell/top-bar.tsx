@@ -3,7 +3,7 @@ import { Kbd } from '@nautink/ui/components/kbd';
 import { Separator } from '@nautink/ui/components/separator';
 import { IconButton } from '@nautink/ui/icon-button';
 import { cn } from '@nautink/ui/lib/utils';
-import { Code, Redo2, Search, Undo2, Upload } from 'lucide-react';
+import { Code, Search, Upload } from 'lucide-react';
 
 import { OUTLINE_BUTTON_CLASS } from './button-styles.ts';
 import { CanvasModeToggle } from './canvas-mode-toggle.tsx';
@@ -11,6 +11,7 @@ import { LogoMark } from './logo-mark.tsx';
 import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { DiagramTitle, SaveStatus } from '../workspace/diagram-title.tsx';
+import { UndoRedoControls } from '../workspace/undo-redo-controls.tsx';
 
 import type { ReactElement } from 'react';
 
@@ -78,18 +79,7 @@ export function TopBar(): ReactElement {
         </Button>
       </div>
       <div className="flex flex-1 items-center justify-end gap-1">
-        <IconButton
-          label="Undo"
-          shortcut={shortcutLabel(SHORTCUTS.undo)}
-          icon={<Undo2 />}
-          isDisabled
-        />
-        <IconButton
-          label="Redo"
-          shortcut={shortcutLabel(SHORTCUTS.redo)}
-          icon={<Redo2 />}
-          isDisabled
-        />
+        <UndoRedoControls />
         <Separator orientation="vertical" className="mx-1.5 data-[orientation=vertical]:h-5" />
         <PaletteButton />
         <Button variant="outline" size="sm" className={OUTLINE_BUTTON_CLASS} disabled>

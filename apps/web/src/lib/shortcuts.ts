@@ -7,7 +7,8 @@ export interface Shortcut {
 
 export type KeyEventLike = Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'shiftKey'>;
 
-export type ShortcutName = 'palette' | 'focusComposer' | 'undo' | 'redo' | 'send' | 'saveVersion';
+export type ShortcutName =
+  'palette' | 'focusComposer' | 'undo' | 'redo' | 'redoAlt' | 'send' | 'saveVersion';
 
 /** The app's global shortcuts. Features add theirs here so the palette and tooltips agree. */
 export const SHORTCUTS: Readonly<Record<ShortcutName, Shortcut>> = {
@@ -15,6 +16,7 @@ export const SHORTCUTS: Readonly<Record<ShortcutName, Shortcut>> = {
   focusComposer: { key: '/', isMod: true },
   undo: { key: 'z', isMod: true },
   redo: { key: 'z', isMod: true, isShift: true },
+  redoAlt: { key: 'y', isMod: true },
   send: { key: 'Enter', isMod: true },
   saveVersion: { key: 's', isMod: true },
 };

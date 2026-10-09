@@ -13,10 +13,10 @@ test.describe('app shell smoke', () => {
   });
 
   test('switches rail panels', async ({ page }) => {
-    await page.getByRole('button', { name: 'History' }).click();
+    await page.getByRole('button', { name: 'History', exact: true }).click();
     await expect(page.getByRole('complementary', { name: 'History' })).toBeVisible();
     await expect(page.getByRole('complementary', { name: 'Chat' })).toHaveCount(0);
-    await page.getByRole('button', { name: 'Diagrams' }).click();
+    await page.getByRole('button', { name: 'Diagrams', exact: true }).click();
     await expect(page.getByRole('complementary', { name: 'Diagrams' })).toBeVisible();
   });
 
