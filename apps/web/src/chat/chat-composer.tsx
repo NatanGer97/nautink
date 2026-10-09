@@ -8,11 +8,13 @@ import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { Diagram } from '@nautink/storage/records';
-import type { KeyboardEvent, ReactElement, RefObject } from 'react';
+import type { KeyboardEvent, ReactElement, ReactNode, RefObject } from 'react';
 
 export interface ChatComposerProps {
   /** The open diagram, whose `draft` the composer edits; undefined while the workspace loads. */
   diagram: Diagram | undefined;
+  /** Shown above the message box, such as quick actions while the chat is empty. */
+  above?: ReactNode;
 }
 
 function placeholder(busyId: string | null, diagramId: string | undefined): string {
@@ -33,7 +35,7 @@ function useComposerFocus(textareaRef: RefObject<HTMLTextAreaElement | null>): v
 }
 
 /** The message box (M1). Its text is the diagram's draft, so it survives switching diagrams. */
-export function ChatComposer({ diagram }: ChatComposerProps): ReactElement {
+export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElement {
   const textareaRef: RefObject<HTMLTextAreaElement | null> = useRef<HTMLTextAreaElement>(null);
   const busyId: string | null = useChatStore((state) => state.busyDiagramId);
   useComposerFocus(textareaRef);
@@ -50,7 +52,8 @@ export function ChatComposer({ diagram }: ChatComposerProps): ReactElement {
     }
   };
   return (
-    <div className="shrink-0 border-t border-border-subtle p-3">
+    <div className="flex shrink-0 flex-col gap-2.5 border-t border-border-subtle p-3">
+      {above}
       <div className="flex flex-col gap-2 rounded-card border border-input bg-panel p-2 pl-2.5 focus-within:border-ring">
         <label htmlFor="chat-composer" className="sr-only">
           Message Claude

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import { AssistantMessage, UserMessage } from './chat-message.tsx';
 import { ChipButton } from './chip-button.tsx';
-import { EXAMPLE_PROMPTS } from './quick-actions.ts';
+import { EXAMPLE_PROMPTS, hasDiagramContent } from './quick-actions.ts';
 import { sendChat } from './send-chat.ts';
 import { EmptyState } from '../shell/panels/empty-state.tsx';
 
@@ -16,7 +16,14 @@ export interface MessageListProps {
 }
 
 /** v1's welcome: what the chat does, and example prompts to start from. */
-function ChatWelcome(): ReactElement {
+function ChatWelcome({ hasContent }: { hasContent: boolean }): ReactElement {
+  if (hasContent) {
+    return (
+      <EmptyState title="Ask about this diagram">
+        Describe a change, or pick a quick action below. Claude edits the code; you can edit it too.
+      </EmptyState>
+    );
+  }
   return (
     <EmptyState
       title="Start with a description"
@@ -75,7 +82,7 @@ export function MessageList({ diagram, latestReplyFooter }: MessageListProps): R
     }
   }, [messages]);
   if (messages.length === 0) {
-    return <ChatWelcome />;
+    return <ChatWelcome hasContent={hasDiagramContent(diagram.code)} />;
   }
   const latest: number = lastAssistantIndex(messages);
   return (

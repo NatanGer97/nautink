@@ -208,6 +208,41 @@ describe('chat panel', () => {
   });
 });
 
+describe('quick actions', () => {
+  it('shows type chips above the empty composer, then under the latest reply', async () => {
+    replies.push(() => eventsResponse(replyEvents(fenced(`${VALID}\n  Pay --> Retry`))));
+    const user = await renderApp();
+    act(() => {
+      useWorkspaceStore.getState().applyEdit(VALID, { label: 'Pasted code', source: 'code' });
+    });
+    const panel = chatPanel();
+    expect(within(panel).getByText('Ask about this diagram')).toBeTruthy();
+    const chips = within(panel).getByRole('group', { name: 'Quick actions' });
+    expect(
+      within(chips)
+        .getAllByRole('button')
+        .map((chip) => chip.textContent),
+    ).toEqual([
+      'Add error handling',
+      'To sequence',
+      'Explain',
+      'Review',
+      'Simplify',
+      'More readable',
+      'More detail',
+    ]);
+    await user.click(within(chips).getByRole('button', { name: 'Add error handling' }));
+    await within(panel).findByText('Diagram updated');
+    expect(chatRequests()[0]?.message).toMatch(/^Add error and failure paths/);
+    const steps =
+      useWorkspaceStore.getState().histories[useWorkspaceStore.getState().activeId ?? ''];
+    expect(steps?.entries.at(-1)?.label).toBe('Claude: Add error handling');
+    const messages = within(panel).getByRole('region', { name: 'Messages' });
+    expect(within(messages).getByRole('group', { name: 'Quick actions' })).toBeTruthy();
+    expect(within(panel).getAllByRole('group', { name: 'Quick actions' })).toHaveLength(1);
+  });
+});
+
 describe('sending from elsewhere', () => {
   it('sends from the floating prompt bar while the chat is closed', async () => {
     useUiStore.getState().setActivePanel(null);

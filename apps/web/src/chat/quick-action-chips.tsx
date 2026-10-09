@@ -1,0 +1,42 @@
+import { cn } from '@nautink/ui/lib/utils';
+
+import { useChatStore } from './chat-store.ts';
+import { ChipButton } from './chip-button.tsx';
+import { quickActionsFor } from './quick-actions.ts';
+import { sendChat } from './send-chat.ts';
+
+import type { QuickAction } from './quick-actions.ts';
+import type { ReactElement } from 'react';
+
+export interface QuickActionChipsProps {
+  /** The diagram the chips act on; its type picks the extra chips. */
+  code: string;
+  className?: string;
+}
+
+/** v1's quick actions for this diagram's type, as chips that send their prompt (M1). */
+export function QuickActionChips({ code, className }: QuickActionChipsProps): ReactElement | null {
+  const isBusy: boolean = useChatStore((state) => state.busyDiagramId !== null);
+  const actions: readonly QuickAction[] = quickActionsFor(code);
+  if (actions.length === 0) {
+    return null;
+  }
+  return (
+    <div
+      role="group"
+      aria-label="Quick actions"
+      className={cn('flex flex-wrap gap-1.5', className)}
+    >
+      {actions.map((action) => (
+        <ChipButton
+          key={action.label}
+          hint={action.prompt}
+          {...(isBusy ? { disabledReason: 'Claude is replying.' } : {})}
+          onClick={() => void sendChat(action.prompt, { title: action.label })}
+        >
+          {action.label}
+        </ChipButton>
+      ))}
+    </div>
+  );
+}
