@@ -80,3 +80,14 @@ test.describe('diagrams panel', () => {
     await expect(panel.getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true');
   });
 });
+
+test('warns in both tabs when the app is open twice', async ({ context }) => {
+  const first = await context.newPage();
+  await first.goto('/');
+  await expect(first.getByLabel('Diagram code')).toBeVisible();
+  const second = await context.newPage();
+  await second.goto('/');
+  const warning = /open in another tab\. Edits made in both tabs overwrite each other/;
+  await expect(second.getByText(warning)).toBeVisible();
+  await expect(first.getByText(warning)).toBeVisible();
+});

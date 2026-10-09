@@ -10,6 +10,7 @@ import { useAppliedTheme } from './shell/use-applied-theme.ts';
 import { useGlobalShortcuts } from './shell/use-global-shortcuts.ts';
 import { useUiStore } from './state/ui-store.ts';
 import { useHistoryShortcuts } from './workspace/history-shortcuts.ts';
+import { useTwoTabNotice } from './workspace/two-tab-notice.ts';
 import { useWorkspaceCommands } from './workspace/use-workspace-commands.ts';
 import { useWorkspaceLifecycle } from './workspace/use-workspace-lifecycle.ts';
 
@@ -31,6 +32,7 @@ export function App(): ReactElement {
   useWorkspaceLifecycle();
   useHistoryShortcuts();
   useWorkspaceCommands();
+  useTwoTabNotice();
   useRegisterCommands(SHELL_COMMANDS);
   return (
     <TooltipProvider delayDuration={TOOLTIP_DELAY_MS}>

@@ -3,6 +3,7 @@ import { cleanup } from '@testing-library/react';
 import { IDBFactory } from 'fake-indexeddb';
 import { afterEach, beforeEach } from 'vitest';
 
+import { installLocalBroadcastChannel } from './broadcast.ts';
 import { installMatchMedia, resetMediaQueries } from './media.ts';
 import { resetUiState } from '../src/state/ui-store.ts';
 import { useWorkspaceStore } from '../src/workspace/use-workspace.ts';
@@ -28,6 +29,7 @@ Element.prototype.hasPointerCapture = (): boolean => false;
 Element.prototype.releasePointerCapture = (): undefined => undefined;
 Element.prototype.setPointerCapture = (): undefined => undefined;
 installMatchMedia();
+installLocalBroadcastChannel();
 
 beforeEach(() => {
   // A fresh, empty IndexedDB per test, so the app's `nautink` database never leaks between tests.

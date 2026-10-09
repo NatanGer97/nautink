@@ -67,6 +67,7 @@ undo/redo stack (`edit-history.ts`, 200 steps, session only) and queues the save
 | `autosave.ts` | Debounced, ordered writes with retry |
 | `undo-redo-controls.tsx`, `history-shortcuts.ts` | Top bar ↶ ↷ with the step menu; ⌘Z / ⌘⇧Z / ⌘Y |
 | `workspace-commands.ts`, `diagram-commands.ts`, `use-workspace-commands.ts` | The workspace's ⌘K commands |
+| `two-tab-notice.ts` | `BroadcastChannel('nautink')`: both tabs warn that their edits overwrite each other (PRD §11) |
 | `panel/` | The diagrams panel: search, type chips, the keyboard listbox, row menu, inline rename |
 | `workspace-deps.ts`, `default-workspace-deps.ts` | Database, notices, downloads, clock: swapped in tests |
 | `active-code-stand-in.tsx` | **Temporary**: the code as plain text until the preview lands |
