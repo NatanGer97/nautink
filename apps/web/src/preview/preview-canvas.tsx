@@ -5,6 +5,7 @@ import { hitFromElement, locateLine } from './locate.ts';
 import { ParseErrorNotice, parseErrorAnnouncement } from './parse-error-notice.tsx';
 import { usePreviewCommands } from './preview-commands.ts';
 import { usePreviewStatus } from './preview-status.ts';
+import { useShapeHighlight } from './shape-highlight.ts';
 import { useDiagramRender } from './use-diagram-render.ts';
 import { STAGE_ATTRIBUTE, usePanZoom } from './use-pan-zoom.ts';
 import { viewTransformCss } from './view-math.ts';
@@ -26,6 +27,8 @@ import type { ReactElement } from 'react';
 export interface PreviewCanvasProps {
   /** A click (not a drag) on something inside the rendered diagram. Default: select its code line. */
   onShapeClick?: (target: Element) => void;
+  /** Diagram ids to mark as selected on the render (Split mirrors the editor's selection). */
+  selectedIds?: readonly string[];
 }
 
 interface PreviewSurfaceProps extends PreviewCanvasProps {
@@ -67,6 +70,13 @@ interface StageProps {
   svg: string;
 }
 
+/** The stage: clickable shapes, and an accent outline on shapes selected in the editor (Split). */
+const STAGE_CLASS: string = [
+  'absolute top-0 left-0 origin-top-left [&_.edgeLabel]:cursor-pointer [&_.node]:cursor-pointer',
+  '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:stroke-accent-ink',
+  '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:[stroke-width:2.5px]',
+].join(' ');
+
 /** The pan surface and the rendered SVG, placed by the current view. */
 function Stage({
   viewportRef,
@@ -88,7 +98,7 @@ function Stage({
       <div
         ref={stageRef}
         {...{ [STAGE_ATTRIBUTE]: '' }}
-        className="absolute top-0 left-0 origin-top-left [&_.edgeLabel]:cursor-pointer [&_.node]:cursor-pointer"
+        className={STAGE_CLASS}
         style={{ transform: viewTransformCss(view) }}
         // Mermaid's own output, sanitized by Mermaid under `securityLevel: 'strict'`.
         dangerouslySetInnerHTML={{ __html: svg }}
@@ -107,7 +117,12 @@ export function revealShapeInCode(diagramId: string, code: string, target: Eleme
   }
 }
 
-function PreviewSurface({ diagramId, code, onShapeClick }: PreviewSurfaceProps): ReactElement {
+function PreviewSurface({
+  diagramId,
+  code,
+  onShapeClick,
+  selectedIds = [],
+}: PreviewSurfaceProps): ReactElement {
   const isDark: boolean = useIsDarkTheme();
   useDiagramRender({ diagramId, code, isDark });
   const status: PreviewStatus = usePreviewStatus();
@@ -122,6 +137,7 @@ function PreviewSurface({ diagramId, code, onShapeClick }: PreviewSurfaceProps):
         revealShapeInCode(diagramId, code, target);
       }),
   });
+  useShapeHighlight(stageRef, svg, selectedIds);
   usePreviewCommands(controller);
   useFocusModeEscape();
   const error: PreviewStatus['error'] = isCurrent ? status.error : null;
@@ -149,7 +165,7 @@ function ignoreClick(): void {
  * The canvas in Preview mode: the open diagram rendered by Mermaid, with pan, zoom and fit. While
  * the history panel views an older version, that version is shown instead, read-only (M5).
  */
-export function PreviewCanvas({ onShapeClick }: PreviewCanvasProps): ReactElement {
+export function PreviewCanvas({ onShapeClick, selectedIds }: PreviewCanvasProps): ReactElement {
   const diagram: Diagram | undefined = useActiveDiagram();
   const viewed: Version | null = useViewedVersion();
   if (diagram === undefined) {
@@ -176,6 +192,7 @@ export function PreviewCanvas({ onShapeClick }: PreviewCanvasProps): ReactElemen
       diagramId={diagram.id}
       code={diagram.code}
       {...(onShapeClick ? { onShapeClick } : {})}
+      {...(selectedIds ? { selectedIds } : {})}
     />
   );
 }

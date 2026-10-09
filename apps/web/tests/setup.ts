@@ -7,6 +7,7 @@ import { installLocalBroadcastChannel } from './broadcast.ts';
 import { resetHistoryState, skipFirstRun } from './history-fixtures.ts';
 import { installMatchMedia, resetMediaQueries } from './media.ts';
 import { resetChatState } from '../src/chat/chat-store.ts';
+import { resetCanvasSelection } from '../src/edit/selection/canvas-selection.ts';
 import { resetRepoState } from '../src/settings/repo-store.ts';
 import { resetUiState } from '../src/state/ui-store.ts';
 import { useWorkspaceStore } from '../src/workspace/use-workspace.ts';
@@ -69,4 +70,5 @@ afterEach(() => {
   cleanup();
   useWorkspaceStore.getState().reset();
   resetHistoryState();
+  resetCanvasSelection();
 });

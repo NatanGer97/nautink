@@ -6,8 +6,13 @@ import {
 import { Eye, PencilRuler } from 'lucide-react';
 
 import { EditCanvasLoader } from './edit-canvas-loader.tsx';
+import { selectedIdsOf, useCanvasSelection } from './selection/canvas-selection.ts';
+import { mirrorShapeClick } from './split-mirror.ts';
 import { PreviewCanvas } from '../preview/preview-canvas.tsx';
+import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
+import type { CanvasSelection } from './selection/canvas-selection.ts';
+import type { Diagram } from '@nautink/storage/records';
 import type { ReactElement, ReactNode } from 'react';
 
 interface HalfProps {
@@ -33,6 +38,23 @@ function SplitHalf({ label, hint, icon, children }: HalfProps): ReactElement {
   );
 }
 
+/** The preview half: shows the editor's selection, and a click selects in the editor too. */
+function MirroredPreview(): ReactElement {
+  const diagram: Diagram | undefined = useActiveDiagram();
+  const selection: CanvasSelection = useCanvasSelection();
+  if (diagram === undefined) {
+    return <PreviewCanvas />;
+  }
+  return (
+    <PreviewCanvas
+      selectedIds={selectedIdsOf(selection, diagram.id)}
+      onShapeClick={(target: Element) => {
+        mirrorShapeClick(diagram.id, diagram.code, target);
+      }}
+    />
+  );
+}
+
 /** Split (PRD §4.4, M4): the visual editor beside the real Mermaid render, with a draggable divider. */
 export function SplitView(): ReactElement {
   return (
@@ -53,7 +75,7 @@ export function SplitView(): ReactElement {
           hint="Exactly what GitHub and docs will show"
           icon={<Eye aria-hidden="true" />}
         >
-          <PreviewCanvas />
+          <MirroredPreview />
         </SplitHalf>
       </ResizablePanel>
     </ResizablePanelGroup>

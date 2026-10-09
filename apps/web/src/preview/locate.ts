@@ -31,7 +31,7 @@ function wordPattern(id: string): RegExp {
 }
 
 /** The diagram ids one element carries: its `name`, a meaningful `data-id`, or a node id. */
-function idsOf(element: Element): string[] {
+export function idsOf(element: Element): string[] {
   const ids: string[] = [];
   const name: string | null = element.getAttribute('name');
   if (name !== null && name !== '') {
