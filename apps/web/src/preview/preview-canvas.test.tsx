@@ -7,6 +7,7 @@ import { PreviewCanvas } from './preview-canvas.tsx';
 import { usePreviewStatusStore } from './preview-status.ts';
 import { useCodeRevealStore } from '../code/code-reveal.ts';
 import { commandRegistry } from '../commands/command-registry.ts';
+import { useViewedVersionStore, viewVersion } from '../history/viewed-version.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
@@ -150,5 +151,32 @@ describe('PreviewCanvas', () => {
     expect(useUiStore.getState().isCodeDrawerOpen).toBe(true);
     expect(useFocusModeStore.getState().isFocusMode).toBe(false);
     useCodeRevealStore.setState({ request: null });
+  });
+
+  it('shows a viewed version instead of the current code, with its bar', async () => {
+    await renderLoaded('flowchart TD\n  A');
+    const version = {
+      id: 'v1',
+      diagramId: useWorkspaceStore.getState().activeId ?? '',
+      code: 'flowchart TD\n  old',
+      createdAt: Date.UTC(2026, 9, 9, 10, 42),
+      kind: 'manual' as const,
+      label: 'First draft',
+      prompt: '',
+    };
+    act(() => {
+      viewVersion(version);
+    });
+    const bar = screen.getByRole('region', { name: 'Viewed version' });
+    expect(bar.textContent).toContain('First draft');
+    await waitFor(() => {
+      expect(usePreviewStatusStore.getState().diagramId).toBe('version:v1');
+    });
+    expect(renderDiagram).toHaveBeenLastCalledWith({ code: 'flowchart TD\n  old', isDark: false });
+    fireEvent.click(within(bar).getByRole('button', { name: 'Compare with current' }));
+    expect(useViewedVersionStore.getState().isCompareOpen).toBe(true);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(useViewedVersionStore.getState().version).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Viewed version' })).toBeNull();
   });
 });

@@ -6,6 +6,7 @@ import { ASK_CLAUDE_TO_FIX_EVENT } from './ask-claude-to-fix.ts';
 import { revealLineInCode, useCodeRevealStore } from './code-reveal.ts';
 import { fakeMonaco, fakeMonacoState, resetFakeMonaco } from '../../tests/fake-monaco.ts';
 import { useChatStore } from '../chat/chat-store.ts';
+import { viewVersion } from '../history/viewed-version.ts';
 import { usePreviewStatusStore } from '../preview/preview-status.ts';
 import { CodeDrawer } from '../shell/code-drawer.tsx';
 import {
@@ -193,5 +194,38 @@ describe('the code drawer', () => {
     });
     expect(editor.options).toMatchObject({ readOnly: false });
     expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('shows a viewed version read-only, then the current code again', async () => {
+    const editor = await renderDrawer();
+    const diagramModel = editor.getModel();
+    const version = {
+      id: 'v1',
+      diagramId: useWorkspaceStore.getState().activeId ?? '',
+      code: 'flowchart TD\n  old',
+      createdAt: 1,
+      kind: 'manual' as const,
+      label: 'Old',
+      prompt: '',
+    };
+    act(() => {
+      viewVersion(version);
+    });
+    expect(editor.getModel()?.getValue()).toBe('flowchart TD\n  old');
+    expect(editor.options).toMatchObject({ readOnly: true });
+    expect(screen.getByRole('status').textContent).toBe('Viewing an older version · read-only');
+    act(() => {
+      editor.typeAtEnd('x');
+    });
+    expect(code()).toBe('flowchart TD\n');
+    act(() => {
+      useWorkspaceStore
+        .getState()
+        .applyEdit('flowchart LR\n', { label: 'Pasted code', source: 'code' });
+      viewVersion(null);
+    });
+    expect(editor.getModel()).toBe(diagramModel);
+    expect(editor.getModel()?.getValue()).toBe('flowchart LR\n');
+    expect(fakeMonacoState.models.size).toBe(1);
   });
 });

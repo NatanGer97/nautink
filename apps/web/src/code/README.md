@@ -14,6 +14,8 @@ autocomplete per diagram type, the parse error marker, and one model per diagram
 - **Read-only** while Claude's reply streams into this diagram (`useChatStore` `busyDiagramId`,
   PRD §4.3): `<CodeEditor readOnlyReason="…">` sets Monaco's `readOnly` and shows the note. The
   model still follows the store, so the reply builds live in the editor and the preview.
+- **Viewed version:** `<CodeEditor viewed={{ id, code }}>` shows a saved version in its own model
+  (`inmemory://version/<id>.mmd`), read-only; it never reaches the diagram or its history.
 - **Reveal a line:** `revealLineInCode({ diagramId, line })` opens the drawer (leaving focus mode)
   and selects the line once Monaco is up (`code-reveal.ts`). Click-to-line in the preview uses it.
 - **Ask Claude to fix:** the drawer dispatches `window` event `nautink:ask-claude-to-fix` with

@@ -8,6 +8,7 @@ and focus mode. Mermaid runs only through `../mermaid/` (the shared queue).
 | Need | Use |
 |---|---|
 | Validity (`valid` / `invalid` / `empty`), the `MermaidError`, render time, the last good SVG | `usePreviewStatus()`; outside React `usePreviewStatusStore.getState()` |
+| A version viewed in the history panel | Shown on the canvas automatically (`useViewedVersion()`), read-only, with `viewed-version-bar.tsx`; its status uses the id `version:<id>` |
 | Focus mode (rail and panels hidden) | `useIsFocusMode()`, `useFocusModeStore.getState().setFocusMode(on)` |
 | A click on a rendered shape | `<PreviewCanvas onShapeClick={(element) => …} />`; the default selects its code line (`locate.ts`, `revealLineInCode`) |
 

@@ -1,13 +1,9 @@
-import { Button } from '@nautink/ui/components/button';
 import { IconButton } from '@nautink/ui/icon-button';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { deleteVersionWithUndo, renameVersionLabel, restoreVersion } from './version-actions.ts';
+import { deleteVersionWithUndo, renameVersionLabel } from './version-actions.ts';
 import { clockTime, versionText } from './version-text.ts';
-import { setCompareOpen, useViewedVersionStore } from './viewed-version.ts';
-import { DiagramThumbnail } from '../mermaid/diagram-thumbnail.tsx';
-import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { InlineRenameInput } from '../workspace/inline-rename-input.tsx';
 
 import type { Version } from '@nautink/storage/records';
@@ -62,16 +58,16 @@ function ViewingBar({ version }: { version: Version }): ReactElement {
 }
 
 /**
- * The viewed version, read-only: its picture and code, with "Compare with current" and "Restore
- * this version" (M5). Shown in the panel until the canvas can show it (`useViewedVersion`).
+ * The viewed version's details in the panel: its name (rename, delete) and Claude's prompt. The
+ * version itself shows on the canvas, read-only, with "Compare with current" and "Restore this
+ * version" (`preview/viewed-version-bar.tsx`, M5).
  */
 export function VersionDetail({ version, currentCode }: VersionDetailProps): ReactElement {
-  const isCompareOpen: boolean = useViewedVersionStore((state) => state.isCompareOpen);
   const isCurrent: boolean = version.code === currentCode;
   return (
     <section
-      aria-label="Viewed version"
-      className="flex shrink-0 flex-col gap-2.5 border-b border-border-subtle p-3"
+      aria-label="Version details"
+      className="flex shrink-0 flex-col gap-2 border-b border-border-subtle p-3"
     >
       <ViewingBar key={version.id} version={version} />
       {version.prompt !== '' && version.label !== '' ? (
@@ -79,38 +75,9 @@ export function VersionDetail({ version, currentCode }: VersionDetailProps): Rea
           “{version.prompt}”
         </p>
       ) : null}
-      <DiagramThumbnail code={version.code} isEager className="h-28 w-full" />
-      <pre
-        aria-label="Version code"
-        className="max-h-40 overflow-auto rounded-track border bg-subtle px-3 py-2 font-mono text-code"
-      >
-        {version.code}
-      </pre>
-      <div className="flex gap-1.5">
-        <Button
-          variant="outline"
-          size="sm"
-          className={`flex-1 ${OUTLINE_BUTTON_CLASS} aria-pressed:bg-muted dark:aria-pressed:bg-muted`}
-          aria-pressed={isCompareOpen}
-          disabled={isCurrent}
-          onClick={() => {
-            setCompareOpen(!isCompareOpen);
-          }}
-        >
-          Compare with current
-        </Button>
-        <Button
-          size="sm"
-          className="flex-1"
-          disabled={isCurrent}
-          onClick={() => void restoreVersion(version)}
-        >
-          Restore this version
-        </Button>
-      </div>
-      {isCurrent ? (
-        <p className="text-xs text-muted-foreground">This version is the current code.</p>
-      ) : null}
+      <p className="text-xs text-muted-foreground">
+        {isCurrent ? 'This version is the current code.' : 'Shown on the canvas, read-only.'}
+      </p>
     </section>
   );
 }

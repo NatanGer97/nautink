@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 
-import { diagramIdOf, ensureModel, syncModel } from './editor-binding.ts';
+import {
+  diagramIdOf,
+  disposeVersionModels,
+  ensureModel,
+  ensureVersionModel,
+  syncModel,
+} from './editor-binding.ts';
 import { selectActiveStack, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { EditorHandle } from './use-monaco-editor.ts';
@@ -42,24 +48,53 @@ function placeCursor(
   target.revealLineInCenterIfOutsideViewport(target.getPosition()?.lineNumber ?? 1);
 }
 
-/** Shows the open diagram's own model; a different diagram never shares Monaco's state. */
-function useModelSwitch(handle: EditorHandle | null, diagramId: string): void {
+/** A saved version shown read-only in place of the diagram's code (M5). */
+export interface ViewedCode {
+  id: string;
+  code: string;
+}
+
+function modelToShow(
+  handle: EditorHandle,
+  diagramId: string,
+  viewed: ViewedCode | null,
+): editor.ITextModel | null {
+  if (viewed !== null) {
+    return ensureVersionModel(handle.monaco, viewed);
+  }
+  const diagram: Diagram | undefined = useWorkspaceStore
+    .getState()
+    .diagrams.find((item) => item.id === diagramId);
+  return diagram === undefined ? null : ensureModel(handle.monaco, diagramId, diagram.code);
+}
+
+/** Shows the open diagram's own model (or a viewed version's); diagrams never share Monaco's state. */
+function useModelSwitch(
+  handle: EditorHandle | null,
+  diagramId: string,
+  viewed: ViewedCode | null,
+): void {
+  const viewedId: string | null = viewed?.id ?? null;
+  const viewedCode: string = viewed?.code ?? '';
   useEffect(() => {
-    const diagram: Diagram | undefined = useWorkspaceStore
-      .getState()
-      .diagrams.find((item) => item.id === diagramId);
-    if (handle === null || diagram === undefined) {
+    const shown: ViewedCode | null = viewedId === null ? null : { id: viewedId, code: viewedCode };
+    const model: editor.ITextModel | null =
+      handle === null ? null : modelToShow(handle, diagramId, shown);
+    if (handle === null || model === null) {
       return;
     }
-    const model: editor.ITextModel = ensureModel(handle.monaco, diagramId, diagram.code);
     if (handle.editor.getModel() !== model) {
       handle.editor.setModel(model);
     }
-  }, [handle, diagramId]);
+    disposeVersionModels(handle.monaco, model);
+  }, [handle, diagramId, viewedId, viewedCode]);
 }
 
 /** Writes code changed elsewhere (undo, Claude, the visual editor) into the model as a minimal edit. */
-function useModelSync(handle: EditorHandle | null, diagramId: string, code: string): void {
+function useModelSync(
+  handle: EditorHandle | null,
+  { diagramId, code, viewedId }: { diagramId: string; code: string; viewedId: string | null },
+): void {
   useEffect(() => {
     const model: editor.ITextModel | null = handle?.editor.getModel() ?? null;
     if (handle === null || model === null || diagramIdOf(model) !== diagramId) {
@@ -69,17 +104,16 @@ function useModelSync(handle: EditorHandle | null, diagramId: string, code: stri
     if (endOffset >= 0) {
       placeCursor(handle.editor, model, endOffset);
     }
-  }, [handle, diagramId, code]);
+  }, [handle, diagramId, code, viewedId]);
 }
 
-/** The open diagram's model in the editor, kept equal to the store's code. */
+/** The open diagram's model in the editor, kept equal to the store's code; or a viewed version. */
 export function useDiagramModel(
   handle: EditorHandle | null,
-  diagramId: string,
-  code: string,
+  { diagramId, code, viewed }: { diagramId: string; code: string; viewed: ViewedCode | null },
 ): void {
-  useModelSwitch(handle, diagramId);
-  useModelSync(handle, diagramId, code);
+  useModelSwitch(handle, diagramId, viewed);
+  useModelSync(handle, { diagramId, code, viewedId: viewed?.id ?? null });
 }
 
 /** Disposes the models of deleted diagrams. */

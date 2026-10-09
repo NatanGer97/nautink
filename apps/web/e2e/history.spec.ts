@@ -20,12 +20,16 @@ test('saves a version with ⌘S, restores it, and undoes the restore', async ({ 
   await replaceCodeInEditor(page, 'flowchart TD\n  A --> C\n');
   await expect.poll(async () => readCode(page)).toMatch(/A --> C/);
   await panel.getByRole('option', { name: /First draft$/ }).click();
-  await expect(panel.getByLabel('Version code')).toHaveText(/A --> B/);
-  await panel.getByRole('button', { name: 'Compare with current' }).click();
+  const viewed = page.getByRole('region', { name: 'Viewed version' });
+  await expect(viewed).toContainText('First draft');
+  await expect(page.locator('.monaco-editor .view-lines')).toContainText('A --> B');
+  await expect(page.getByRole('region', { name: 'Code' })).toContainText('read-only');
+  await viewed.getByRole('button', { name: 'Compare with current' }).click();
   await expect(page.getByRole('region', { name: 'Changes since this version' })).toContainText(
     '+1 −1',
   );
-  await panel.getByRole('button', { name: 'Restore this version' }).click();
+  await viewed.getByRole('button', { name: 'Restore this version' }).click();
+  await expect(viewed).toHaveCount(0);
   await expect.poll(async () => readCode(page)).toMatch(/A --> B/);
   await expect(panel.getByRole('option', { name: /^Before restore/ })).toBeVisible();
   await page.keyboard.press('ControlOrMeta+z');

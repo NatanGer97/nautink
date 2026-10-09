@@ -15,6 +15,7 @@ import { usePreviewStatus } from '../preview/preview-status.ts';
 import { APP_HISTORY_ATTRIBUTE } from '../workspace/history-shortcuts.ts';
 
 import type { CursorPosition } from './use-cursor-position.ts';
+import type { ViewedCode } from './use-model-sync.ts';
 import type { EditorHandle, EditorLoad } from './use-monaco-editor.ts';
 import type { PreviewStatus } from '../preview/preview-status.ts';
 import type { ReactElement, RefObject } from 'react';
@@ -24,21 +25,26 @@ export interface CodeEditorProps {
   code: string;
   /** Why the code cannot be edited right now ("Claude is editing…"), or null when it can. */
   readOnlyReason?: string | null;
+  /** A saved version to show read-only instead of the diagram's code. */
+  viewed?: ViewedCode | null;
 }
 
 interface FooterProps {
   diagramId: string;
   cursor: CursorPosition;
+  /** A saved version is on view: the canvas and the error belong to it, not to this diagram. */
+  isViewingVersion: boolean;
 }
 
 /** Under the editor: the parse error with "Ask Claude to fix", or a hint; and the cursor (M3). */
-function CodeFooter({ diagramId, cursor }: FooterProps): ReactElement {
+function CodeFooter({ diagramId, cursor, isViewingVersion }: FooterProps): ReactElement {
   const status: PreviewStatus = usePreviewStatus();
   const error: PreviewStatus['error'] = status.diagramId === diagramId ? status.error : null;
+  const hint: string = isViewingVersion ? '' : 'Click a shape on the canvas to find its line';
   return (
     <div className="flex min-h-9 shrink-0 items-center justify-between gap-3 border-t border-border-subtle px-3.5 py-1.5 text-xs text-faint">
       {error === null ? (
-        <span className="truncate">Click a shape on the canvas to find its line</span>
+        <span className="truncate">{hint}</span>
       ) : (
         <span className="flex min-w-0 items-center gap-2">
           <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-destructive" />
@@ -80,11 +86,11 @@ function LoadNotice({ load }: { load: EditorLoad }): ReactElement | null {
 
 function useEditorBindings(
   handle: EditorHandle | null,
-  { diagramId, code, readOnlyReason = null }: CodeEditorProps,
+  { diagramId, code, readOnlyReason = null, viewed = null }: CodeEditorProps,
 ): void {
   useEditorTheme(handle, useIsDarkTheme());
   useEditorReadOnly(handle, readOnlyReason);
-  useDiagramModel(handle, diagramId, code);
+  useDiagramModel(handle, { diagramId, code, viewed });
   useEditRecording(handle);
   useErrorMarkers(handle, diagramId);
   useDisposeDeletedModels(handle);
@@ -120,7 +126,11 @@ export function CodeEditor(props: CodeEditorProps): ReactElement {
         />
         <LoadNotice load={load} />
       </div>
-      <CodeFooter diagramId={props.diagramId} cursor={cursor} />
+      <CodeFooter
+        diagramId={props.diagramId}
+        cursor={cursor}
+        isViewingVersion={(props.viewed ?? null) !== null}
+      />
     </div>
   );
 }

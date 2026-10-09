@@ -6,10 +6,11 @@ import { toast } from 'sonner';
 
 import { useChatStore } from '../chat/chat-store.ts';
 import { CodeEditor } from '../code/code-editor.tsx';
+import { useViewedVersion } from '../history/viewed-version.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
-import type { Diagram } from '@nautink/storage/records';
+import type { Diagram, Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
 /** Shown over the code while Claude's reply streams into it (PRD §4.3). */
@@ -24,17 +25,31 @@ async function copyCode(code: string): Promise<void> {
   }
 }
 
-function DrawerBody({
-  diagram,
-  readOnlyReason,
-}: {
-  diagram: Diagram | undefined;
-  readOnlyReason: string | null;
-}): ReactElement {
+/** Shown over a saved version's code while the history panel views it (M5). */
+const VIEWING_VERSION: string = 'Viewing an older version · read-only';
+
+/** Why the code cannot be edited now: Claude is replying, or an older version is on view. */
+function readOnlyReason(isClaudeEditing: boolean, viewed: Version | null): string | null {
+  if (viewed !== null) {
+    return VIEWING_VERSION;
+  }
+  return isClaudeEditing ? CLAUDE_EDITING : null;
+}
+
+function DrawerBody({ diagram }: { diagram: Diagram | undefined }): ReactElement {
+  const busyDiagramId: string | null = useChatStore((state) => state.busyDiagramId);
+  const viewed: Version | null = useViewedVersion();
   if (diagram === undefined) {
     return <p className="px-3.5 py-2.5 text-muted-foreground">Opening your diagrams…</p>;
   }
-  return <CodeEditor diagramId={diagram.id} code={diagram.code} readOnlyReason={readOnlyReason} />;
+  return (
+    <CodeEditor
+      diagramId={diagram.id}
+      code={diagram.code}
+      viewed={viewed === null ? null : { id: viewed.id, code: viewed.code }}
+      readOnlyReason={readOnlyReason(busyDiagramId === diagram.id, viewed)}
+    />
+  );
 }
 
 /** The code drawer on the right of the canvas (M3): the open diagram's Mermaid in Monaco. */
@@ -43,8 +58,6 @@ export function CodeDrawer(): ReactElement {
     (state) => state.setCodeDrawerOpen,
   );
   const diagram: Diagram | undefined = useActiveDiagram();
-  const busyDiagramId: string | null = useChatStore((state) => state.busyDiagramId);
-  const isClaudeEditing: boolean = busyDiagramId !== null && busyDiagramId === diagram?.id;
   return (
     <section aria-label="Code" className="flex h-full flex-col bg-panel">
       <div className="flex h-11 shrink-0 items-center justify-between border-b border-border-subtle pr-2 pl-3.5">
@@ -74,7 +87,7 @@ export function CodeDrawer(): ReactElement {
           />
         </span>
       </div>
-      <DrawerBody diagram={diagram} readOnlyReason={isClaudeEditing ? CLAUDE_EDITING : null} />
+      <DrawerBody diagram={diagram} />
     </section>
   );
 }

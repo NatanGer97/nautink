@@ -35,6 +35,28 @@ export function diagramIdOf(model: editor.ITextModel): string | null {
   return MODEL_PATH.exec(model.uri.path)?.[1] ?? null;
 }
 
+/** A saved version's own model: read-only, never synced into the diagram or its history. */
+export function ensureVersionModel(
+  monaco: MonacoApi,
+  version: { id: string; code: string },
+): editor.ITextModel {
+  const uri: Uri = monaco.Uri.from({
+    scheme: 'inmemory',
+    authority: 'version',
+    path: `/${version.id}.mmd`,
+  });
+  return monaco.editor.getModel(uri) ?? monaco.editor.createModel(version.code, 'mermaid', uri);
+}
+
+/** Disposes the version models the editor no longer shows (a version's model is made per view). */
+export function disposeVersionModels(monaco: MonacoApi, keep: editor.ITextModel | null): void {
+  for (const model of monaco.editor.getModels()) {
+    if (model.uri.authority === 'version' && model !== keep) {
+      model.dispose();
+    }
+  }
+}
+
 /** The diagram's model, created on first use. */
 export function ensureModel(monaco: MonacoApi, diagramId: string, code: string): editor.ITextModel {
   const uri: Uri = modelUri(monaco, diagramId);

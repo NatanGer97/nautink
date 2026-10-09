@@ -8,8 +8,10 @@ import { usePreviewStatus } from './preview-status.ts';
 import { useDiagramRender } from './use-diagram-render.ts';
 import { STAGE_ATTRIBUTE, usePanZoom } from './use-pan-zoom.ts';
 import { viewTransformCss } from './view-math.ts';
+import { ViewedVersionBar } from './viewed-version-bar.tsx';
 import { ZoomControls } from './zoom-controls.tsx';
 import { revealLineInCode } from '../code/code-reveal.ts';
+import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
@@ -18,7 +20,7 @@ import type { PreviewStatus } from './preview-status.ts';
 import type { PanZoom, PointerHandlers } from './use-pan-zoom.ts';
 import type { ViewController } from './view-controller.ts';
 import type { ViewTransform } from './view-math.ts';
-import type { Diagram } from '@nautink/storage/records';
+import type { Diagram, Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
 export interface PreviewCanvasProps {
@@ -124,7 +126,7 @@ function PreviewSurface({ diagramId, code, onShapeClick }: PreviewSurfaceProps):
   useFocusModeEscape();
   const error: PreviewStatus['error'] = isCurrent ? status.error : null;
   return (
-    <div className="absolute inset-0">
+    <div className="@container absolute inset-0">
       {code.trim() === '' ? (
         <EmptyPreview />
       ) : (
@@ -139,14 +141,34 @@ function PreviewSurface({ diagramId, code, onShapeClick }: PreviewSurfaceProps):
   );
 }
 
-/** The canvas in Preview mode: the open diagram rendered by Mermaid, with pan, zoom and fit. */
+function ignoreClick(): void {
+  // An older version is on view: its lines are not in the code drawer's model.
+}
+
+/**
+ * The canvas in Preview mode: the open diagram rendered by Mermaid, with pan, zoom and fit. While
+ * the history panel views an older version, that version is shown instead, read-only (M5).
+ */
 export function PreviewCanvas({ onShapeClick }: PreviewCanvasProps): ReactElement {
   const diagram: Diagram | undefined = useActiveDiagram();
+  const viewed: Version | null = useViewedVersion();
   if (diagram === undefined) {
     return (
       <div className="grid h-full place-items-center p-6 text-muted-foreground">
         Opening your diagrams…
       </div>
+    );
+  }
+  if (viewed !== null) {
+    return (
+      <>
+        <PreviewSurface
+          diagramId={`version:${viewed.id}`}
+          code={viewed.code}
+          onShapeClick={ignoreClick}
+        />
+        <ViewedVersionBar version={viewed} currentCode={diagram.code} />
+      </>
     );
   }
   return (

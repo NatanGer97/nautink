@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { announceVersionsChanged, useVersionsStore } from './versions-store.ts';
 import { useViewedVersionStore } from './viewed-version.ts';
 import { App } from '../app.tsx';
+import { usePreviewStatusStore } from '../preview/preview-status.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { selectActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
@@ -59,6 +60,11 @@ async function seed(
   });
 }
 
+/** The floating bar over the canvas while a version is viewed. */
+function canvasBar(): HTMLElement {
+  return screen.getByRole('region', { name: 'Viewed version' });
+}
+
 function panel(): HTMLElement {
   return screen.getByRole('complementary', { name: 'History' });
 }
@@ -101,11 +107,15 @@ describe('history panel', () => {
     await seed([{ code: 'flowchart TD\n  old', kind: 'manual', label: 'Old' }]);
     within(panel()).getByRole('listbox', { name: 'Versions' }).focus();
     await user.keyboard('{ArrowDown}');
-    const detail = within(panel()).getByRole('region', { name: 'Viewed version' });
-    expect(within(detail).getByLabelText('Version code').textContent).toBe('flowchart TD\n  old');
+    const bar = screen.getByRole('region', { name: 'Viewed version' });
+    expect(bar.textContent).toMatch(/Viewing \d\d:\d\d · Old/);
+    expect(within(panel()).getByRole('region', { name: 'Version details' })).toBeTruthy();
+    await waitFor(() => {
+      expect(usePreviewStatusStore.getState().diagramId).toMatch(/^version:/);
+    });
     expect(useViewedVersionStore.getState().version?.label).toBe('Old');
     await user.keyboard('{Escape}');
-    expect(within(panel()).queryByRole('region', { name: 'Viewed version' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Viewed version' })).toBeNull();
     expect(useViewedVersionStore.getState().version).toBeNull();
   });
 
@@ -148,12 +158,12 @@ describe('history panel', () => {
     await seed([{ code: 'flowchart TD\n  saved', kind: 'manual', label: 'Saved one' }]);
     edit('flowchart TD\n  edited');
     await user.click(within(panel()).getByRole('option', { name: /Saved one$/ }));
-    await user.click(within(panel()).getByRole('button', { name: 'Restore this version' }));
+    await user.click(within(canvasBar()).getByRole('button', { name: 'Restore this version' }));
     await waitFor(() => {
       expect(activeCode()).toBe('flowchart TD\n  saved');
     });
     expect(await within(panel()).findByRole('option', { name: /^Before restore/ })).toBeTruthy();
-    expect(within(panel()).queryByRole('region', { name: 'Viewed version' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Viewed version' })).toBeNull();
     expect(await screen.findByText('Restored the version')).toBeTruthy();
     await clickToastUndo(user);
     expect(activeCode()).toBe('flowchart TD\n  edited');
@@ -164,7 +174,7 @@ describe('history panel', () => {
     await seed([{ code: 'flowchart TD\n  a --> b', kind: 'manual', label: 'Before' }]);
     edit('flowchart TD\n  a --> c\n  c --> d');
     await user.click(within(panel()).getByRole('option', { name: /Before$/ }));
-    await user.click(within(panel()).getByRole('button', { name: 'Compare with current' }));
+    await user.click(within(canvasBar()).getByRole('button', { name: 'Compare with current' }));
     const drawer = screen.getByRole('region', { name: 'Changes since this version' });
     expect(drawer.textContent).toContain('+2');
     expect(drawer.textContent).toContain('−1');
@@ -177,7 +187,7 @@ describe('history panel', () => {
     const user = await renderHistory();
     await seed([{ code: activeCode(), kind: 'manual', label: 'Same' }]);
     await user.click(within(panel()).getByRole('option', { name: /Same$/ }));
-    const restore = within(panel()).getByRole('button', { name: 'Restore this version' });
+    const restore = within(canvasBar()).getByRole('button', { name: 'Restore this version' });
     expect(restore.hasAttribute('disabled')).toBe(true);
     expect(within(panel()).getByText('This version is the current code.')).toBeTruthy();
   });

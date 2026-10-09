@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { create } from 'zustand';
 
+import { diagramIdOf } from './editor-binding.ts';
 import { useFocusModeStore } from '../preview/focus-mode.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
@@ -50,7 +51,8 @@ export function useRevealRequests(handle: EditorHandle | null, diagramId: string
   const request: RevealRequest | null = useCodeRevealStore((state) => state.request);
   useEffect(() => {
     const model: editor.ITextModel | null = handle?.editor.getModel() ?? null;
-    if (handle === null || model === null || request?.diagramId !== diagramId) {
+    const isDiagramShown: boolean = model !== null && diagramIdOf(model) === diagramId;
+    if (handle === null || model === null || !isDiagramShown || request?.diagramId !== diagramId) {
       return;
     }
     selectLine(handle.editor, model, request.line);
