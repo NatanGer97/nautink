@@ -15,6 +15,8 @@ export default defineConfig({
   webServer: {
     command: `pnpm dev --port ${String(PORT)}`,
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    // Always start this checkout's own server: reusing whatever holds the port once tested another
+    // worktree's build. Set E2E_REUSE_SERVER=1 to run against a dev server you started yourself.
+    reuseExistingServer: process.env.E2E_REUSE_SERVER === '1',
   },
 });
