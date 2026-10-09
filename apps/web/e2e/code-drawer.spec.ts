@@ -1,0 +1,55 @@
+import { expect, test } from '@playwright/test';
+
+import type { Page } from '@playwright/test';
+
+/** Opens the code drawer and puts the cursor at the end of the code. */
+async function openCodeAtEnd(page: Page): Promise<void> {
+  await page.getByRole('banner').getByRole('button', { name: 'Code', exact: true }).click();
+  const editor = page.locator('.monaco-editor');
+  await expect(editor).toBeVisible();
+  await editor.locator('.view-lines').click();
+  await page.keyboard.press('ControlOrMeta+End');
+}
+
+test.describe('code drawer', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
+  });
+
+  test('typing updates the preview, and ⌘Z reverts it', async ({ page }) => {
+    await openCodeAtEnd(page);
+    await page.keyboard.type('  A[Typed node]');
+    const preview = page.getByRole('group', { name: 'Diagram preview' });
+    await expect(preview.getByText('Typed node', { exact: true })).toBeVisible();
+    await page.keyboard.press('ControlOrMeta+z');
+    await expect(preview.getByText('Typed node', { exact: true })).toHaveCount(0);
+    await expect(page.locator('.monaco-editor .view-lines')).not.toContainText('Typed node');
+    await page.keyboard.press('ControlOrMeta+Shift+z');
+    await expect(preview.getByText('Typed node', { exact: true })).toBeVisible();
+  });
+
+  test('an invalid edit marks the line, keeps the last render and offers a fix', async ({
+    page,
+  }) => {
+    await openCodeAtEnd(page);
+    await page.keyboard.type('  A[Kept] --> B');
+    const preview = page.getByRole('group', { name: 'Diagram preview' });
+    await expect(preview.getByText('Kept', { exact: true })).toBeVisible();
+    await page.keyboard.type(' -->');
+    await expect(page.getByRole('region', { name: 'Parse error' })).toContainText('line 2');
+    await expect(preview.getByText('Kept', { exact: true })).toBeVisible();
+    const drawer = page.getByRole('region', { name: 'Code' });
+    await expect(drawer.getByText('Parse error on line 2')).toBeVisible();
+    await expect(page.locator('.monaco-editor .squiggly-error')).toHaveCount(1);
+    await page.evaluate(() => {
+      window.addEventListener('nautink:ask-claude-to-fix', (event) => {
+        document.body.dataset.askedFixLine = String(
+          (event as CustomEvent<{ line: number }>).detail.line,
+        );
+      });
+    });
+    await drawer.getByRole('button', { name: 'Ask Claude to fix' }).click();
+    await expect(page.locator('body')).toHaveAttribute('data-asked-fix-line', '2');
+  });
+});
