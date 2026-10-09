@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // Node runs the TypeScript source directly, so `build` only type-checks and writes nothing.
+    "build": {
+      "outputs": []
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  // Node runs `src/*.ts` directly by stripping types, so the server resolves modules the way Node
+  // does and type-checks against Node's globals.
+  "extends": "../../tsconfig.library.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["src", "tests", "vitest.config.ts"]
+}
