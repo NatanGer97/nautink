@@ -6,7 +6,7 @@ export default mergeConfig(
   shared,
   defineConfig({
     test: {
-      coverage: { thresholds: { perFile: true, lines: 90 } },
+      coverage: { thresholds: { lines: 100, functions: 100, statements: 100, branches: 95 } },
     },
   }),
 );

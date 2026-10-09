@@ -43,5 +43,5 @@ export function detectType(code: string): DetectedType {
   const hit: readonly [RegExp, EditorId] | undefined = KEYWORDS.find(([pattern]) =>
     pattern.test(line),
   );
-  return { editor: hit ? hit[1] : null, keyword: line.split(/\s/)[0] ?? '', isEmpty: false };
+  return { editor: hit ? hit[1] : null, keyword: line.replace(/\s[\s\S]*$/, ''), isEmpty: false };
 }

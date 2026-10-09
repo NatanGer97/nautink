@@ -58,6 +58,11 @@ describe('findIcon', () => {
 
   it('follows aliases', () => {
     expect(findIcon(pack, 'db-alias')?.body).toBe('<path d="db"/>');
+    expect(findIcon({ icons: { x: { body: 'b', height: 10 } } }, 'x')).toEqual({
+      body: 'b',
+      width: 24,
+      height: 10,
+    });
   });
 
   it('returns null for unknown names and broken aliases', () => {
@@ -82,6 +87,18 @@ describe('searchIconNames', () => {
       'x:database',
       'x:data-base',
       'x:database-off',
+    ]);
+  });
+
+  it('sorts prefix matches before others in either order', () => {
+    const names = {
+      icons: { ab: { body: '' }, b: { body: '' }, cb: { body: '' }, bb: { body: '' } },
+    };
+    expect(searchIconNames({ pack: names, prefix: 'p', query: 'b' })).toEqual([
+      'p:b',
+      'p:bb',
+      'p:ab',
+      'p:cb',
     ]);
   });
 
