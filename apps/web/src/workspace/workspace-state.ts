@@ -26,6 +26,8 @@ export interface WorkspaceData {
   renamingId: string | null;
   /** True until the diagrams panel has focused its search box for ⌘K "Search diagrams". */
   isSearchFocusRequested: boolean;
+  /** True until the top bar title has turned into its rename field for ⌘K "Rename diagram". */
+  isTitleRenameRequested: boolean;
 }
 
 /** A code change through the history; `diagramId` defaults to the open diagram. */
@@ -114,6 +116,10 @@ export interface RequestActions {
   requestSearchFocus: () => void;
   /** The panel calls this once it has focused the search box. */
   takeSearchFocusRequest: () => void;
+  /** Asks the top bar to edit the open diagram's title in place. */
+  requestTitleRename: () => void;
+  /** The top bar calls this once its rename field is open. */
+  takeTitleRenameRequest: () => void;
   /** Closes the database and forgets everything, unsaved changes included. For tests. */
   reset: () => void;
 }
@@ -144,4 +150,5 @@ export const INITIAL_WORKSPACE: WorkspaceData = {
   histories: {},
   renamingId: null,
   isSearchFocusRequested: false,
+  isTitleRenameRequested: false,
 };

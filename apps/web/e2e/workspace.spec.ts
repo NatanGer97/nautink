@@ -26,6 +26,19 @@ test.describe('workspace', () => {
   });
 });
 
+test('renames the diagram in place from the command palette', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByLabel('Diagram code')).toBeVisible();
+  await page.keyboard.press('ControlOrMeta+k');
+  await page.getByRole('dialog', { name: 'Command palette' }).getByRole('combobox').fill('rename');
+  await page.keyboard.press('Enter');
+  const banner = page.getByRole('banner');
+  await expect(banner.getByRole('textbox', { name: 'Diagram title' })).toBeFocused();
+  await page.keyboard.type('Orders');
+  await page.keyboard.press('Enter');
+  await expect(banner.getByRole('button', { name: 'Orders' })).toBeVisible();
+});
+
 test.describe('diagrams panel', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');

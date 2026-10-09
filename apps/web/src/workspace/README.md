@@ -31,6 +31,7 @@ the open database for stores the workspace does not own (versions); it throws be
 | Claude session id | `setSessionId(id, sessionId \| null)` |
 | Unsent chat text | `setDraft(id, draft)` |
 | Preview / Edit / Split | `setView(id, view)` |
+| Rename in place in the top bar (⌘K) | `requestTitleRename()` |
 | Title, pin, duplicate, delete, download | `renameDiagram`, `togglePin`, `duplicateDiagram`, `deleteDiagram` (Undo notice), `downloadDiagram` |
 | New / open | `createDiagram()` (blank flowchart), `selectDiagram(id)` |
 | New from code (templates, imported files) | `createDiagrams([{ fields: { code, title?, view? }, step }])`: saves, opens the last |

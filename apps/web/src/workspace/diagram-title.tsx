@@ -10,7 +10,21 @@ import type { SaveState } from './autosave.ts';
 import type { Diagram } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
-/** The open diagram's title in the top bar; click it to rename. Also names the browser tab. */
+/** Opens the rename field when ⌘K "Rename diagram" asks for it. */
+function useTitleRenameRequest(isLoaded: boolean, setEditing: (isEditing: boolean) => void): void {
+  const isRequested: boolean = useWorkspaceStore((state) => state.isTitleRenameRequested);
+  useEffect(() => {
+    if (isRequested && isLoaded) {
+      setEditing(true);
+      useWorkspaceStore.getState().takeTitleRenameRequest();
+    }
+  }, [isRequested, isLoaded, setEditing]);
+}
+
+/**
+ * The open diagram's title in the top bar; click it (or run ⌘K "Rename diagram") to rename it in
+ * place. Also names the browser tab.
+ */
 export function DiagramTitle(): ReactElement {
   const diagram: Diagram | undefined = useActiveDiagram();
   const renameDiagram: (id: string, title: string) => void = useWorkspaceStore(
@@ -21,6 +35,7 @@ export function DiagramTitle(): ReactElement {
   useEffect(() => {
     document.title = title === '' ? 'Nautink' : `${title} · Nautink`;
   }, [title]);
+  useTitleRenameRequest(diagram !== undefined, setEditing);
   if (diagram === undefined) {
     return <span className="truncate text-muted-foreground max-md:hidden">Loading…</span>;
   }

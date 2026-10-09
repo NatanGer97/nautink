@@ -26,8 +26,25 @@ export function fieldActions(ctx: StoreContext): FieldActions {
   };
 }
 
-/** Panel requests from ⌘K, and `reset`. */
+/** A request flag and the call that takes it back (⌘K asks, a component answers). */
+function flagActions(
+  ctx: StoreContext,
+  flag: 'isSearchFocusRequested' | 'isTitleRenameRequested',
+): [() => void, () => void] {
+  return [
+    (): void => {
+      ctx.set({ [flag]: true });
+    },
+    (): void => {
+      ctx.set({ [flag]: false });
+    },
+  ];
+}
+
+/** Panel and top bar requests from ⌘K, and `reset`. */
 export function requestActions(ctx: StoreContext, initial: () => void): RequestActions {
+  const [requestSearchFocus, takeSearchFocusRequest] = flagActions(ctx, 'isSearchFocusRequested');
+  const [requestTitleRename, takeTitleRenameRequest] = flagActions(ctx, 'isTitleRenameRequested');
   return {
     startRename: (id: string): void => {
       ctx.set({ renamingId: findDiagram(ctx.get(), id).id });
@@ -35,12 +52,10 @@ export function requestActions(ctx: StoreContext, initial: () => void): RequestA
     endRename: (): void => {
       ctx.set({ renamingId: null });
     },
-    requestSearchFocus: (): void => {
-      ctx.set({ isSearchFocusRequested: true });
-    },
-    takeSearchFocusRequest: (): void => {
-      ctx.set({ isSearchFocusRequested: false });
-    },
+    requestSearchFocus,
+    takeSearchFocusRequest,
+    requestTitleRename,
+    takeTitleRenameRequest,
     reset: (): void => {
       ctx.runtime.disconnect();
       initial();

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildDiagramCommands, uniqueTitles } from './diagram-commands.ts';
 import { selectActiveDiagram, useWorkspaceStore } from './use-workspace.ts';
+import { setMediaQuery } from '../../tests/media.ts';
 import { App } from '../app.tsx';
 import { useUiStore } from '../state/ui-store.ts';
 
@@ -66,7 +67,20 @@ describe('diagram commands in the palette', () => {
     expect(active()?.id).toBe(first);
   });
 
-  it('renames and searches through the diagrams panel', async () => {
+  it('renames the diagram in place in the top bar', async () => {
+    const user = await renderApp();
+    await runCommand(user, 'rename diagram');
+    const banner = screen.getByRole('banner');
+    const input = await within(banner).findByRole('textbox', { name: 'Diagram title' });
+    expect(document.activeElement).toBe(input);
+    expect(useUiStore.getState().activePanel).toBe('chat');
+    await user.keyboard('Checkout flow{Enter}');
+    expect(active()?.title).toBe('Checkout flow');
+    expect(useWorkspaceStore.getState().isTitleRenameRequested).toBe(false);
+  });
+
+  it('renames in the diagrams panel when the top bar hides the title, and searches there', async () => {
+    setMediaQuery('(max-width: 767.98px)', true);
     const user = await renderApp();
     await runCommand(user, 'rename diagram');
     expect(useUiStore.getState().activePanel).toBe('diagrams');

@@ -96,12 +96,19 @@ function pinSpec(isPinned: boolean): CommandSpec {
   };
 }
 
+/** Below `md` the top bar hides the title, so rename falls back to the diagrams panel. */
+const TITLE_HIDDEN_QUERY: string = '(max-width: 767.98px)';
+
 function renameSpec(getUi: GetUi): CommandSpec {
   return {
     id: 'diagram.rename',
     title: 'Rename diagram',
     isDeferred: true,
     run: (workspace: WorkspaceState, id: string): void => {
+      if (!window.matchMedia(TITLE_HIDDEN_QUERY).matches) {
+        workspace.requestTitleRename();
+        return;
+      }
       getUi().setActivePanel('diagrams');
       workspace.startRename(id);
     },
