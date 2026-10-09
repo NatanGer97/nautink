@@ -4,7 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_UI_PREFS, parseSavedUiPrefs, pickUiPrefs } from './ui-prefs.ts';
 import { safeLocalStorage } from '../lib/safe-storage.ts';
 
-import type { CanvasMode, PanelId, UiPrefs } from './ui-prefs.ts';
+import type { PanelId, UiPrefs } from './ui-prefs.ts';
 import type { ModelId } from '@nautink/contracts/models';
 import type { ThemePreference } from '@nautink/ui/theme';
 import type { Mutate, StoreApi, UseBoundStore } from 'zustand';
@@ -26,7 +26,6 @@ export interface UiActions {
   setActivePanel: (panel: PanelId | null) => void;
   toggleCodeDrawer: () => void;
   setCodeDrawerOpen: (isOpen: boolean) => void;
-  setCanvasMode: (mode: CanvasMode) => void;
   setThemePreference: (preference: ThemePreference) => void;
   setDefaultModel: (model: ModelId | null) => void;
   setPaletteOpen: (isOpen: boolean) => void;
@@ -48,7 +47,7 @@ const INITIAL_OVERLAYS: UiOverlays = {
 
 type LayoutActions = Pick<
   UiActions,
-  'togglePanel' | 'setActivePanel' | 'toggleCodeDrawer' | 'setCodeDrawerOpen' | 'setCanvasMode'
+  'togglePanel' | 'setActivePanel' | 'toggleCodeDrawer' | 'setCodeDrawerOpen'
 >;
 
 function layoutActions(set: SetUiState): LayoutActions {
@@ -64,9 +63,6 @@ function layoutActions(set: SetUiState): LayoutActions {
     },
     setCodeDrawerOpen: (isOpen: boolean): void => {
       set({ isCodeDrawerOpen: isOpen });
-    },
-    setCanvasMode: (mode: CanvasMode): void => {
-      set({ canvasMode: mode });
     },
   };
 }

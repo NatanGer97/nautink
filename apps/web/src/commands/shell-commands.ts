@@ -1,10 +1,10 @@
 import { THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/theme';
 
 import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
-import { CANVAS_MODES, PANEL_IDS } from '../state/ui-prefs.ts';
+import { PANEL_IDS } from '../state/ui-prefs.ts';
 
 import type { AppCommand } from './command-registry.ts';
-import type { CanvasMode, PanelId } from '../state/ui-prefs.ts';
+import type { PanelId } from '../state/ui-prefs.ts';
 import type { UiState } from '../state/ui-store.ts';
 
 type GetUiState = () => UiState;
@@ -13,12 +13,6 @@ export const PANEL_LABELS: Readonly<Record<PanelId, string>> = {
   chat: 'Chat',
   diagrams: 'Diagrams',
   history: 'History',
-};
-
-export const CANVAS_MODE_LABELS: Readonly<Record<CanvasMode, string>> = {
-  preview: 'Preview',
-  edit: 'Edit',
-  split: 'Split',
 };
 
 function panelCommands(getState: GetUiState): AppCommand[] {
@@ -53,17 +47,6 @@ function toggleCodeCommand(getState: GetUiState): AppCommand {
       getState().toggleCodeDrawer();
     },
   };
-}
-
-function viewCommands(getState: GetUiState): AppCommand[] {
-  return CANVAS_MODES.map((mode) => ({
-    id: `canvas.${mode}`,
-    group: 'View',
-    title: `Switch to ${CANVAS_MODE_LABELS[mode].toLowerCase()}`,
-    run: (): void => {
-      getState().setCanvasMode(mode);
-    },
-  }));
 }
 
 function themeCommands(getState: GetUiState): AppCommand[] {
@@ -102,13 +85,12 @@ function settingsCommand(getState: GetUiState): AppCommand {
   };
 }
 
-/** The shell's own palette commands: panels, the code drawer, canvas mode, theme, settings. */
+/** The shell's own palette commands: panels, the code drawer, theme, settings. */
 export function buildShellCommands(getState: GetUiState): AppCommand[] {
   return [
     ...panelCommands(getState),
     closePanelCommand(getState),
     toggleCodeCommand(getState),
-    ...viewCommands(getState),
     ...themeCommands(getState),
     focusComposerCommand(getState),
     settingsCommand(getState),

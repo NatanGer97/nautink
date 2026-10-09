@@ -6,6 +6,7 @@ import { useChatFeature } from './chat/use-chat-feature.ts';
 import { CommandPalette } from './commands/command-palette.tsx';
 import { buildShellCommands } from './commands/shell-commands.ts';
 import { useRegisterCommands } from './commands/use-commands.ts';
+import { useViewCommands } from './edit/use-view-commands.ts';
 import { FeatureHost } from './feature-host.tsx';
 import { AppShell } from './shell/app-shell.tsx';
 import { TemplatesDialog } from './shell/templates-dialog.tsx';
@@ -38,6 +39,8 @@ export function App(): ReactElement {
   useTwoTabNotice();
   useChatFeature();
   useRegisterCommands(SHELL_COMMANDS);
+  // After the shell's: palette groups keep their order (Panels before View).
+  useViewCommands();
   return (
     <TooltipProvider delayDuration={TOOLTIP_DELAY_MS}>
       <AppShell />

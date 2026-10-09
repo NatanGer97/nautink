@@ -58,12 +58,6 @@ describe('App shell', () => {
     expect(screen.queryByRole('region', { name: 'Code' })).toBeNull();
   });
 
-  it('switches canvas mode with the segmented control', async () => {
-    const user = renderApp();
-    await user.click(screen.getByRole('radio', { name: 'Split' }));
-    expect(useUiStore.getState().canvasMode).toBe('split');
-  });
-
   it('opens the palette with the keyboard and runs a command', async () => {
     const user = renderApp();
     await user.keyboard('{Control>}k{/Control}');

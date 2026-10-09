@@ -42,13 +42,22 @@ describe('useUiStore', () => {
   it('restores saved preferences and ignores a corrupt save', async () => {
     window.localStorage.setItem(
       UI_STORAGE_KEY,
+      JSON.stringify({ state: { ...DEFAULT_UI_PREFS, themePreference: 'dark' }, version: 1 }),
+    );
+    await useUiStore.persist.rehydrate();
+    expect(useUiStore.getState().themePreference).toBe('dark');
+    window.localStorage.setItem(UI_STORAGE_KEY, JSON.stringify({ state: { activePanel: 'zoom' } }));
+    await useUiStore.persist.rehydrate();
+    expect(useUiStore.getState().themePreference).toBe('system');
+  });
+
+  it('ignores the canvas mode an earlier build saved: the view is per diagram now', async () => {
+    window.localStorage.setItem(
+      UI_STORAGE_KEY,
       JSON.stringify({ state: { ...DEFAULT_UI_PREFS, canvasMode: 'split' }, version: 1 }),
     );
     await useUiStore.persist.rehydrate();
-    expect(useUiStore.getState().canvasMode).toBe('split');
-    window.localStorage.setItem(UI_STORAGE_KEY, JSON.stringify({ state: { canvasMode: 'zoom' } }));
-    await useUiStore.persist.rehydrate();
-    expect(useUiStore.getState().canvasMode).toBe('preview');
+    expect(useUiStore.getState()).not.toHaveProperty('canvasMode');
   });
 });
 
