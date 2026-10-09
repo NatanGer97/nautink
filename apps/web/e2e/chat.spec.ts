@@ -39,10 +39,16 @@ async function cannedChat(page: Page, bodies: string[]): Promise<string[]> {
   return messages;
 }
 
+/** Sends from the composer and waits until the message is in the chat (the draft was taken). */
 async function send(page: Page, text: string): Promise<void> {
   const composer = page.getByLabel('Message Claude');
   await composer.fill(text);
+  await expect(composer).toHaveValue(text);
+  await expect(page.getByRole('button', { name: 'Send' })).not.toHaveAttribute('aria-disabled');
   await composer.press('ControlOrMeta+Enter');
+  await expect(composer).toHaveValue('');
+  const chat = page.getByRole('complementary', { name: 'Chat' });
+  await expect(chat.getByRole('region', { name: 'Messages' }).getByText(text)).toBeVisible();
 }
 
 const VALID = 'flowchart TD\n  Cart --> Pay\n  Pay --> Done';
@@ -51,6 +57,12 @@ test.describe('chat', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await expect(page.getByLabel('Diagram code')).toHaveText('flowchart TD');
+    // Playwright reuses whatever dev server holds E2E_PORT. Fail clearly when it serves a build
+    // without the chat (another checkout's server), instead of timing out on an unsent message.
+    await expect(
+      page.getByRole('button', { name: /^Model: / }),
+      `The server on this port has no chat feature; is it another checkout's dev server?`,
+    ).toBeVisible();
   });
 
   test('streams the reply into the diagram, and one undo reverts the whole turn', async ({
