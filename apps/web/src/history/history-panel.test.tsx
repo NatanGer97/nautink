@@ -105,8 +105,13 @@ describe('history panel', () => {
   it('views a version with the keyboard and goes back with Escape', async () => {
     const user = await renderHistory();
     await seed([{ code: 'flowchart TD\n  old', kind: 'manual', label: 'Old' }]);
+    const footer = screen.getByRole('contentinfo');
+    expect(footer.textContent).toContain('1 version');
+    expect(footer.textContent).toContain('Saved');
     within(panel()).getByRole('listbox', { name: 'Versions' }).focus();
     await user.keyboard('{ArrowDown}');
+    expect(footer.textContent).toContain('Viewing an older version · read-only');
+    expect(footer.textContent).toContain('2 lines');
     const bar = screen.getByRole('region', { name: 'Viewed version' });
     expect(bar.textContent).toMatch(/Viewing \d\d:\d\d · Old/);
     expect(within(panel()).getByRole('region', { name: 'Version details' })).toBeTruthy();
@@ -117,6 +122,7 @@ describe('history panel', () => {
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('region', { name: 'Viewed version' })).toBeNull();
     expect(useViewedVersionStore.getState().version).toBeNull();
+    expect(footer.textContent).not.toContain('Viewing an older version');
   });
 
   it('saves a named version with ⌘S, and names the latest when nothing changed', async () => {
