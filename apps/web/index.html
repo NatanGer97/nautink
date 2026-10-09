@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nautink</title>
+    <script>
+      // Paint the saved theme before the first frame, so a dark user never sees a light flash.
+      // Reads the same key and shape the UI store persists (src/state/ui-store.ts).
+      try {
+        var saved = JSON.parse(localStorage.getItem('nautink.ui') || '{}');
+        var pref = (saved.state && saved.state.themePreference) || 'system';
+        var dark =
+          pref === 'dark' ||
+          (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+      } catch (err) {
+        // Storage can be blocked; the app then follows the system theme once it mounts.
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
