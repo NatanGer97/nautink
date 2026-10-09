@@ -1,0 +1,58 @@
+{
+  "name": "merrow",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": "^22.13.0 || >=24"
+  },
+  "scripts": {
+    "check": "turbo run lint typecheck test build",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:file": "node scripts/lint-file.mjs",
+    "lint:fixtures": "node scripts/check-lint-fixtures.mjs",
+    "lint:agent-hook": "node scripts/check-agent-hook.mjs",
+    "lint:changeset": "node scripts/check-changeset.mjs",
+    "check:agents": "node scripts/check-agent-hook.mjs && node scripts/check-agent-parity.mjs",
+    "agents:sync": "node scripts/check-agent-parity.mjs --write",
+    "agents:install-prompts": "node scripts/install-agent-prompts.mjs",
+    "test:coverage-gate": "node scripts/check-coverage-gate.mjs",
+    "test:changeset-gate": "node --test scripts/check-changeset.test.mjs",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}": [
+      "prettier --write",
+      "eslint --fix --max-warnings 0 --no-warn-ignored"
+    ],
+    "*.{json,jsonc,css,yaml,yml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-unicorn": "^76.0.0",
+    "globals": "^17.12.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
+    "prettier": "^3.9.8",
+    "turbo": "^2.11.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
+  }
+}

@@ -1,0 +1,84 @@
+name: CI
+
+# The same graph an agent runs locally with `pnpm check`, plus the assertions that prove every gate
+# still fires.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A superseded pull request run is waste, but every commit on `main` keeps its own run.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # Keep this id stable: it is the string a required status check is configured against.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # `fetch-depth: 0` so the changeset check below has the pull request's base commit to diff
+      # against; a shallow clone has neither it nor the merge base.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # No `version:` on purpose: the action reads `packageManager` from package.json. It has to
+      # precede setup-node, which shells out to `pnpm store path` to find the directory it caches.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore the turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+
+      - run: pnpm turbo run lint typecheck test build
+
+      # `!cancelled()` on every assertion: a pull request that fails the graph above is exactly the
+      # one most likely to have weakened a gate, so the assertions still have to report.
+      - name: Assert every lint fixture still fires
+        if: ${{ !cancelled() }}
+        run: pnpm lint:fixtures
+
+      # Both harness paths: the hook still blocks a bad file, the CLI agrees with it,
+      # and every harness still points at the same procedure files.
+      - name: Assert the agent harness is armed
+        if: ${{ !cancelled() }}
+        run: pnpm check:agents
+
+      - name: Assert uncovered code still fails the gated packages
+        if: ${{ !cancelled() }}
+        run: pnpm test:coverage-gate
+
+      - name: Assert the changeset check still fails a source change without one
+        if: ${{ !cancelled() }}
+        run: pnpm test:changeset-gate
+
+      # Pull requests only: a push to `main` has no base to diff against. The "Version Packages"
+      # pull request is exempt — it consumes changesets rather than adding one.
+      - name: Require a changeset for a source change
+        if: >-
+          ${{ !cancelled() && github.event_name == 'pull_request'
+          && github.head_ref != 'changeset-release/main' }}
+        run: pnpm lint:changeset ${{ github.event.pull_request.base.sha }}
+
+      # CI is the only gate nobody can bypass: `--no-verify` and edits made in the GitHub web UI
+      # both skip husky, and no ESLint rule reports on formatting.
+      - name: Check formatting
+        if: ${{ !cancelled() }}
+        run: pnpm format:check

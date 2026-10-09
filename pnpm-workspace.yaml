@@ -1,0 +1,6 @@
+# Workspace members. Apps go in `apps/*`, shared libraries in `packages/*`.
+# `tools/eslint-plugin-local` is deliberately not a member:
+# `eslint.config.js` loads it by relative path, so it needs no install and no resolution.
+packages:
+  - "apps/*"
+  - "packages/*"

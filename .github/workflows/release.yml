@@ -1,0 +1,60 @@
+name: Release
+
+# Turns the changesets that have landed on `main` into bumped versions and changelogs — as a
+# pull request, not a push to the branch, so a release stays something a human reads and approves.
+# Merging the "Version Packages" pull request is what bumps the versions. The next run then finds no
+# pending changesets and runs the publish script, which only tags: every workspace is private and
+# nothing goes to a registry. The action pushes those tags and creates a GitHub Release for each.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}
+  # Never cancel: a half-run release leaves the "Version Packages" pull request out of step with
+  # the changesets on the branch.
+  cancel-in-progress: false
+
+# `contents: write` to commit the bumps on the release branch and to push tags and Releases,
+# `pull-requests: write` to open the pull request that carries the bumps.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # The changesets action pushes the release branch, which fires the husky `pre-push` hook. Those
+    # hooks are a developer-machine gate; ci.yml already runs the same checks the way they need to
+    # run (through turbo, so workspace types are built first).
+    env:
+      HUSKY: "0"
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Same shape as ci.yml: the action reads the pinned pnpm from `packageManager`, and it has to
+      # precede setup-node, which shells out to `pnpm store path`.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: ppnpm install --frozen-lockfile
+
+      # v2 is the line built for Changesets v3: it reads the tags from `CHANGESETS_OUTPUT`, which
+      # `changeset git-tag` writes. v1 looks for output v3 no longer prints.
+      - name: Open the "Version Packages" pull request, or tag and release
+        uses: changesets/action@v2
+        with:
+          version-script: pnpm changeset version
+          publish-script: pnpm changeset git-tag
+          create-github-releases: true
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"

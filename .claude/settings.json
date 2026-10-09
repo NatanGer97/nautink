@@ -1,0 +1,19 @@
+{
+  "enabledPlugins": {
+    "mattpocock-skills@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": false
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-edited-file.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

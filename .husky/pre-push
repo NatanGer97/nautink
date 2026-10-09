@@ -1,0 +1,5 @@
+pnpm lint
+pnpm lint:fixtures
+pnpm check:agents
+pnpm test:changeset-gate
+pnpm test:coverage-gate

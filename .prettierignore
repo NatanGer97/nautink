@@ -1,0 +1,21 @@
+node_modules
+dist
+build
+coverage
+.turbo
+pnpm-lock.yaml
+
+# Prose is hand-authored and hand-wrapped; Prettier would churn every table and list.
+# Drop these two lines if you decide docs should be formatted too.
+docs
+*.md
+
+# Deliberately-broken fixtures; formatting them would fight the lint gate they exist to prove.
+tools/lint-fixtures/invalid
+
+# Git worktrees carry their own checkout and format themselves from their own root.
+.claude/worktrees
+.worktrees
+
+# Machine-local agent settings, never committed.
+.claude/settings.local.json

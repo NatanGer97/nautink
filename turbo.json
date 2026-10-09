@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": [
+    "tsconfig.base.json",
+    "vitest.shared.config.ts",
+    "eslint.config.js",
+    ".prettierrc.json",
+    ".prettierignore",
+    ".npmrc",
+    ".nvmrc",
+    "tools/eslint-plugin-local/**"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      // Turbo 2 runs tasks in strict environment mode and strips anything not declared here.
+      // Add each variable a test reads as it appears.
+      "env": ["NODE_ENV"]
+    },
+    // Dev servers never finish and never produce a cacheable result.
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "//#lint": {
+      "inputs": ["**/*.{ts,tsx,mts,cts,js,mjs,cjs,jsx}", "scripts/**", "tools/**"],
+      "outputs": []
+    }
+  }
+}

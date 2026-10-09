@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.vitest/
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Caches
+.cache/
+.eslintcache
+.vite/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# git worktrees
+.worktrees/
+
+.serena/cache
+.serena/project.local.yml
