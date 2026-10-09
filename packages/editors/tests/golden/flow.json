@@ -1,0 +1,2160 @@
+{
+  "editor": "flow",
+  "source": {
+    "repo": "mermaid-chat (Nautink v1)",
+    "commit": "7fee72d628b262962cbc8830961247fcf19b6364",
+    "note": "Generated from v1 by a script kept outside the repo; see README.md in this folder."
+  },
+  "mappings": [
+    "v1 parse result `{ ok: true, graph }` -> `{ kind: \"ok\" }`; `{ ok: false, kind, message }` -> `{ kind, message }`.",
+    "v1 serialize output: lines `class <ids> clickable` removed (v1 wrote Mermaid's own `clickable` class back; the port does not).",
+    "Op args are written in the port's signatures; the generator maps them to v1's positional arguments (addEdge(g, source, target, extra), groupNodes -> { graph, id }).",
+    "Ops returning `{ graph, id }` are compared on the graph; `expected` is the serialized code after the step.",
+    "Layout positions are top-left corners rounded to 2 decimals; `l` is the label tag. Place cases start from v1's dagre layout of the previous code (rounded), stored in `start`."
+  ],
+  "roundTrip": [
+    {
+      "name": "template",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+      }
+    },
+    {
+      "name": "blank",
+      "code": "flowchart TD\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n"
+      }
+    },
+    {
+      "name": "graphKeyword",
+      "code": "graph LR\n    a --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart LR\n    a\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "directions",
+      "code": "flowchart BT\n    a\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart BT\n    a\n"
+      }
+    },
+    {
+      "name": "arrows",
+      "code": "flowchart LR\n    a --- b\n    a --o c\n    a --x d\n    a -.-> e\n    a -.- f\n    a ==> g\n    a === h\n    a ==o i\n    a -.-x j\n    a <--> k\n    a ~~~ l\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart LR\n    a\n    b\n    c\n    d\n    e\n    f\n    g\n    h\n    i\n    j\n    k\n    l\n    a --- b\n    a --o c\n    a --x d\n    a -.-> e\n    a -.- f\n    a ==> g\n    a === h\n    a ==o i\n    a -.-x j\n    a --> k\n    a --- l\n"
+      }
+    },
+    {
+      "name": "chainsAndAmpersands",
+      "code": "flowchart TD\n    a --> b --> c\n    a & b --> d\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    c\n    d\n    a --> b\n    b --> c\n    a --> d\n    b --> d\n"
+      }
+    },
+    {
+      "name": "parallelEdges",
+      "code": "flowchart TD\n    a --> b\n    a -->|again| b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    a --> b\n    a -->|again| b\n"
+      }
+    },
+    {
+      "name": "labels",
+      "code": "flowchart TD\n    a[\"Say &quot;hi&quot;\"] -- text on link --> b(\"a (b)\")\n    c[end] --> d[\"--\"]\n    e[A label] -->|\"with | pipe\"| f\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a[\"Say #quot;hi#quot;\"]\n    b(\"a (b)\")\n    c[\"end\"]\n    d[\"--\"]\n    e[A label]\n    f\n    a -->|text on link| b\n    c --> d\n    e -->|\"with | pipe\"| f\n"
+      }
+    },
+    {
+      "name": "shapes",
+      "code": "flowchart TD\n    a@{ shape: doc, label: \"Report\" }\n    b@{ shape: cloud }\n    c@{ shape: sm-circ }\n    d>Flag]\n    e[[Sub]]\n    f[\\Out\\]\n    g[/Trap\\]\n    h(((Double)))\n    i{{Hex}}\n    j@{ shape: lightning-bolt, label: \"Bolt\" }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a@{ shape: doc, label: \"Report\" }\n    b@{ shape: cloud, label: \"b\" }\n    c@{ shape: sm-circ, label: \"c\" }\n    d>Flag]\n    e[[Sub]]\n    f[\\Out\\]\n    g[/Trap\\]\n    h(((Double)))\n    i{{Hex}}\n    j@{ shape: bolt, label: \"Bolt\" }\n"
+      }
+    },
+    {
+      "name": "icons",
+      "code": "flowchart TD\n    a@{ icon: \"mdi:database\", form: \"square\", label: \"DB\", pos: \"b\", h: 60 }\n    b@{ img: \"https://example.com/x.png\", label: \"Pic\", w: 80, h: 40, constraint: \"on\" }\n    c@{ icon: \"logos:aws\" }\n    a --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a@{ icon: \"mdi:database\", form: \"square\", label: \"DB\", pos: \"b\", h: 60 }\n    b@{ img: \"https://example.com/x.png\", label: \"Pic\", w: 80, h: 40, constraint: \"on\" }\n    c@{ icon: \"logos:aws\" }\n    a --> b\n"
+      }
+    },
+    {
+      "name": "subgraphs",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+      }
+    },
+    {
+      "name": "styling",
+      "code": "flowchart TD\n    %% a comment that is dropped\n    a:::hot --> b\n    c\n    class b,c cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style a stroke-width:4px\n    linkStyle 0 stroke:red\n    click a href \"https://example.com\"\n    accTitle: Title\n    accDescr: Description\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    c\n    a --> b\n    class a hot\n    class b,c cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style a stroke-width:4px\n    linkStyle 0 stroke:red\n    click a href \"https://example.com\"\n    accTitle: Title\n    accDescr: Description\n"
+      }
+    },
+    {
+      "name": "preamble",
+      "code": "---\ntitle: Hello\n---\n%%{init: {\"theme\": \"dark\"}}%%\nflowchart TD\n    a --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "---\ntitle: Hello\n---\n%%{init: {\"theme\": \"dark\"}}%%\nflowchart TD\n    a\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "empty code",
+      "code": "",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n"
+      }
+    },
+    {
+      "name": "another diagram type",
+      "code": "pie title Traffic sources\n    \"Search\" : 45\n    \"Direct\" : 25\n    \"Social\" : 20\n    \"Email\" : 10\n",
+      "expected": {
+        "kind": "unsupported",
+        "message": "pie"
+      }
+    },
+    {
+      "name": "invalid code",
+      "code": "flowchart TD\n    a -->\n",
+      "expected": {
+        "kind": "error",
+        "message": "Parse error on line 4:\n...chart TD    a -->\n--------------------^\nExpecting 'AMP', 'COLON', 'PIPE', 'TESTSTR', 'DOWN', 'DEFAULT', 'NUM', 'COMMA', 'NODE_STRING', 'BRKT', 'MINUS', 'MULT', 'UNICODE_TEXT', got 'EOF'"
+      }
+    },
+    {
+      "name": "direction RL",
+      "code": "flowchart RL\n    a --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart RL\n    a\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "direction TB keyword",
+      "code": "flowchart TB\n    a --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "click with callback",
+      "code": "flowchart TD\n    a --> b\n    click a call cb()\n    click b href \"https://example.com\" _blank\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    a --> b\n    click a call cb()\n    click b href \"https://example.com\" _blank\n"
+      }
+    },
+    {
+      "name": "invisible link",
+      "code": "flowchart TD\n    a ~~~ b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    a --- b\n"
+      }
+    },
+    {
+      "name": "node label with brackets",
+      "code": "flowchart TD\n    a[\"[x] (y) {z}\"] --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a[\"[x] (y) {z}\"]\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "multiline label",
+      "code": "flowchart TD\n    a[\"one<br>two\"] --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a[\"one<br>two\"]\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "subgraph title only",
+      "code": "flowchart TD\n    subgraph \"Quoted title\"\n        a\n    end\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    subgraph subGraph0 [Quoted title]\n        a\n    end\n"
+      }
+    },
+    {
+      "name": "edge to subgraph",
+      "code": "flowchart TD\n    subgraph g\n        a\n    end\n    b --> g\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    b\n    subgraph g\n        a\n    end\n    b --> g\n"
+      }
+    },
+    {
+      "name": "unicode labels",
+      "code": "flowchart TD\n    a[\"Größe ✓ 日本\"] --> b((\"ü\"))\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a[\"Größe ✓ 日本\"]\n    b((ü))\n    a --> b\n"
+      }
+    },
+    {
+      "name": "entity and quotes in edge label",
+      "code": "flowchart TD\n    a -->|\"#quot;q#quot; &amp; more\"| b\n    a -- \"quoted text\" --> c\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    c\n    a -->|\"#quot;q#quot; &amp; more\"| b\n    a -->|quoted text| c\n"
+      }
+    },
+    {
+      "name": "dotted and dashed ids",
+      "code": "flowchart TD\n    a.b --> c-d\n    c-d --> e_f\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a.b\n    c-d\n    e_f\n    a.b --> c-d\n    c-d --> e_f\n"
+      }
+    },
+    {
+      "name": "semicolons",
+      "code": "flowchart TD;a-->b;b-->c;\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    c\n    a --> b\n    b --> c\n"
+      }
+    },
+    {
+      "name": "init directive only",
+      "code": "%%{init: {\"flowchart\": {\"curve\": \"basis\"}}}%%\ngraph TD\n    a --> b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "%%{init: {\"flowchart\": {\"curve\": \"basis\"}}}%%\nflowchart TD\n    a\n    b\n    a --> b\n"
+      }
+    },
+    {
+      "name": "subgraph with dashed id and title",
+      "code": "flowchart TD\n    subgraph a-b [Title here]\n        x\n    end\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    subgraph a-b [Title here]\n        x\n    end\n"
+      }
+    },
+    {
+      "name": "node classes with comma",
+      "code": "flowchart TD\n    a:::one --> b:::two\n    class a two\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a\n    b\n    a --> b\n    class a one\n    class a,b two\n"
+      }
+    },
+    {
+      "name": "long label wraps the box",
+      "code": "flowchart TD\n    a[\"a very long label that is wider than the maximum box width of the canvas\"] --> b{\"decision<br>two lines\"}\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart TD\n    a[a very long label that is wider than the maximum box width of the canvas]\n    b{\"decision<br>two lines\"}\n    a --> b\n"
+      }
+    },
+    {
+      "name": "every classic shape in LR",
+      "code": "flowchart LR\n    a((Circle)) --> b>Flag] --> c{{Hex}} --> d[/Lean/] --> e[\\Lean left\\] --> f[(Cyl)] --> g[[Sub]]\n",
+      "expected": {
+        "kind": "ok",
+        "code": "flowchart LR\n    a((Circle))\n    b>Flag]\n    c{{Hex}}\n    d[/Lean/]\n    e[\\Lean left\\]\n    f[(Cyl)]\n    g[[Sub]]\n    a --> b\n    b --> c\n    c --> d\n    d --> e\n    e --> f\n    f --> g\n"
+      }
+    }
+  ],
+  "ops": [
+    {
+      "name": "addNode plain",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "n1",
+              "label": "New step",
+              "shape": "rect"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    n1[New step]\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "addNode id-as-label",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "n1",
+              "label": "n1",
+              "shape": "rect"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    n1\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "addNode library shape",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "n1",
+              "label": "Report \"Q1\"",
+              "shape": "doc"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    n1@{ shape: doc, label: \"Report #quot;Q1#quot;\" }\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "addNode into group",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "e",
+              "label": "E",
+              "shape": "rounded"
+            },
+            "solo"
+          ],
+          "expected": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n        e(E)\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "addNode into nested group",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "e",
+              "label": "E",
+              "shape": "diam"
+            },
+            "inner"
+          ],
+          "expected": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        subgraph inner\n            c\n            e{E}\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "addNode icon",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "ic",
+              "label": "Home",
+              "shape": "rect",
+              "icon": "mdi:home",
+              "form": "circle",
+              "pos": "t",
+              "h": 64
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    ic@{ icon: \"mdi:home\", form: \"circle\", label: \"Home\", pos: \"t\", h: 64 }\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "addNode image",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "pic",
+              "label": "",
+              "shape": "rect",
+              "img": "https://example.com/a.png",
+              "w": 80,
+              "h": 40,
+              "constraint": "on"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    pic@{ img: \"https://example.com/a.png\", w: 80, h: 40, constraint: \"on\" }\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNode label and shape",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "updateNode",
+          "args": [
+            "input",
+            {
+              "label": "Say \"hi\" | (now)",
+              "shape": "doc"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input@{ shape: doc, label: \"Say #quot;hi#quot; | (now)\" }\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNode back to bare id",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "updateNode",
+          "args": [
+            "valid",
+            {
+              "shape": "rect",
+              "label": "valid"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNode classes",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "updateNode",
+          "args": [
+            "save",
+            {
+              "classes": ["hot", "cold"]
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n    class save hot\n    class save cold\n"
+        },
+        {
+          "op": "updateNode",
+          "args": [
+            "done",
+            {
+              "classes": ["hot"]
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n    class save,done hot\n    class save cold\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNode keeps styling lines",
+      "code": "flowchart TD\n    %% a comment that is dropped\n    a:::hot --> b\n    c\n    class b,c cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style a stroke-width:4px\n    linkStyle 0 stroke:red\n    click a href \"https://example.com\"\n    accTitle: Title\n    accDescr: Description\n",
+      "steps": [
+        {
+          "op": "updateNode",
+          "args": [
+            "a",
+            {
+              "label": "Alpha"
+            }
+          ],
+          "expected": "flowchart TD\n    a[Alpha]\n    b\n    c\n    a --> b\n    class a hot\n    class b,c cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style a stroke-width:4px\n    linkStyle 0 stroke:red\n    click a href \"https://example.com\"\n    accTitle: Title\n    accDescr: Description\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNode on icon node",
+      "code": "flowchart TD\n    a@{ icon: \"mdi:database\", form: \"square\", label: \"DB\", pos: \"b\", h: 60 }\n    b@{ img: \"https://example.com/x.png\", label: \"Pic\", w: 80, h: 40, constraint: \"on\" }\n    c@{ icon: \"logos:aws\" }\n    a --> b\n",
+      "steps": [
+        {
+          "op": "updateNode",
+          "args": [
+            "a",
+            {
+              "label": "Data \"store\"",
+              "pos": "t",
+              "h": 72
+            }
+          ],
+          "expected": "flowchart TD\n    a@{ icon: \"mdi:database\", form: \"square\", label: \"Data #quot;store#quot;\", pos: \"t\", h: 72 }\n    b@{ img: \"https://example.com/x.png\", label: \"Pic\", w: 80, h: 40, constraint: \"on\" }\n    c@{ icon: \"logos:aws\" }\n    a --> b\n"
+        }
+      ]
+    },
+    {
+      "name": "addEdge twice between the same nodes",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "done",
+              "target": "start"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n    done --> start\n"
+        },
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "done",
+              "target": "start",
+              "label": "again",
+              "arrow": "cross",
+              "stroke": "dotted"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n    done --> start\n    done -.-x|again| start\n"
+        }
+      ]
+    },
+    {
+      "name": "addEdge every stroke and arrow",
+      "code": "flowchart LR\n    a\n    b\n",
+      "steps": [
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "a",
+              "target": "b",
+              "arrow": "open",
+              "stroke": "thick"
+            }
+          ],
+          "expected": "flowchart LR\n    a\n    b\n    a === b\n"
+        },
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "a",
+              "target": "b",
+              "arrow": "circle",
+              "stroke": "normal"
+            }
+          ],
+          "expected": "flowchart LR\n    a\n    b\n    a === b\n    a --o b\n"
+        },
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "b",
+              "target": "a",
+              "arrow": "point",
+              "stroke": "dotted",
+              "label": "back"
+            }
+          ],
+          "expected": "flowchart LR\n    a\n    b\n    a === b\n    a --o b\n    b -.->|back| a\n"
+        },
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "b",
+              "target": "a",
+              "arrow": "circle",
+              "stroke": "thick"
+            }
+          ],
+          "expected": "flowchart LR\n    a\n    b\n    a === b\n    a --o b\n    b -.->|back| a\n    b ==o a\n"
+        }
+      ]
+    },
+    {
+      "name": "updateEdge",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "updateEdge",
+          "args": [
+            "L_valid_save_0",
+            {
+              "label": "ok | fine",
+              "stroke": "thick"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid ==>|\"ok | fine\"| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "updateEdge clears label",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "updateEdge",
+          "args": [
+            "L_valid_error_0",
+            {
+              "label": "",
+              "arrow": "open"
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid --- error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseEdge",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "reverseEdge",
+          "args": ["L_error_input_0"],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    input --> error\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup outer",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["outer"],
+          "expected": "flowchart LR\n    a\n    b\n    outer\n    subgraph inner\n        c\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup nested",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["inner"],
+          "expected": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        c\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup solo",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["solo"],
+          "expected": "flowchart LR\n    d\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        subgraph inner\n            c\n        end\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems node",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "nodeIds": ["valid"]
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    start --> input\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems edge",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "edgeIds": ["L_save_done_0", "L_start_input_0"]
+            }
+          ],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems group and edge",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "groupIds": ["solo"],
+              "edgeIds": ["L_c_d_0"]
+            }
+          ],
+          "expected": "flowchart LR\n    d\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        subgraph inner\n            c\n        end\n    end\n    a --> b\n    outer --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems node in group",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "nodeIds": ["c", "a"]
+            }
+          ],
+          "expected": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        b\n        subgraph inner\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "setNodeGroup into group",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "setNodeGroup",
+          "args": ["a", "solo"],
+          "expected": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        a\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "setNodeGroup to top level",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "setNodeGroup",
+          "args": ["c", null],
+          "expected": "flowchart LR\n    c\n    subgraph outer [Outer group]\n        direction TB\n        a\n        b\n        subgraph inner\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "setNodeGroup top-level node into group",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "groupNodes",
+          "args": [["valid"], "G"],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    save[(Save to DB)]\n    error[Show error]\n    done([Done])\n    subgraph group1 [G]\n        valid{Valid?}\n    end\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        },
+        {
+          "op": "setNodeGroup",
+          "args": ["save", "group1"],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    error[Show error]\n    done([Done])\n    subgraph group1 [G]\n        valid{Valid?}\n        save[(Save to DB)]\n    end\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "groupNodes at top level",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "groupNodes",
+          "args": [["valid", "save"], "Checks"],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    error[Show error]\n    done([Done])\n    subgraph group1 [Checks]\n        valid{Valid?}\n        save[(Save to DB)]\n    end\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "groupNodes default title",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "steps": [
+        {
+          "op": "groupNodes",
+          "args": [["done"]],
+          "expected": "flowchart TD\n    start([Start])\n    input[/Read request/]\n    valid{Valid?}\n    save[(Save to DB)]\n    error[Show error]\n    subgraph group1 [Group]\n        done([Done])\n    end\n    start --> input\n    input --> valid\n    valid -->|yes| save\n    valid -->|no| error\n    error --> input\n    save --> done\n"
+        }
+      ]
+    },
+    {
+      "name": "groupNodes inside a group",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "groupNodes",
+          "args": [["a", "b"], "Pair"],
+          "expected": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        subgraph group1 [Pair]\n            a\n            b\n        end\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "groupNodes across groups",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "groupNodes",
+          "args": [["a", "d"], "Mixed"],
+          "expected": "flowchart LR\n    subgraph group1 [Mixed]\n        a\n        d\n    end\n    subgraph outer [Outer group]\n        direction TB\n        b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "updateGroup title and direction",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "updateGroup",
+          "args": [
+            "outer",
+            {
+              "title": "Renamed \"x\"",
+              "dir": "LR"
+            }
+          ],
+          "expected": "flowchart LR\n    subgraph outer [\"Renamed #quot;x#quot;\"]\n        direction LR\n        a\n        b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "updateGroup clears title",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "steps": [
+        {
+          "op": "updateGroup",
+          "args": [
+            "outer",
+            {
+              "title": ""
+            }
+          ],
+          "expected": "flowchart LR\n    subgraph outer\n        direction TB\n        a\n        b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        },
+        {
+          "op": "updateGroup",
+          "args": [
+            "inner",
+            {
+              "dir": "RL"
+            }
+          ],
+          "expected": "flowchart LR\n    subgraph outer\n        direction TB\n        a\n        b\n        subgraph inner\n            direction RL\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    a --> b\n    outer --> d\n    c --> d\n"
+        }
+      ]
+    },
+    {
+      "name": "build from blank",
+      "code": "flowchart TD\n",
+      "steps": [
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "a",
+              "label": "Start",
+              "shape": "stadium"
+            }
+          ],
+          "expected": "flowchart TD\n    a([Start])\n"
+        },
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "b",
+              "label": "b",
+              "shape": "rect"
+            }
+          ],
+          "expected": "flowchart TD\n    a([Start])\n    b\n"
+        },
+        {
+          "op": "addEdge",
+          "args": [
+            {
+              "source": "a",
+              "target": "b"
+            }
+          ],
+          "expected": "flowchart TD\n    a([Start])\n    b\n    a --> b\n"
+        },
+        {
+          "op": "groupNodes",
+          "args": [["a", "b"], "Flow"],
+          "expected": "flowchart TD\n    subgraph group1 [Flow]\n        a([Start])\n        b\n    end\n    a --> b\n"
+        },
+        {
+          "op": "updateGroup",
+          "args": [
+            "group1",
+            {
+              "dir": "LR"
+            }
+          ],
+          "expected": "flowchart TD\n    subgraph group1 [Flow]\n        direction LR\n        a([Start])\n        b\n    end\n    a --> b\n"
+        },
+        {
+          "op": "addNode",
+          "args": [
+            {
+              "id": "c",
+              "label": "Inside",
+              "shape": "cyl"
+            },
+            "group1"
+          ],
+          "expected": "flowchart TD\n    subgraph group1 [Flow]\n        direction LR\n        a([Start])\n        b\n        c[(Inside)]\n    end\n    a --> b\n"
+        },
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "nodeIds": ["b"]
+            }
+          ],
+          "expected": "flowchart TD\n    subgraph group1 [Flow]\n        direction LR\n        a([Start])\n        c[(Inside)]\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "preamble survives edits",
+      "code": "---\ntitle: Hello\n---\n%%{init: {\"theme\": \"dark\"}}%%\nflowchart TD\n    a --> b\n",
+      "steps": [
+        {
+          "op": "reverseEdge",
+          "args": ["L_a_b_0"],
+          "expected": "---\ntitle: Hello\n---\n%%{init: {\"theme\": \"dark\"}}%%\nflowchart TD\n    a\n    b\n    b --> a\n"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "template",
+      "kind": "dagre",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "expected": {
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520
+          },
+          "error": {
+            "x": 20,
+            "y": 398
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134
+          },
+          "save": {
+            "x": 180,
+            "y": 390
+          },
+          "start": {
+            "x": 110,
+            "y": 20
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248
+          }
+        }
+      }
+    },
+    {
+      "name": "graphKeyword",
+      "kind": "dagre",
+      "code": "graph LR\n    a --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 180,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "directions",
+      "kind": "dagre",
+      "code": "flowchart BT\n    a\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "arrows",
+      "kind": "dagre",
+      "code": "flowchart LR\n    a --- b\n    a --o c\n    a --x d\n    a -.-> e\n    a -.- f\n    a ==> g\n    a === h\n    a ==o i\n    a -.-x j\n    a <--> k\n    a ~~~ l\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 490
+          },
+          "b": {
+            "x": 180,
+            "y": 960
+          },
+          "c": {
+            "x": 180,
+            "y": 866
+          },
+          "d": {
+            "x": 180,
+            "y": 772
+          },
+          "e": {
+            "x": 180,
+            "y": 678
+          },
+          "f": {
+            "x": 180,
+            "y": 584
+          },
+          "g": {
+            "x": 180,
+            "y": 490
+          },
+          "h": {
+            "x": 180,
+            "y": 396
+          },
+          "i": {
+            "x": 180,
+            "y": 302
+          },
+          "j": {
+            "x": 180,
+            "y": 208
+          },
+          "k": {
+            "x": 180,
+            "y": 114
+          },
+          "l": {
+            "x": 180,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "chainsAndAmpersands",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a --> b --> c\n    a & b --> d\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 90,
+            "y": 20
+          },
+          "b": {
+            "x": 150,
+            "y": 134
+          },
+          "c": {
+            "x": 160,
+            "y": 248
+          },
+          "d": {
+            "x": 20,
+            "y": 248
+          }
+        }
+      }
+    },
+    {
+      "name": "parallelEdges",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a --> b\n    a -->|again| b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "labels",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a[\"Say &quot;hi&quot;\"] -- text on link --> b(\"a (b)\")\n    c[end] --> d[\"--\"]\n    e[A label] -->|\"with | pipe\"| f\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 22.5,
+            "y": 134
+          },
+          "c": {
+            "x": 165,
+            "y": 20
+          },
+          "d": {
+            "x": 165,
+            "y": 134
+          },
+          "e": {
+            "x": 305,
+            "y": 20
+          },
+          "f": {
+            "x": 305,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "shapes",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a@{ shape: doc, label: \"Report\" }\n    b@{ shape: cloud }\n    c@{ shape: sm-circ }\n    d>Flag]\n    e[[Sub]]\n    f[\\Out\\]\n    g[/Trap\\]\n    h(((Double)))\n    i{{Hex}}\n    j@{ shape: lightning-bolt, label: \"Bolt\" }\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 32.5
+          },
+          "b": {
+            "x": 160,
+            "y": 24.5
+          },
+          "c": {
+            "x": 340,
+            "y": 49.5
+          },
+          "d": {
+            "x": 412,
+            "y": 38.5
+          },
+          "e": {
+            "x": 552,
+            "y": 38.5
+          },
+          "f": {
+            "x": 692,
+            "y": 38.5
+          },
+          "g": {
+            "x": 860,
+            "y": 38.5
+          },
+          "h": {
+            "x": 1028,
+            "y": 20
+          },
+          "i": {
+            "x": 1159,
+            "y": 38.5
+          },
+          "j": {
+            "x": 1327,
+            "y": 30.5
+          }
+        }
+      }
+    },
+    {
+      "name": "icons",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a@{ icon: \"mdi:database\", form: \"square\", label: \"DB\", pos: \"b\", h: 60 }\n    b@{ img: \"https://example.com/x.png\", label: \"Pic\", w: 80, h: 40, constraint: \"on\" }\n    c@{ icon: \"logos:aws\" }\n    a --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 30,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 174
+          },
+          "c": {
+            "x": 140,
+            "y": 38
+          }
+        }
+      }
+    },
+    {
+      "name": "subgraphs",
+      "kind": "dagre",
+      "code": "flowchart LR\n    subgraph outer [Outer group]\n        direction TB\n        a --> b\n        subgraph inner\n            c\n        end\n    end\n    subgraph solo\n        d\n    end\n    outer --> d\n    c --> d\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 55,
+            "y": 189
+          },
+          "b": {
+            "x": 250,
+            "y": 189
+          },
+          "c": {
+            "x": 250,
+            "y": 75
+          },
+          "d": {
+            "x": 515,
+            "y": 75
+          }
+        }
+      }
+    },
+    {
+      "name": "styling",
+      "kind": "dagre",
+      "code": "flowchart TD\n    %% a comment that is dropped\n    a:::hot --> b\n    c\n    class b,c cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style a stroke-width:4px\n    linkStyle 0 stroke:red\n    click a href \"https://example.com\"\n    accTitle: Title\n    accDescr: Description\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          },
+          "c": {
+            "x": 160,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "preamble",
+      "kind": "dagre",
+      "code": "---\ntitle: Hello\n---\n%%{init: {\"theme\": \"dark\"}}%%\nflowchart TD\n    a --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "direction RL",
+      "kind": "dagre",
+      "code": "flowchart RL\n    a --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 180,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "direction TB keyword",
+      "kind": "dagre",
+      "code": "flowchart TB\n    a --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "click with callback",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a --> b\n    click a call cb()\n    click b href \"https://example.com\" _blank\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "invisible link",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a ~~~ b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "node label with brackets",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a[\"[x] (y) {z}\"] --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 33.5,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "multiline label",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a[\"one<br>two\"] --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 150
+          }
+        }
+      }
+    },
+    {
+      "name": "subgraph title only",
+      "kind": "dagre",
+      "code": "flowchart TD\n    subgraph \"Quoted title\"\n        a\n    end\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 55,
+            "y": 55
+          }
+        }
+      }
+    },
+    {
+      "name": "edge to subgraph",
+      "kind": "dagre",
+      "code": "flowchart TD\n    subgraph g\n        a\n    end\n    b --> g\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 55,
+            "y": 55
+          },
+          "b": {
+            "x": 215,
+            "y": 55
+          }
+        }
+      }
+    },
+    {
+      "name": "unicode labels",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a[\"Größe ✓ 日本\"] --> b((\"ü\"))\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 34.5,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "entity and quotes in edge label",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a -->|\"#quot;q#quot; &amp; more\"| b\n    a -- \"quoted text\" --> c\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 90,
+            "y": 20
+          },
+          "b": {
+            "x": 160,
+            "y": 134
+          },
+          "c": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "dotted and dashed ids",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a.b --> c-d\n    c-d --> e_f\n",
+      "expected": {
+        "positions": {
+          "a.b": {
+            "x": 20,
+            "y": 20
+          },
+          "c-d": {
+            "x": 20,
+            "y": 134
+          },
+          "e_f": {
+            "x": 20,
+            "y": 248
+          }
+        }
+      }
+    },
+    {
+      "name": "semicolons",
+      "kind": "dagre",
+      "code": "flowchart TD;a-->b;b-->c;\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          },
+          "c": {
+            "x": 20,
+            "y": 248
+          }
+        }
+      }
+    },
+    {
+      "name": "init directive only",
+      "kind": "dagre",
+      "code": "%%{init: {\"flowchart\": {\"curve\": \"basis\"}}}%%\ngraph TD\n    a --> b\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "subgraph with dashed id and title",
+      "kind": "dagre",
+      "code": "flowchart TD\n    subgraph a-b [Title here]\n        x\n    end\n",
+      "expected": {
+        "positions": {
+          "x": {
+            "x": 55,
+            "y": 55
+          }
+        }
+      }
+    },
+    {
+      "name": "node classes with comma",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a:::one --> b:::two\n    class a two\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 20,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "long label wraps the box",
+      "kind": "dagre",
+      "code": "flowchart TD\n    a[\"a very long label that is wider than the maximum box width of the canvas\"] --> b{\"decision<br>two lines\"}\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 85.5,
+            "y": 134
+          }
+        }
+      }
+    },
+    {
+      "name": "every classic shape in LR",
+      "kind": "dagre",
+      "code": "flowchart LR\n    a((Circle)) --> b>Flag] --> c{{Hex}} --> d[/Lean/] --> e[\\Lean left\\] --> f[(Cyl)] --> g[[Sub]]\n",
+      "expected": {
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20
+          },
+          "b": {
+            "x": 171,
+            "y": 38.5
+          },
+          "c": {
+            "x": 331,
+            "y": 38.5
+          },
+          "d": {
+            "x": 519,
+            "y": 38.5
+          },
+          "e": {
+            "x": 707,
+            "y": 38.5
+          },
+          "f": {
+            "x": 908,
+            "y": 30.5
+          },
+          "g": {
+            "x": 1068,
+            "y": 38.5
+          }
+        }
+      }
+    },
+    {
+      "name": "place one new linked node",
+      "kind": "place",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n    done --> extra[Extra step]\n",
+      "start": {
+        "done": {
+          "x": 190,
+          "y": 520,
+          "l": "Done"
+        },
+        "error": {
+          "x": 20,
+          "y": 398,
+          "l": "Show error"
+        },
+        "input": {
+          "x": 78.5,
+          "y": 134,
+          "l": "Read request"
+        },
+        "save": {
+          "x": 180,
+          "y": 390,
+          "l": "Save to DB"
+        },
+        "start": {
+          "x": 110,
+          "y": 20,
+          "l": "Start"
+        },
+        "valid": {
+          "x": 159.5,
+          "y": 248,
+          "l": "Valid?"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520,
+            "l": "Done"
+          },
+          "error": {
+            "x": 20,
+            "y": 398,
+            "l": "Show error"
+          },
+          "extra": {
+            "x": 180,
+            "y": 634,
+            "l": "Extra step"
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134,
+            "l": "Read request"
+          },
+          "save": {
+            "x": 180,
+            "y": 390,
+            "l": "Save to DB"
+          },
+          "start": {
+            "x": 110,
+            "y": 20,
+            "l": "Start"
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248,
+            "l": "Valid?"
+          }
+        }
+      }
+    },
+    {
+      "name": "place a new source node",
+      "kind": "place",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n    first[First] --> start\n",
+      "start": {
+        "done": {
+          "x": 190,
+          "y": 520,
+          "l": "Done"
+        },
+        "error": {
+          "x": 20,
+          "y": 398,
+          "l": "Show error"
+        },
+        "input": {
+          "x": 78.5,
+          "y": 134,
+          "l": "Read request"
+        },
+        "save": {
+          "x": 180,
+          "y": 390,
+          "l": "Save to DB"
+        },
+        "start": {
+          "x": 110,
+          "y": 20,
+          "l": "Start"
+        },
+        "valid": {
+          "x": 159.5,
+          "y": 248,
+          "l": "Valid?"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520,
+            "l": "Done"
+          },
+          "error": {
+            "x": 20,
+            "y": 398,
+            "l": "Show error"
+          },
+          "first": {
+            "x": 338,
+            "y": 134,
+            "l": "First"
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134,
+            "l": "Read request"
+          },
+          "save": {
+            "x": 180,
+            "y": 390,
+            "l": "Save to DB"
+          },
+          "start": {
+            "x": 110,
+            "y": 20,
+            "l": "Start"
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248,
+            "l": "Valid?"
+          }
+        }
+      }
+    },
+    {
+      "name": "place an unlinked node",
+      "kind": "place",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n    lone[Alone]\n",
+      "start": {
+        "done": {
+          "x": 190,
+          "y": 520,
+          "l": "Done"
+        },
+        "error": {
+          "x": 20,
+          "y": 398,
+          "l": "Show error"
+        },
+        "input": {
+          "x": 78.5,
+          "y": 134,
+          "l": "Read request"
+        },
+        "save": {
+          "x": 180,
+          "y": 390,
+          "l": "Save to DB"
+        },
+        "start": {
+          "x": 110,
+          "y": 20,
+          "l": "Start"
+        },
+        "valid": {
+          "x": 159.5,
+          "y": 248,
+          "l": "Valid?"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520,
+            "l": "Done"
+          },
+          "error": {
+            "x": 20,
+            "y": 398,
+            "l": "Show error"
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134,
+            "l": "Read request"
+          },
+          "lone": {
+            "x": 370.5,
+            "y": 20,
+            "l": "Alone"
+          },
+          "save": {
+            "x": 180,
+            "y": 390,
+            "l": "Save to DB"
+          },
+          "start": {
+            "x": 110,
+            "y": 20,
+            "l": "Start"
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248,
+            "l": "Valid?"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in LR",
+      "kind": "place",
+      "code": "flowchart LR\n    a --> b\n    b --> c\n    c --> d\n    b --> e\n",
+      "start": {
+        "a": {
+          "x": 20,
+          "y": 20,
+          "l": "a"
+        },
+        "b": {
+          "x": 180,
+          "y": 20,
+          "l": "b"
+        },
+        "c": {
+          "x": 340,
+          "y": 20,
+          "l": "c"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 20,
+            "l": "a"
+          },
+          "b": {
+            "x": 180,
+            "y": 20,
+            "l": "b"
+          },
+          "c": {
+            "x": 340,
+            "y": 20,
+            "l": "c"
+          },
+          "d": {
+            "x": 520,
+            "y": 20,
+            "l": "d"
+          },
+          "e": {
+            "x": 360,
+            "y": 88,
+            "l": "e"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in RL",
+      "kind": "place",
+      "code": "flowchart RL\n    a --> b\n    b --> c\n    c --> d\n",
+      "start": {
+        "a": {
+          "x": 340,
+          "y": 20,
+          "l": "a"
+        },
+        "b": {
+          "x": 180,
+          "y": 20,
+          "l": "b"
+        },
+        "c": {
+          "x": 20,
+          "y": 20,
+          "l": "c"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "a": {
+            "x": 340,
+            "y": 20,
+            "l": "a"
+          },
+          "b": {
+            "x": 180,
+            "y": 20,
+            "l": "b"
+          },
+          "c": {
+            "x": 20,
+            "y": 20,
+            "l": "c"
+          },
+          "d": {
+            "x": -160,
+            "y": 20,
+            "l": "d"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in BT",
+      "kind": "place",
+      "code": "flowchart BT\n    a --> b\n    b --> c\n    c --> d\n    x --> c\n",
+      "start": {
+        "a": {
+          "x": 20,
+          "y": 248,
+          "l": "a"
+        },
+        "b": {
+          "x": 20,
+          "y": 134,
+          "l": "b"
+        },
+        "c": {
+          "x": 20,
+          "y": 20,
+          "l": "c"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "a": {
+            "x": 20,
+            "y": 248,
+            "l": "a"
+          },
+          "b": {
+            "x": 20,
+            "y": 134,
+            "l": "b"
+          },
+          "c": {
+            "x": 20,
+            "y": 20,
+            "l": "c"
+          },
+          "d": {
+            "x": 20,
+            "y": -94,
+            "l": "d"
+          },
+          "x": {
+            "x": 134,
+            "y": -94,
+            "l": "x"
+          }
+        }
+      }
+    },
+    {
+      "name": "relabelled node is placed again",
+      "kind": "place",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Report error]\n    error --> input\n    save --> done([Done])\n",
+      "start": {
+        "done": {
+          "x": 190,
+          "y": 520,
+          "l": "Done"
+        },
+        "error": {
+          "x": 20,
+          "y": 398,
+          "l": "Show error"
+        },
+        "input": {
+          "x": 78.5,
+          "y": 134,
+          "l": "Read request"
+        },
+        "save": {
+          "x": 180,
+          "y": 390,
+          "l": "Save to DB"
+        },
+        "start": {
+          "x": 110,
+          "y": 20,
+          "l": "Start"
+        },
+        "valid": {
+          "x": 159.5,
+          "y": 248,
+          "l": "Valid?"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520,
+            "l": "Done"
+          },
+          "error": {
+            "x": 311.5,
+            "y": 390,
+            "l": "Report error"
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134,
+            "l": "Read request"
+          },
+          "save": {
+            "x": 180,
+            "y": 390,
+            "l": "Save to DB"
+          },
+          "start": {
+            "x": 110,
+            "y": 20,
+            "l": "Start"
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248,
+            "l": "Valid?"
+          }
+        }
+      }
+    },
+    {
+      "name": "mostly unknown lays out again",
+      "kind": "place",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "start": {
+        "a": {
+          "x": 20,
+          "y": 20,
+          "l": "a"
+        },
+        "b": {
+          "x": 20,
+          "y": 134,
+          "l": "b"
+        }
+      },
+      "expected": {
+        "isFullLayout": true,
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520,
+            "l": "Done"
+          },
+          "error": {
+            "x": 20,
+            "y": 398,
+            "l": "Show error"
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134,
+            "l": "Read request"
+          },
+          "save": {
+            "x": 180,
+            "y": 390,
+            "l": "Save to DB"
+          },
+          "start": {
+            "x": 110,
+            "y": 20,
+            "l": "Start"
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248,
+            "l": "Valid?"
+          }
+        }
+      }
+    },
+    {
+      "name": "removed nodes are dropped",
+      "kind": "place",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n",
+      "start": {
+        "done": {
+          "x": 190,
+          "y": 520,
+          "l": "Done"
+        },
+        "error": {
+          "x": 20,
+          "y": 398,
+          "l": "Show error"
+        },
+        "input": {
+          "x": 78.5,
+          "y": 134,
+          "l": "Read request"
+        },
+        "save": {
+          "x": 180,
+          "y": 390,
+          "l": "Save to DB"
+        },
+        "start": {
+          "x": 110,
+          "y": 20,
+          "l": "Start"
+        },
+        "valid": {
+          "x": 159.5,
+          "y": 248,
+          "l": "Valid?"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "done": {
+            "x": 190,
+            "y": 520,
+            "l": "Done"
+          },
+          "error": {
+            "x": 20,
+            "y": 398,
+            "l": "Show error"
+          },
+          "input": {
+            "x": 78.5,
+            "y": 134,
+            "l": "Read request"
+          },
+          "save": {
+            "x": 180,
+            "y": 390,
+            "l": "Save to DB"
+          },
+          "start": {
+            "x": 110,
+            "y": 20,
+            "l": "Start"
+          },
+          "valid": {
+            "x": 159.5,
+            "y": 248,
+            "l": "Valid?"
+          }
+        }
+      }
+    }
+  ]
+}

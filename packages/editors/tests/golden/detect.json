@@ -1,0 +1,281 @@
+{
+  "editor": "detect",
+  "source": {
+    "repo": "mermaid-chat (Nautink v1)",
+    "commit": "7fee72d628b262962cbc8830961247fcf19b6364",
+    "note": "Generated from v1 by a script kept outside the repo; see README.md in this folder."
+  },
+  "mappings": ["v1 `detectType` field `empty` -> `isEmpty`."],
+  "cases": [
+    {
+      "name": "flow example",
+      "code": "flowchart TD\n    start([Start]) --> input[/Read request/]\n    input --> valid{Valid?}\n    valid -->|yes| save[(Save to DB)]\n    valid -->|no| error[Show error]\n    error --> input\n    save --> done([Done])\n",
+      "expected": {
+        "editor": "flow",
+        "keyword": "flowchart",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "flow blank",
+      "code": "flowchart TD\n",
+      "expected": {
+        "editor": "flow",
+        "keyword": "flowchart",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "class example",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "expected": {
+        "editor": "class",
+        "keyword": "classDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "class blank",
+      "code": "classDiagram\n    class Class1\n",
+      "expected": {
+        "editor": "class",
+        "keyword": "classDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "sequence example",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "expected": {
+        "editor": "sequence",
+        "keyword": "sequenceDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "sequence blank",
+      "code": "sequenceDiagram\n",
+      "expected": {
+        "editor": "sequence",
+        "keyword": "sequenceDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "er example",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "expected": {
+        "editor": "er",
+        "keyword": "erDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "er blank",
+      "code": "erDiagram\n",
+      "expected": {
+        "editor": "er",
+        "keyword": "erDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "state example",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "expected": {
+        "editor": "state",
+        "keyword": "stateDiagram-v2",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "state blank",
+      "code": "stateDiagram-v2\n",
+      "expected": {
+        "editor": "state",
+        "keyword": "stateDiagram-v2",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "gantt example",
+      "code": "gantt\n    title Release plan\n    dateFormat YYYY-MM-DD\n    section Design\n        Research       :a1, 2026-01-05, 7d\n        Wireframes     :a2, after a1, 5d\n    section Build\n        Backend        :b1, after a2, 10d\n        Frontend       :b2, after a2, 12d\n    section Launch\n        QA             :c1, after b2, 5d\n        Release        :milestone, after c1, 0d\n",
+      "expected": {
+        "editor": null,
+        "keyword": "gantt",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "mindmap example",
+      "code": "mindmap\n  root((Product launch))\n    Marketing\n      Blog post\n      Social media\n    Engineering\n      Feature freeze\n      Load testing\n    Support\n      Docs\n      FAQ\n",
+      "expected": {
+        "editor": null,
+        "keyword": "mindmap",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "timeline example",
+      "code": "timeline\n    title Company history\n    2019 : Founded\n    2021 : First product : Seed round\n    2023 : 100 customers\n    2025 : Series A\n",
+      "expected": {
+        "editor": null,
+        "keyword": "timeline",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "pie example",
+      "code": "pie title Traffic sources\n    \"Search\" : 45\n    \"Direct\" : 25\n    \"Social\" : 20\n    \"Email\" : 10\n",
+      "expected": {
+        "editor": null,
+        "keyword": "pie",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "journey example",
+      "code": "journey\n    title Checkout\n    section Browse\n      Find product: 4: Customer\n      Read reviews: 3: Customer\n    section Buy\n      Add to cart: 5: Customer\n      Pay: 2: Customer, Payment service\n",
+      "expected": {
+        "editor": null,
+        "keyword": "journey",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "git example",
+      "code": "gitGraph\n    commit\n    branch feature\n    checkout feature\n    commit\n    commit\n    checkout main\n    merge feature\n    commit\n",
+      "expected": {
+        "editor": null,
+        "keyword": "gitGraph",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "architecture example",
+      "code": "architecture-beta\n    group cloud(cloud)[Cloud]\n    service web(internet)[Web] in cloud\n    service api(server)[API] in cloud\n    service db(database)[Database] in cloud\n    web:R --> L:api\n    api:R --> L:db\n",
+      "expected": {
+        "editor": null,
+        "keyword": "architecture-beta",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "quadrant example",
+      "code": "quadrantChart\n    title Feature priority\n    x-axis Low effort --> High effort\n    y-axis Low impact --> High impact\n    quadrant-1 Plan\n    quadrant-2 Do now\n    quadrant-3 Skip\n    quadrant-4 Maybe\n    Search: [0.3, 0.8]\n    Dark mode: [0.2, 0.4]\n    Offline sync: [0.8, 0.7]\n",
+      "expected": {
+        "editor": null,
+        "keyword": "quadrantChart",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "kanban example",
+      "code": "kanban\n  todo[To do]\n    t1[Write spec]\n    t2[Design review]\n  doing[In progress]\n    t3[Build editor]\n  done[Done]\n    t4[Set up repo]\n",
+      "expected": {
+        "editor": null,
+        "keyword": "kanban",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "empty",
+      "code": "",
+      "expected": {
+        "editor": null,
+        "keyword": "",
+        "isEmpty": true
+      }
+    },
+    {
+      "name": "whitespace only",
+      "code": "  \n\t\n",
+      "expected": {
+        "editor": null,
+        "keyword": "",
+        "isEmpty": true
+      }
+    },
+    {
+      "name": "comments only",
+      "code": "%% just a comment\n%% another\n",
+      "expected": {
+        "editor": null,
+        "keyword": "",
+        "isEmpty": true
+      }
+    },
+    {
+      "name": "comment first",
+      "code": "%% note\nflowchart LR\n    a --> b\n",
+      "expected": {
+        "editor": "flow",
+        "keyword": "flowchart",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "front matter and init",
+      "code": "---\ntitle: x\n---\n%%{init: {\"theme\": \"dark\"}}%%\nsequenceDiagram\n    A->>B: hi\n",
+      "expected": {
+        "editor": "sequence",
+        "keyword": "sequenceDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "graph keyword",
+      "code": "graph TD\n    a --> b\n",
+      "expected": {
+        "editor": "flow",
+        "keyword": "graph",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "stateDiagram v1 header",
+      "code": "stateDiagram\n    A --> B\n",
+      "expected": {
+        "editor": "state",
+        "keyword": "stateDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "classDiagram-v2 header",
+      "code": "classDiagram-v2\n    A --> B\n",
+      "expected": {
+        "editor": "class",
+        "keyword": "classDiagram-v2",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "keyword prefix only",
+      "code": "flowchartish\n",
+      "expected": {
+        "editor": null,
+        "keyword": "flowchartish",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "leading spaces",
+      "code": "   erDiagram\n",
+      "expected": {
+        "editor": "er",
+        "keyword": "erDiagram",
+        "isEmpty": false
+      }
+    },
+    {
+      "name": "unknown type",
+      "code": "zenumlDiagram\n    A->B: x\n",
+      "expected": {
+        "editor": null,
+        "keyword": "zenumlDiagram",
+        "isEmpty": false
+      }
+    }
+  ]
+}

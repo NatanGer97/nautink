@@ -1,0 +1,5429 @@
+{
+  "editor": "sequence",
+  "source": {
+    "repo": "mermaid-chat (Nautink v1)",
+    "commit": "7fee72d628b262962cbc8830961247fcf19b6364",
+    "note": "Generated from v1 by a script kept outside the repo; see README.md in this folder."
+  },
+  "mappings": [
+    "v1 parse result `{ ok: true, model }` -> `{ kind: \"ok\" }`; `{ ok: false, kind, message }` -> `{ kind, message }`.",
+    "Field renames (op args use the port names): participant `created` -> `isCreated`, activation `on` -> `isOn`, `wrap` -> `shouldWrap`, autonumber `visible` -> `isVisible`.",
+    "Op args are written in the port's signatures; the generator maps them to v1's positional arguments (setSectionLabel(m, blockId, sectionIndex, label), removeSection(m, blockId, sectionIndex)).",
+    "Item ids made in the editor are random, so args name items by position: `{ \"$item\": n }` is the id of the n-th item (depth first, source order) and `{ \"$section\": [n, s] }` is that block's list key `<id>:<s>`, both resolved against the model before the step.",
+    "Ops returning `{ model, id }` are compared on the model; `expected` is the serialized code after the step.",
+    "Layout: v1 `HH` -> `headH`, row `self` -> `isSelf`, column `destroyed` -> `isDestroyed`, bar `open` -> `isOpen`; `item`/`box` objects are replaced by their ids, a column's `p` (participant) is dropped, numbers rounded to 2 decimals.",
+    "Text is measured at 7px per character (v1's DOM-free fallback = approximateTextWidth in the port). Box titles: v1 asked CSS.supports; the generator answers with jsdom's CSS parser."
+  ],
+  "roundTrip": [
+    {
+      "name": "template",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+      }
+    },
+    {
+      "name": "minimal",
+      "code": "sequenceDiagram\n    Alice->>Bob: Hi\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    Alice->>Bob: Hi\n"
+      }
+    },
+    {
+      "name": "arrows",
+      "code": "sequenceDiagram\n    A->B: open\n    A-->B: dotted open\n    A->>B: arrow\n    A-->>B: dotted arrow\n    A-xB: cross\n    A--xB: dotted cross\n    A-)B: async\n    A--)B: dotted async\n    A<<->>B: both\n    A<<-->>B: dotted both\n    A-|\\B: half top\n    A-|/B: half bottom\n    A/|-B: half top reverse\n    A-\\\\B: stick top\n    A-//B: stick bottom\n    A//-B: stick top reverse\n    A--|\\B: dotted half\n    A()->>B: central from\n    A->>()B: central to\n    A()->>()B: central both\n    A->>A: self\n    A->>B:\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->B: open\n    A-->B: dotted open\n    A->>B: arrow\n    A-->>B: dotted arrow\n    A-xB: cross\n    A--xB: dotted cross\n    A-)B: async\n    A--)B: dotted async\n    A<<->>B: both\n    A<<-->>B: dotted both\n    A-|\\B: half top\n    A-|/B: half bottom\n    A/|-B: half top reverse\n    A-\\\\B: stick top\n    A-//B: stick bottom\n    A//-B: stick top reverse\n    A--|\\B: dotted half\n    A()->>B: central from\n    A->>()B: central to\n    A()->>()B: central both\n    A->>A: self\n    A->>B:\n"
+      }
+    },
+    {
+      "name": "activations",
+      "code": "sequenceDiagram\n    A->>+B: start\n    B->>+C: nested\n    C-->>-B: done\n    B-->>-A: done\n    activate A\n    A->>A: self call\n    deactivate A\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>+B: start\n    B->>+C: nested\n    C-->>-B: done\n    B-->>-A: done\n    activate A\n    A->>-A: self call\n"
+      }
+    },
+    {
+      "name": "notes",
+      "code": "sequenceDiagram\n    participant A\n    participant B\n    Note left of A: left\n    Note right of B: right\n    Note over A: over one\n    Note over A,B: over both\n    Note over A: line one<br>line two\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    Note left of A: left\n    Note right of B: right\n    Note over A: over one\n    Note over A,B: over both\n    Note over A: line one<br>line two\n"
+      }
+    },
+    {
+      "name": "blocks",
+      "code": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n"
+      }
+    },
+    {
+      "name": "boxes",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+      }
+    },
+    {
+      "name": "kinds",
+      "code": "sequenceDiagram\n    participant A@{ \"type\": \"boundary\" }\n    participant B@{ \"type\": \"control\" }\n    participant C@{ \"type\": \"entity\" }\n    participant D@{ \"type\": \"collections\" }\n    participant E@{ \"type\": \"queue\" }\n    A->>E: hi\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    participant A@{ \"type\": \"boundary\" }\n    participant B@{ \"type\": \"control\" }\n    participant C@{ \"type\": \"entity\" }\n    participant D@{ \"type\": \"collections\" }\n    participant E@{ \"type\": \"queue\" }\n    A->>E: hi\n"
+      }
+    },
+    {
+      "name": "lifecycle",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n"
+      }
+    },
+    {
+      "name": "autonumber",
+      "code": "sequenceDiagram\n    autonumber 10 5\n    A->>B: one\n    autonumber off\n    A->>B: two\n    autonumber 3\n    A->>B: three\n    autonumber\n    A->>B: four\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    autonumber 10 5\n    A->>B: one\n    autonumber off\n    A->>B: two\n    autonumber 3\n    A->>B: three\n    autonumber\n    A->>B: four\n"
+      }
+    },
+    {
+      "name": "wrapping",
+      "code": "sequenceDiagram\n    A->>B: wrap:long text here\n    A->>B: nowrap:short\n    Note over A: wrap:a note\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>B: wrap:long text here\n    A->>B: short\n    Note over A: wrap:a note\n"
+      }
+    },
+    {
+      "name": "text",
+      "code": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n        Long\n        description\n    }\n    A->>B: I #9829; you #35; 1#59;2\n    A->>B: say #quot;hi#quot;\n    link A: Dashboard @ https://example.com\n    links B: {\"Repo\": \"https://example.com\"}\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n    Long\n    description\n    }\n    A->>B: I ♥ you #35; 1#59;2\n    A->>B: say \"hi\"\n    link A: Dashboard @ https://example.com\n    links B: {\"Repo\": \"https://example.com\"}\n"
+      }
+    },
+    {
+      "name": "preamble",
+      "code": "---\ntitle: Calls\n---\nsequenceDiagram\n    A->>B: hi\n",
+      "expected": {
+        "kind": "ok",
+        "code": "---\ntitle: Calls\n---\nsequenceDiagram\n    A->>B: hi\n"
+      }
+    },
+    {
+      "name": "v1 template blank",
+      "code": "sequenceDiagram\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n"
+      }
+    },
+    {
+      "name": "empty code",
+      "code": "",
+      "expected": {
+        "kind": "error",
+        "message": "No diagram type detected matching given configuration for text: "
+      }
+    },
+    {
+      "name": "another diagram type",
+      "code": "pie title Traffic sources\n    \"Search\" : 45\n    \"Direct\" : 25\n    \"Social\" : 20\n    \"Email\" : 10\n",
+      "expected": {
+        "kind": "unsupported",
+        "message": "pie"
+      }
+    },
+    {
+      "name": "invalid code",
+      "code": "sequenceDiagram\n    loop forever\n        A->>B: x\n",
+      "expected": {
+        "kind": "error",
+        "message": "Parse error on line 5:\n...r        A->>B: x\n--------------------^\nExpecting 'SPACE', 'NEWLINE', 'INVALID', 'create', 'box', 'end', 'autonumber', 'activate', 'deactivate', 'title', 'legacy_title', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'loop', 'rect', 'opt', 'alt', 'par', 'par_over', 'critical', 'break', 'participant', 'participant_actor', 'destroy', 'note', 'links', 'link', 'properties', 'details', 'ACTOR', got '1'"
+      }
+    },
+    {
+      "name": "box with color word title",
+      "code": "sequenceDiagram\n    box Aqua\n        participant A\n    end\n    A->>A: x\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    box Aqua\n        participant A\n    end\n    A->>A: x\n"
+      }
+    },
+    {
+      "name": "nested blocks with notes",
+      "code": "sequenceDiagram\n    loop outer\n        alt a\n            Note over A: x\n        else b\n            A->>B: y\n        end\n    end\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    loop outer\n        alt a\n            Note over A: x\n        else b\n            A->>B: y\n        end\n    end\n"
+      }
+    },
+    {
+      "name": "message with semicolon text",
+      "code": "sequenceDiagram\n    A->>B: a #59; b\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>B: a #59; b\n"
+      }
+    },
+    {
+      "name": "quoted participant labels",
+      "code": "sequenceDiagram\n    participant A as \"Quoted name\"\n    actor B as User #1\n    A->>B: hi\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    participant A as \"Quoted name\"\n    actor B as User\n    A->>B: hi\n"
+      }
+    },
+    {
+      "name": "rect with rgba",
+      "code": "sequenceDiagram\n    rect rgba(0, 0, 255, 0.1)\n        A->>B: x\n    end\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    rect rgba(0, 0, 255, 0.1)\n        A->>B: x\n    end\n"
+      }
+    },
+    {
+      "name": "critical without options",
+      "code": "sequenceDiagram\n    critical alone\n        A->>B: x\n    end\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    critical alone\n        A->>B: x\n    end\n"
+      }
+    },
+    {
+      "name": "box without a name",
+      "code": "sequenceDiagram\n    box\n        participant A\n    end\n    participant B\n    A->>B: x\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    box\n        participant A\n    end\n    A->>B: x\n"
+      }
+    },
+    {
+      "name": "autonumber off first",
+      "code": "sequenceDiagram\n    autonumber off\n    A->>B: x\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    autonumber off\n    A->>B: x\n"
+      }
+    },
+    {
+      "name": "activation shorthand with create",
+      "code": "sequenceDiagram\n    A->>+B: go\n    create participant C\n    B->>+C: make\n    C-->>-B: done\n    B-->>-A: back\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>+B: go\n    create participant C\n    B->>+C: make\n    C-->>-B: done\n    B-->>-A: back\n"
+      }
+    },
+    {
+      "name": "notes across many participants",
+      "code": "sequenceDiagram\n    participant A\n    participant B\n    participant C\n    Note over A,C: wide note\n    Note left of A: far left\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    participant A\n    participant B\n    Note over A,C: wide note\n    Note left of A: far left\n"
+      }
+    },
+    {
+      "name": "unicode text",
+      "code": "sequenceDiagram\n    A->>B: Größe ✓ 日本\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>B: Größe ✓ 日本\n"
+      }
+    },
+    {
+      "name": "long message widens the gap",
+      "code": "sequenceDiagram\n    A->>B: a very long message text that is much wider than the default participant gap\n    B->>B: and a long self message as well\n",
+      "expected": {
+        "kind": "ok",
+        "code": "sequenceDiagram\n    A->>B: a very long message text that is much wider than the default participant gap\n    B->>B: and a long self message as well\n"
+      }
+    }
+  ],
+  "ops": [
+    {
+      "name": "insertItem message",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 1
+            },
+            {
+              "t": "msg",
+              "id": "new1",
+              "from": "U",
+              "to": "A",
+              "text": "Hi",
+              "line": "solid",
+              "head": "arrow",
+              "act": "",
+              "central": "",
+              "create": [],
+              "destroy": []
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    U->>A: Hi\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem styled message",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 9
+            },
+            {
+              "t": "msg",
+              "id": "new1",
+              "from": "D",
+              "to": "U",
+              "text": "late",
+              "line": "dotted",
+              "head": "cross",
+              "act": "-",
+              "central": "both",
+              "create": [],
+              "destroy": []
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n    D()--x()U: late\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem self message",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 0
+            },
+            {
+              "t": "msg",
+              "id": "new1",
+              "from": "W",
+              "to": "W",
+              "text": "think",
+              "line": "solid",
+              "head": "async",
+              "act": "",
+              "central": "",
+              "create": [],
+              "destroy": []
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    W-)W: think\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem into a block section",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": {
+                "$section": [3, 1]
+              },
+              "index": 0
+            },
+            {
+              "t": "note",
+              "id": "new2",
+              "placement": "over",
+              "actors": ["W", "A"],
+              "text": "Retry?"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        Note over W,A: Retry?\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem activation",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 0
+            },
+            {
+              "t": "act",
+              "id": "new3",
+              "actor": "U",
+              "isOn": true
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    activate U\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem note left",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 2
+            },
+            {
+              "t": "note",
+              "id": "new4",
+              "placement": "left",
+              "actors": ["W"],
+              "text": "line one\nline two"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    Note left of W: line one<br>line two\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem wrapped note",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 2
+            },
+            {
+              "t": "note",
+              "id": "new4",
+              "placement": "right",
+              "actors": ["A"],
+              "text": "long",
+              "shouldWrap": true
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    Note right of A: wrap:long\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem autonumber",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 2
+            },
+            {
+              "t": "autonumber",
+              "id": "new5",
+              "start": 5,
+              "step": 2,
+              "isVisible": true
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    autonumber 5 2\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "insertItem creating message",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 9
+            },
+            {
+              "t": "msg",
+              "id": "new6",
+              "from": "A",
+              "to": "Z",
+              "text": "spawn",
+              "line": "solid",
+              "head": "arrow",
+              "act": "",
+              "central": "",
+              "create": ["Z"],
+              "destroy": []
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n    A->>Z: spawn\n"
+        }
+      ]
+    },
+    {
+      "name": "updateItem message",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "updateItem",
+          "args": [
+            {
+              "$item": 0
+            },
+            {
+              "text": "Tap login",
+              "head": "async",
+              "line": "dotted"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U--)W: Tap login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "updateItem wrap",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "updateItem",
+          "args": [
+            {
+              "$item": 0
+            },
+            {
+              "shouldWrap": true
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: wrap:Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "updateItem note text",
+      "code": "sequenceDiagram\n    participant A\n    participant B\n    Note left of A: left\n    Note right of B: right\n    Note over A: over one\n    Note over A,B: over both\n    Note over A: line one<br>line two\n",
+      "steps": [
+        {
+          "op": "updateItem",
+          "args": [
+            {
+              "$item": 3
+            },
+            {
+              "text": "both \"sides\""
+            }
+          ],
+          "expected": "sequenceDiagram\n    Note left of A: left\n    Note right of B: right\n    Note over A: over one\n    Note over A,B: both \"sides\"\n    Note over A: line one<br>line two\n"
+        }
+      ]
+    },
+    {
+      "name": "updateItem activation",
+      "code": "sequenceDiagram\n    A->>+B: start\n    B->>+C: nested\n    C-->>-B: done\n    B-->>-A: done\n    activate A\n    A->>A: self call\n    deactivate A\n",
+      "steps": [
+        {
+          "op": "updateItem",
+          "args": [
+            {
+              "$item": 4
+            },
+            {
+              "actor": "B"
+            }
+          ],
+          "expected": "sequenceDiagram\n    A->>+B: start\n    B->>+C: nested\n    C-->>-B: done\n    B-->>-A: done\n    activate B\n    A->>-A: self call\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems message",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            [
+              {
+                "$item": 1
+              }
+            ]
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems block",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            [
+              {
+                "$item": 3
+              }
+            ]
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems creating message",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            [
+              {
+                "$item": 1
+              }
+            ]
+          ],
+          "expected": "sequenceDiagram\n    participant A\n    participant B\n    participant C as Carl\n    A->>B: hello\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems destroyed participant message",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            [
+              {
+                "$item": 3
+              }
+            ]
+          ],
+          "expected": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n"
+        }
+      ]
+    },
+    {
+      "name": "moveItems to top",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveItems",
+          "args": [
+            [
+              {
+                "$item": 8
+              }
+            ],
+            {
+              "key": "root",
+              "index": 0
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    W-->>U: Show result\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n"
+        }
+      ]
+    },
+    {
+      "name": "moveItems into a block",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              }
+            ],
+            {
+              "key": {
+                "$section": [3, 0]
+              },
+              "index": 0
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        U->>W: Click login\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "moveItems out of a block",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveItems",
+          "args": [
+            [
+              {
+                "$item": 6
+              }
+            ],
+            {
+              "key": "root",
+              "index": 9
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n    end\n    deactivate A\n    W-->>U: Show result\n    A-->>W: 401\n"
+        }
+      ]
+    },
+    {
+      "name": "moveItems several",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            {
+              "key": "root",
+              "index": 9
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n    U->>W: Click login\n    W->>+A: POST /login\n"
+        }
+      ]
+    },
+    {
+      "name": "moveItems into itself",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveItems",
+          "args": [
+            [
+              {
+                "$item": 3
+              }
+            ],
+            {
+              "key": {
+                "$section": [3, 0]
+              },
+              "index": 0
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "moveItems creating message later",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "moveItems",
+          "args": [
+            [
+              {
+                "$item": 1
+              }
+            ],
+            {
+              "key": "root",
+              "index": 5
+            }
+          ],
+          "expected": "sequenceDiagram\n    participant A\n    participant B\n    participant C as Carl\n    A->>B: hello\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n    B->>C: make\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems loop",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "loop"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    loop every second\n        U->>W: Click login\n        W->>+A: POST /login\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems alt",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "alt"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    alt success\n        U->>W: Click login\n        W->>+A: POST /login\n    else failure\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems opt",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "opt"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    opt optional\n        U->>W: Click login\n        W->>+A: POST /login\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems par",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "par"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    par in parallel\n        U->>W: Click login\n        W->>+A: POST /login\n    and meanwhile\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems par_over",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "par_over"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    par_over in parallel\n        U->>W: Click login\n        W->>+A: POST /login\n    and meanwhile\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems critical",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "critical"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    critical must succeed\n        U->>W: Click login\n        W->>+A: POST /login\n    option on error\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems break",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "break"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    break on failure\n        U->>W: Click login\n        W->>+A: POST /login\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems rect",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "rect"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    rect rgba(127, 127, 255, 0.15)\n        U->>W: Click login\n        W->>+A: POST /login\n    end\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems nothing selected",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [[], "opt"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n    opt optional\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems inside a block",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 4
+              },
+              {
+                "$item": 5
+              }
+            ],
+            "loop"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        loop every second\n            D-->>A: user\n            A-->>W: token\n        end\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapItems not contiguous",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 2
+              }
+            ],
+            "alt"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n    alt success\n    else failure\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "unwrap",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "unwrap",
+          "args": [
+            {
+              "$item": 3
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    D-->>A: user\n    A-->>W: token\n    A-->>W: 401\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "unwrap nested",
+      "code": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n",
+      "steps": [
+        {
+          "op": "unwrap",
+          "args": [
+            {
+              "$item": 3
+            }
+          ],
+          "expected": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        B-->>A: pong\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "setBlockKind merges sections",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setBlockKind",
+          "args": [
+            {
+              "$item": 3
+            },
+            "loop"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    loop valid password\n        D-->>A: user\n        A-->>W: token\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "setBlockKind keeps sections",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setBlockKind",
+          "args": [
+            {
+              "$item": 3
+            },
+            "par"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    par valid password\n        D-->>A: user\n        A-->>W: token\n    and wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "setBlockKind to rect",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setBlockKind",
+          "args": [
+            {
+              "$item": 3
+            },
+            "rect"
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    rect rgba(127, 127, 255, 0.15)\n        D-->>A: user\n        A-->>W: token\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "setBlockKind from rect",
+      "code": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n",
+      "steps": [
+        {
+          "op": "setBlockKind",
+          "args": [
+            {
+              "$item": 13
+            },
+            "opt"
+          ],
+          "expected": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    opt optional\n        A->>B: highlighted\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "setSectionLabel",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setSectionLabel",
+          "args": [
+            {
+              "blockId": {
+                "$item": 3
+              },
+              "sectionIndex": 1,
+              "label": "locked out"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else locked out\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "setSectionLabel first",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setSectionLabel",
+          "args": [
+            {
+              "blockId": {
+                "$item": 3
+              },
+              "sectionIndex": 0,
+              "label": "ok \"now\""
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt ok \"now\"\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "addSection",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "addSection",
+          "args": [
+            {
+              "$item": 3
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    else failure\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "addSection to par",
+      "code": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n",
+      "steps": [
+        {
+          "op": "addSection",
+          "args": [
+            {
+              "$item": 5
+            }
+          ],
+          "expected": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    and meanwhile\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "removeSection",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "removeSection",
+          "args": [
+            {
+              "blockId": {
+                "$item": 3
+              },
+              "sectionIndex": 1
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "removeSection first",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "removeSection",
+          "args": [
+            {
+              "blockId": {
+                "$item": 3
+              },
+              "sectionIndex": 0
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "toggleAutonumber on",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "toggleAutonumber",
+          "args": [],
+          "expected": "sequenceDiagram\n    autonumber\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "toggleAutonumber off",
+      "code": "sequenceDiagram\n    autonumber 10 5\n    A->>B: one\n    autonumber off\n    A->>B: two\n    autonumber 3\n    A->>B: three\n    autonumber\n    A->>B: four\n",
+      "steps": [
+        {
+          "op": "toggleAutonumber",
+          "args": [],
+          "expected": "sequenceDiagram\n    A->>B: one\n    autonumber off\n    A->>B: two\n    autonumber 3\n    A->>B: three\n    autonumber\n    A->>B: four\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseMessage",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "reverseMessage",
+          "args": [
+            {
+              "$item": 2
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    D->>A: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "addParticipant default",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    participant P1\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "addParticipant actor",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [
+            {
+              "kind": "actor"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    actor Actor\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "addParticipant typed at index",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [
+            {
+              "kind": "database",
+              "index": 1,
+              "label": "Cache"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant Database@{ \"type\": \"database\" } as Cache\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "addParticipant inside a box",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [
+            {
+              "index": 1
+            }
+          ],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant P1\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "addParticipant before created ones",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [
+            {
+              "kind": "queue"
+            }
+          ],
+          "expected": "sequenceDiagram\n    participant A\n    participant B\n    participant Queue@{ \"type\": \"queue\" }\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n"
+        }
+      ]
+    },
+    {
+      "name": "addParticipant twice",
+      "code": "sequenceDiagram\n    Alice->>Bob: Hi\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [],
+          "expected": "sequenceDiagram\n    participant Alice\n    participant Bob\n    participant P1\n    Alice->>Bob: Hi\n"
+        },
+        {
+          "op": "addParticipant",
+          "args": [],
+          "expected": "sequenceDiagram\n    participant Alice\n    participant Bob\n    participant P1\n    participant P2\n    Alice->>Bob: Hi\n"
+        }
+      ]
+    },
+    {
+      "name": "updateParticipant label",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "updateParticipant",
+          "args": [
+            "W",
+            {
+              "label": "Website"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Website\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "updateParticipant kind",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "updateParticipant",
+          "args": [
+            "A",
+            {
+              "kind": "queue"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A@{ \"type\": \"queue\" } as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "updateParticipant label equals id",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "updateParticipant",
+          "args": [
+            "A",
+            {
+              "label": "A"
+            }
+          ],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "renameParticipant",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "renameParticipant",
+          "args": ["A", "Api"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant Api as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+Api: POST /login\n    Api->>D: Find user\n    alt valid password\n        D-->>Api: user\n        Api-->>W: token\n    else wrong password\n        Api-->>W: 401\n    end\n    deactivate Api\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "renameParticipant keeps a custom label",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "renameParticipant",
+          "args": ["W", "Web"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant Web as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>Web: Click login\n    Web->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>Web: token\n    else wrong password\n        A-->>Web: 401\n    end\n    deactivate A\n    Web-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "renameParticipant with links",
+      "code": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n        Long\n        description\n    }\n    A->>B: I #9829; you #35; 1#59;2\n    A->>B: say #quot;hi#quot;\n    link A: Dashboard @ https://example.com\n    links B: {\"Repo\": \"https://example.com\"}\n",
+      "steps": [
+        {
+          "op": "renameParticipant",
+          "args": ["A", "X"],
+          "expected": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n    Long\n    description\n    }\n    X->>B: I ♥ you #35; 1#59;2\n    X->>B: say \"hi\"\n    link X: Dashboard @ https://example.com\n    links B: {\"Repo\": \"https://example.com\"}\n"
+        }
+      ]
+    },
+    {
+      "name": "renameParticipant created",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "renameParticipant",
+          "args": ["C", "Carl"],
+          "expected": "sequenceDiagram\n    A->>B: hello\n    create participant Carl\n    B->>Carl: make\n    create actor D\n    A->>D: make actor\n    destroy Carl\n    Carl->>B: bye\n"
+        }
+      ]
+    },
+    {
+      "name": "renameParticipant invalid",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "renameParticipant",
+          "args": ["A", "W"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        },
+        {
+          "op": "renameParticipant",
+          "args": ["A", "bad id"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteParticipant unused",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "deleteParticipant",
+          "args": ["D"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    U->>W: Click login\n    W->>+A: POST /login\n    alt valid password\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteParticipant with messages",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "deleteParticipant",
+          "args": ["A"],
+          "expected": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    alt valid password\n    else wrong password\n    end\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteParticipant empties a box",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "deleteParticipant",
+          "args": ["E"],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteParticipant created",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "deleteParticipant",
+          "args": ["C"],
+          "expected": "sequenceDiagram\n    A->>B: hello\n    create actor D\n    A->>D: make actor\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteParticipant from a shared note",
+      "code": "sequenceDiagram\n    participant A\n    participant B\n    Note left of A: left\n    Note right of B: right\n    Note over A: over one\n    Note over A,B: over both\n    Note over A: line one<br>line two\n",
+      "steps": [
+        {
+          "op": "deleteParticipant",
+          "args": ["B"],
+          "expected": "sequenceDiagram\n    Note left of A: left\n    Note over A: over one\n    Note over A: over both\n    Note over A: line one<br>line two\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteParticipant with links",
+      "code": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n        Long\n        description\n    }\n    A->>B: I #9829; you #35; 1#59;2\n    A->>B: say #quot;hi#quot;\n    link A: Dashboard @ https://example.com\n    links B: {\"Repo\": \"https://example.com\"}\n",
+      "steps": [
+        {
+          "op": "deleteParticipant",
+          "args": ["A"],
+          "expected": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n    Long\n    description\n    }\n    participant B\n    links B: {\"Repo\": \"https://example.com\"}\n"
+        }
+      ]
+    },
+    {
+      "name": "moveParticipant to the start",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveParticipant",
+          "args": ["D", 0],
+          "expected": "sequenceDiagram\n    participant D@{ \"type\": \"database\" } as Database\n    actor U as User\n    participant W as Web app\n    participant A as API\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "moveParticipant to the end",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "moveParticipant",
+          "args": ["U", 4],
+          "expected": "sequenceDiagram\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    actor U as User\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "moveParticipant into a box",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "moveParticipant",
+          "args": ["E", 1],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant E\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "moveParticipant out of a box",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "moveParticipant",
+          "args": ["A", 5],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "moveParticipant created",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "steps": [
+        {
+          "op": "moveParticipant",
+          "args": ["C", 0],
+          "expected": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n"
+        }
+      ]
+    },
+    {
+      "name": "setParticipantBox new",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setParticipantBox",
+          "args": ["W", "new"],
+          "expected": "sequenceDiagram\n    actor U as User\n    box Group\n        participant W as Web app\n    end\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "setParticipantBox new twice",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "steps": [
+        {
+          "op": "setParticipantBox",
+          "args": ["W", "new"],
+          "expected": "sequenceDiagram\n    actor U as User\n    box Group\n        participant W as Web app\n    end\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        },
+        {
+          "op": "setParticipantBox",
+          "args": ["A", "box1"],
+          "expected": "sequenceDiagram\n    actor U as User\n    box Group\n        participant W as Web app\n        participant A as API\n    end\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        },
+        {
+          "op": "setParticipantBox",
+          "args": ["U", "new"],
+          "expected": "sequenceDiagram\n    box Group\n        actor U as User\n    end\n    box Group\n        participant W as Web app\n        participant A as API\n    end\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n"
+        }
+      ]
+    },
+    {
+      "name": "setParticipantBox leave",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "setParticipantBox",
+          "args": ["A", null],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant B as Web\n    end\n    participant A\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "setParticipantBox join",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "setParticipantBox",
+          "args": ["E", "box1"],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n        participant E\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "updateBox",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "updateBox",
+          "args": [
+            "box1",
+            {
+              "name": "Front end",
+              "fill": "#eee"
+            }
+          ],
+          "expected": "sequenceDiagram\n    box #eee Front end\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "updateBox color word title",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "updateBox",
+          "args": [
+            "box3",
+            {
+              "name": "Aqua team"
+            }
+          ],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box transparent Aqua team\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "updateBox empty title",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "updateBox",
+          "args": [
+            "box3",
+            {
+              "name": ""
+            }
+          ],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "removeBox",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "steps": [
+        {
+          "op": "removeBox",
+          "args": ["box2"],
+          "expected": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    participant C\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n"
+        }
+      ]
+    },
+    {
+      "name": "build from blank",
+      "code": "sequenceDiagram\n    Alice->>Bob: Hi\n",
+      "steps": [
+        {
+          "op": "addParticipant",
+          "args": [
+            {
+              "kind": "actor"
+            }
+          ],
+          "expected": "sequenceDiagram\n    participant Alice\n    participant Bob\n    actor Actor\n    Alice->>Bob: Hi\n"
+        },
+        {
+          "op": "insertItem",
+          "args": [
+            {
+              "key": "root",
+              "index": 1
+            },
+            {
+              "t": "msg",
+              "id": "b1",
+              "from": "Bob",
+              "to": "Actor1",
+              "text": "Ask",
+              "line": "solid",
+              "head": "arrow",
+              "act": "+",
+              "central": "",
+              "create": [],
+              "destroy": []
+            }
+          ],
+          "expected": "sequenceDiagram\n    participant Alice\n    participant Bob\n    actor Actor\n    Alice->>Bob: Hi\n    Bob->>+Actor1: Ask\n"
+        },
+        {
+          "op": "wrapItems",
+          "args": [
+            [
+              {
+                "$item": 0
+              },
+              {
+                "$item": 1
+              }
+            ],
+            "loop"
+          ],
+          "expected": "sequenceDiagram\n    participant Alice\n    participant Bob\n    actor Actor\n    loop every second\n        Alice->>Bob: Hi\n        Bob->>+Actor1: Ask\n    end\n"
+        },
+        {
+          "op": "setSectionLabel",
+          "args": [
+            {
+              "blockId": {
+                "$item": 0
+              },
+              "sectionIndex": 0,
+              "label": "forever"
+            }
+          ],
+          "expected": "sequenceDiagram\n    participant Alice\n    participant Bob\n    actor Actor\n    loop forever\n        Alice->>Bob: Hi\n        Bob->>+Actor1: Ask\n    end\n"
+        },
+        {
+          "op": "toggleAutonumber",
+          "args": [],
+          "expected": "sequenceDiagram\n    autonumber\n    participant Alice\n    participant Bob\n    actor Actor\n    loop forever\n        Alice->>Bob: Hi\n        Bob->>+Actor1: Ask\n    end\n"
+        },
+        {
+          "op": "setParticipantBox",
+          "args": ["Alice", "new"],
+          "expected": "sequenceDiagram\n    autonumber\n    box Group\n        participant Alice\n    end\n    participant Bob\n    actor Actor\n    loop forever\n        Alice->>Bob: Hi\n        Bob->>+Actor1: Ask\n    end\n"
+        },
+        {
+          "op": "renameParticipant",
+          "args": ["Bob", "Robert"],
+          "expected": "sequenceDiagram\n    autonumber\n    box Group\n        participant Alice\n    end\n    participant Robert\n    actor Actor\n    loop forever\n        Alice->>Robert: Hi\n        Robert->>+Actor1: Ask\n    end\n"
+        }
+      ]
+    },
+    {
+      "name": "preamble survives edits",
+      "code": "---\ntitle: Calls\n---\nsequenceDiagram\n    A->>B: hi\n",
+      "steps": [
+        {
+          "op": "reverseMessage",
+          "args": [
+            {
+              "$item": 0
+            }
+          ],
+          "expected": "---\ntitle: Calls\n---\nsequenceDiagram\n    participant A\n    B->>A: hi\n"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "template",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    actor U as User\n    participant W as Web app\n    participant A as API\n    participant D@{ \"type\": \"database\" } as Database\n    U->>W: Click login\n    W->>+A: POST /login\n    A->>D: Find user\n    alt valid password\n        D-->>A: user\n        A-->>W: token\n    else wrong password\n        A-->>W: 401\n    end\n    deactivate A\n    W-->>U: Show result\n",
+      "expected": {
+        "title": "",
+        "titleX": 287,
+        "cols": [
+          {
+            "id": "U",
+            "x": 62,
+            "w": 64,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 548,
+            "isDestroyed": false,
+            "footY": 548
+          },
+          {
+            "id": "W",
+            "x": 212,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 548,
+            "isDestroyed": false,
+            "footY": 548
+          },
+          {
+            "id": "A",
+            "x": 362,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 548,
+            "isDestroyed": false,
+            "footY": 548
+          },
+          {
+            "id": "D",
+            "x": 512,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 548,
+            "isDestroyed": false,
+            "footY": 548
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 94,
+            "depth": 0,
+            "h": 46,
+            "ay": 126,
+            "x1": 62,
+            "x2": 212,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 140,
+            "depth": 0,
+            "h": 46,
+            "ay": 172,
+            "x1": 212,
+            "x2": 357,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 186,
+            "depth": 0,
+            "h": 46,
+            "ay": 218,
+            "x1": 367,
+            "x2": 512,
+            "labelLines": 1
+          },
+          {
+            "item": "i4",
+            "key": "i3:0",
+            "index": 0,
+            "y": 262,
+            "depth": 1,
+            "h": 46,
+            "ay": 294,
+            "x1": 512,
+            "x2": 367,
+            "labelLines": 1
+          },
+          {
+            "item": "i5",
+            "key": "i3:0",
+            "index": 1,
+            "y": 308,
+            "depth": 1,
+            "h": 46,
+            "ay": 340,
+            "x1": 357,
+            "x2": 212,
+            "labelLines": 1
+          },
+          {
+            "item": "i6",
+            "key": "i3:1",
+            "index": 0,
+            "y": 380,
+            "depth": 1,
+            "h": 46,
+            "ay": 412,
+            "x1": 357,
+            "x2": 212,
+            "labelLines": 1
+          },
+          {
+            "item": "i7",
+            "key": "root",
+            "index": 4,
+            "y": 438,
+            "depth": 0,
+            "h": 20,
+            "cx": 362
+          },
+          {
+            "item": "i8",
+            "key": "root",
+            "index": 5,
+            "y": 458,
+            "depth": 0,
+            "h": 46,
+            "ay": 490,
+            "x1": 212,
+            "x2": 62,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y1": 236,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 236,
+                "label": "valid password",
+                "k": 0
+              },
+              {
+                "y": 354,
+                "label": "wrong password",
+                "k": 1
+              }
+            ],
+            "x1": 190,
+            "x2": 534,
+            "y2": 432,
+            "tabW": 39
+          }
+        ],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 94,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 140,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 186,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 232,
+            "depth": 0
+          },
+          {
+            "key": "i3:0",
+            "index": 0,
+            "y": 262,
+            "depth": 1
+          },
+          {
+            "key": "i3:0",
+            "index": 1,
+            "y": 308,
+            "depth": 1
+          },
+          {
+            "key": "i3:0",
+            "index": 2,
+            "y": 354,
+            "depth": 1
+          },
+          {
+            "key": "i3:1",
+            "index": 0,
+            "y": 380,
+            "depth": 1
+          },
+          {
+            "key": "i3:1",
+            "index": 1,
+            "y": 426,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 438,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 5,
+            "y": 458,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 6,
+            "y": 504,
+            "depth": 0
+          }
+        ],
+        "bars": [
+          {
+            "actor": "A",
+            "x": 357,
+            "y1": 172,
+            "y2": 448,
+            "isOpen": false
+          }
+        ],
+        "boxes": [],
+        "width": 588,
+        "minX": 0,
+        "height": 634,
+        "headH": 62,
+        "bandBottom": 76,
+        "top": 14,
+        "end": 548,
+        "y0": 94
+      }
+    },
+    {
+      "name": "minimal",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    Alice->>Bob: Hi\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "Alice",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          },
+          {
+            "id": "Bob",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 226,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 162,
+        "y0": 72
+      }
+    },
+    {
+      "name": "arrows",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->B: open\n    A-->B: dotted open\n    A->>B: arrow\n    A-->>B: dotted arrow\n    A-xB: cross\n    A--xB: dotted cross\n    A-)B: async\n    A--)B: dotted async\n    A<<->>B: both\n    A<<-->>B: dotted both\n    A-|\\B: half top\n    A-|/B: half bottom\n    A/|-B: half top reverse\n    A-\\\\B: stick top\n    A-//B: stick bottom\n    A//-B: stick top reverse\n    A--|\\B: dotted half\n    A()->>B: central from\n    A->>()B: central to\n    A()->>()B: central both\n    A->>A: self\n    A->>B:\n",
+      "expected": {
+        "title": "",
+        "titleX": 155.5,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 1126,
+            "isDestroyed": false,
+            "footY": 1126
+          },
+          {
+            "id": "B",
+            "x": 235,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 1126,
+            "isDestroyed": false,
+            "footY": 1126
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0,
+            "h": 46,
+            "ay": 150,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 164,
+            "depth": 0,
+            "h": 46,
+            "ay": 196,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 210,
+            "depth": 0,
+            "h": 46,
+            "ay": 242,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i4",
+            "key": "root",
+            "index": 4,
+            "y": 256,
+            "depth": 0,
+            "h": 46,
+            "ay": 288,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i5",
+            "key": "root",
+            "index": 5,
+            "y": 302,
+            "depth": 0,
+            "h": 46,
+            "ay": 334,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i6",
+            "key": "root",
+            "index": 6,
+            "y": 348,
+            "depth": 0,
+            "h": 46,
+            "ay": 380,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i7",
+            "key": "root",
+            "index": 7,
+            "y": 394,
+            "depth": 0,
+            "h": 46,
+            "ay": 426,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i8",
+            "key": "root",
+            "index": 8,
+            "y": 440,
+            "depth": 0,
+            "h": 46,
+            "ay": 472,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i9",
+            "key": "root",
+            "index": 9,
+            "y": 486,
+            "depth": 0,
+            "h": 46,
+            "ay": 518,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i10",
+            "key": "root",
+            "index": 10,
+            "y": 532,
+            "depth": 0,
+            "h": 46,
+            "ay": 564,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i11",
+            "key": "root",
+            "index": 11,
+            "y": 578,
+            "depth": 0,
+            "h": 46,
+            "ay": 610,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i12",
+            "key": "root",
+            "index": 12,
+            "y": 624,
+            "depth": 0,
+            "h": 46,
+            "ay": 656,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i13",
+            "key": "root",
+            "index": 13,
+            "y": 670,
+            "depth": 0,
+            "h": 46,
+            "ay": 702,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i14",
+            "key": "root",
+            "index": 14,
+            "y": 716,
+            "depth": 0,
+            "h": 46,
+            "ay": 748,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i15",
+            "key": "root",
+            "index": 15,
+            "y": 762,
+            "depth": 0,
+            "h": 46,
+            "ay": 794,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i16",
+            "key": "root",
+            "index": 16,
+            "y": 808,
+            "depth": 0,
+            "h": 46,
+            "ay": 840,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i17",
+            "key": "root",
+            "index": 17,
+            "y": 854,
+            "depth": 0,
+            "h": 46,
+            "ay": 886,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i18",
+            "key": "root",
+            "index": 18,
+            "y": 900,
+            "depth": 0,
+            "h": 46,
+            "ay": 932,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i19",
+            "key": "root",
+            "index": 19,
+            "y": 946,
+            "depth": 0,
+            "h": 46,
+            "ay": 978,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 1
+          },
+          {
+            "item": "i20",
+            "key": "root",
+            "index": 20,
+            "y": 992,
+            "depth": 0,
+            "h": 60,
+            "ay": 1020,
+            "x1": 76,
+            "x2": 76,
+            "isSelf": true,
+            "labelLines": 1
+          },
+          {
+            "item": "i21",
+            "key": "root",
+            "index": 21,
+            "y": 1052,
+            "depth": 0,
+            "h": 30,
+            "ay": 1068,
+            "x1": 76,
+            "x2": 235,
+            "labelLines": 0
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 164,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 210,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 256,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 5,
+            "y": 302,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 6,
+            "y": 348,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 7,
+            "y": 394,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 8,
+            "y": 440,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 9,
+            "y": 486,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 10,
+            "y": 532,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 11,
+            "y": 578,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 12,
+            "y": 624,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 13,
+            "y": 670,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 14,
+            "y": 716,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 15,
+            "y": 762,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 16,
+            "y": 808,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 17,
+            "y": 854,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 18,
+            "y": 900,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 19,
+            "y": 946,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 20,
+            "y": 992,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 21,
+            "y": 1052,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 22,
+            "y": 1082,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 311,
+        "minX": 0,
+        "height": 1190,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 1126,
+        "y0": 72
+      }
+    },
+    {
+      "name": "activations",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>+B: start\n    B->>+C: nested\n    C-->>-B: done\n    B-->>-A: done\n    activate A\n    A->>A: self call\n    deactivate A\n",
+      "expected": {
+        "title": "",
+        "titleX": 226,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 380,
+            "isDestroyed": false,
+            "footY": 380
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 380,
+            "isDestroyed": false,
+            "footY": 380
+          },
+          {
+            "id": "C",
+            "x": 376,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 380,
+            "isDestroyed": false,
+            "footY": 380
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 221,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0,
+            "h": 46,
+            "ay": 150,
+            "x1": 231,
+            "x2": 371,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 164,
+            "depth": 0,
+            "h": 46,
+            "ay": 196,
+            "x1": 371,
+            "x2": 231,
+            "labelLines": 1
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 210,
+            "depth": 0,
+            "h": 46,
+            "ay": 242,
+            "x1": 221,
+            "x2": 76,
+            "labelLines": 1
+          },
+          {
+            "item": "i4",
+            "key": "root",
+            "index": 4,
+            "y": 256,
+            "depth": 0,
+            "h": 20,
+            "cx": 76
+          },
+          {
+            "item": "i5",
+            "key": "root",
+            "index": 5,
+            "y": 276,
+            "depth": 0,
+            "h": 60,
+            "ay": 304,
+            "x1": 81,
+            "x2": 81,
+            "isSelf": true,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 164,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 210,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 256,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 5,
+            "y": 276,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 6,
+            "y": 336,
+            "depth": 0
+          }
+        ],
+        "bars": [
+          {
+            "actor": "C",
+            "x": 371,
+            "y1": 150,
+            "y2": 196,
+            "isOpen": false
+          },
+          {
+            "actor": "B",
+            "x": 221,
+            "y1": 104,
+            "y2": 242,
+            "isOpen": false
+          },
+          {
+            "actor": "A",
+            "x": 71,
+            "y1": 266,
+            "y2": 304,
+            "isOpen": false
+          }
+        ],
+        "boxes": [],
+        "width": 452,
+        "minX": 0,
+        "height": 444,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 380,
+        "y0": 72
+      }
+    },
+    {
+      "name": "notes",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    participant A\n    participant B\n    Note left of A: left\n    Note right of B: right\n    Note over A: over one\n    Note over A,B: over both\n    Note over A: line one<br>line two\n",
+      "expected": {
+        "title": "",
+        "titleX": 179,
+        "cols": [
+          {
+            "id": "A",
+            "x": 104,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 342,
+            "isDestroyed": false,
+            "footY": 342
+          },
+          {
+            "id": "B",
+            "x": 254,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 342,
+            "isDestroyed": false,
+            "footY": 342
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 42,
+            "ny": 78,
+            "nh": 30,
+            "nx2": 96,
+            "nx1": 16
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 114,
+            "depth": 0,
+            "h": 42,
+            "ny": 120,
+            "nh": 30,
+            "nx1": 262,
+            "nx2": 342
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 156,
+            "depth": 0,
+            "h": 42,
+            "ny": 162,
+            "nh": 30,
+            "nx1": 64,
+            "nx2": 144
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 198,
+            "depth": 0,
+            "h": 42,
+            "ny": 204,
+            "nh": 30,
+            "nx1": 79,
+            "nx2": 279
+          },
+          {
+            "item": "i4",
+            "key": "root",
+            "index": 4,
+            "y": 240,
+            "depth": 0,
+            "h": 58,
+            "ny": 246,
+            "nh": 46,
+            "nx1": 64,
+            "nx2": 144
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 114,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 156,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 198,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 240,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 5,
+            "y": 298,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 372,
+        "minX": -4,
+        "height": 406,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 342,
+        "y0": 72
+      }
+    },
+    {
+      "name": "blocks",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>B: start\n    loop every minute\n        A->>B: ping\n        opt maybe\n            B-->>A: pong\n        end\n    end\n    par first\n        A->>B: x\n    and second\n        A->>C: y\n    end\n    critical connect\n        A->>B: try\n    option timeout\n        A->>B: retry\n    end\n    break on failure\n        A->>B: stop\n    end\n    rect rgb(200, 220, 255)\n        A->>B: highlighted\n    end\n",
+      "expected": {
+        "title": "",
+        "titleX": 226,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 834,
+            "isDestroyed": false,
+            "footY": 834
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 834,
+            "isDestroyed": false,
+            "footY": 834
+          },
+          {
+            "id": "C",
+            "x": 376,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 834,
+            "isDestroyed": false,
+            "footY": 834
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "i1:0",
+            "index": 0,
+            "y": 148,
+            "depth": 1,
+            "h": 46,
+            "ay": 180,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i4",
+            "key": "i3:0",
+            "index": 0,
+            "y": 224,
+            "depth": 2,
+            "h": 46,
+            "ay": 256,
+            "x1": 226,
+            "x2": 76,
+            "labelLines": 1
+          },
+          {
+            "item": "i6",
+            "key": "i5:0",
+            "index": 0,
+            "y": 324,
+            "depth": 1,
+            "h": 46,
+            "ay": 356,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i7",
+            "key": "i5:1",
+            "index": 0,
+            "y": 396,
+            "depth": 1,
+            "h": 46,
+            "ay": 428,
+            "x1": 76,
+            "x2": 376,
+            "labelLines": 1
+          },
+          {
+            "item": "i9",
+            "key": "i8:0",
+            "index": 0,
+            "y": 484,
+            "depth": 1,
+            "h": 46,
+            "ay": 516,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i10",
+            "key": "i8:1",
+            "index": 0,
+            "y": 556,
+            "depth": 1,
+            "h": 46,
+            "ay": 588,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i12",
+            "key": "i11:0",
+            "index": 0,
+            "y": 644,
+            "depth": 1,
+            "h": 46,
+            "ay": 676,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i14",
+            "key": "i13:0",
+            "index": 0,
+            "y": 732,
+            "depth": 1,
+            "h": 46,
+            "ay": 764,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y1": 122,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 122,
+                "label": "every minute",
+                "k": 0
+              }
+            ],
+            "x1": 42,
+            "x2": 260,
+            "y2": 288,
+            "tabW": 46
+          },
+          {
+            "item": "i3",
+            "key": "i1:0",
+            "index": 1,
+            "y1": 198,
+            "depth": 1,
+            "sections": [
+              {
+                "y": 198,
+                "label": "maybe",
+                "k": 0
+              }
+            ],
+            "x1": 54,
+            "x2": 248,
+            "y2": 276,
+            "tabW": 39
+          },
+          {
+            "item": "i5",
+            "key": "root",
+            "index": 2,
+            "y1": 298,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 298,
+                "label": "first",
+                "k": 0
+              },
+              {
+                "y": 370,
+                "label": "second",
+                "k": 1
+              }
+            ],
+            "x1": 54,
+            "x2": 398,
+            "y2": 448,
+            "tabW": 39
+          },
+          {
+            "item": "i8",
+            "key": "root",
+            "index": 3,
+            "y1": 458,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 458,
+                "label": "connect",
+                "k": 0
+              },
+              {
+                "y": 530,
+                "label": "timeout",
+                "k": 1
+              }
+            ],
+            "x1": 54,
+            "x2": 248,
+            "y2": 608,
+            "tabW": 74
+          },
+          {
+            "item": "i11",
+            "key": "root",
+            "index": 4,
+            "y1": 618,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 618,
+                "label": "on failure",
+                "k": 0
+              }
+            ],
+            "x1": 54,
+            "x2": 248,
+            "y2": 696,
+            "tabW": 53
+          },
+          {
+            "item": "i13",
+            "key": "root",
+            "index": 5,
+            "y1": 706,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 706,
+                "label": "rgb(200, 220, 255)",
+                "k": 0
+              }
+            ],
+            "x1": 54,
+            "x2": 248,
+            "y2": 784,
+            "tabW": 46
+          }
+        ],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "i1:0",
+            "index": 0,
+            "y": 148,
+            "depth": 1
+          },
+          {
+            "key": "i1:0",
+            "index": 1,
+            "y": 194,
+            "depth": 1
+          },
+          {
+            "key": "i3:0",
+            "index": 0,
+            "y": 224,
+            "depth": 2
+          },
+          {
+            "key": "i3:0",
+            "index": 1,
+            "y": 270,
+            "depth": 2
+          },
+          {
+            "key": "i1:0",
+            "index": 2,
+            "y": 282,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 294,
+            "depth": 0
+          },
+          {
+            "key": "i5:0",
+            "index": 0,
+            "y": 324,
+            "depth": 1
+          },
+          {
+            "key": "i5:0",
+            "index": 1,
+            "y": 370,
+            "depth": 1
+          },
+          {
+            "key": "i5:1",
+            "index": 0,
+            "y": 396,
+            "depth": 1
+          },
+          {
+            "key": "i5:1",
+            "index": 1,
+            "y": 442,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 454,
+            "depth": 0
+          },
+          {
+            "key": "i8:0",
+            "index": 0,
+            "y": 484,
+            "depth": 1
+          },
+          {
+            "key": "i8:0",
+            "index": 1,
+            "y": 530,
+            "depth": 1
+          },
+          {
+            "key": "i8:1",
+            "index": 0,
+            "y": 556,
+            "depth": 1
+          },
+          {
+            "key": "i8:1",
+            "index": 1,
+            "y": 602,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 614,
+            "depth": 0
+          },
+          {
+            "key": "i11:0",
+            "index": 0,
+            "y": 644,
+            "depth": 1
+          },
+          {
+            "key": "i11:0",
+            "index": 1,
+            "y": 690,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 5,
+            "y": 702,
+            "depth": 0
+          },
+          {
+            "key": "i13:0",
+            "index": 0,
+            "y": 732,
+            "depth": 1
+          },
+          {
+            "key": "i13:0",
+            "index": 1,
+            "y": 778,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 6,
+            "y": 790,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 452,
+        "minX": 0,
+        "height": 898,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 834,
+        "y0": 72
+      }
+    },
+    {
+      "name": "boxes",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    box Purple Frontend\n        participant A\n        participant B as Web\n    end\n    box rgb(33,66,99) Backend\n        participant C\n    end\n    box Team services\n        participant D\n    end\n    box transparent Aqua\n        participant E\n    end\n    A->>B: x\n    B->>C: y\n    C->>D: z\n    D->>E: w\n",
+      "expected": {
+        "title": "",
+        "titleX": 376,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 34,
+            "y": 34,
+            "h": 40,
+            "lifeTop": 74,
+            "lifeBottom": 320,
+            "isDestroyed": false,
+            "footY": 320
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 34,
+            "y": 34,
+            "h": 40,
+            "lifeTop": 74,
+            "lifeBottom": 320,
+            "isDestroyed": false,
+            "footY": 320
+          },
+          {
+            "id": "C",
+            "x": 376,
+            "w": 92,
+            "top": 34,
+            "y": 34,
+            "h": 40,
+            "lifeTop": 74,
+            "lifeBottom": 320,
+            "isDestroyed": false,
+            "footY": 320
+          },
+          {
+            "id": "D",
+            "x": 526,
+            "w": 92,
+            "top": 34,
+            "y": 34,
+            "h": 40,
+            "lifeTop": 74,
+            "lifeBottom": 320,
+            "isDestroyed": false,
+            "footY": 320
+          },
+          {
+            "id": "E",
+            "x": 676,
+            "w": 92,
+            "top": 34,
+            "y": 34,
+            "h": 40,
+            "lifeTop": 74,
+            "lifeBottom": 320,
+            "isDestroyed": false,
+            "footY": 320
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 92,
+            "depth": 0,
+            "h": 46,
+            "ay": 124,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 138,
+            "depth": 0,
+            "h": 46,
+            "ay": 170,
+            "x1": 226,
+            "x2": 376,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 184,
+            "depth": 0,
+            "h": 46,
+            "ay": 216,
+            "x1": 376,
+            "x2": 526,
+            "labelLines": 1
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 230,
+            "depth": 0,
+            "h": 46,
+            "ay": 262,
+            "x1": 526,
+            "x2": 676,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 92,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 138,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 184,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 230,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 276,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [
+          {
+            "box": "box1",
+            "x1": 20,
+            "x2": 282,
+            "y1": 4,
+            "y2": 370
+          },
+          {
+            "box": "box2",
+            "x1": 320,
+            "x2": 432,
+            "y1": 4,
+            "y2": 370
+          },
+          {
+            "box": "box3",
+            "x1": 470,
+            "x2": 582,
+            "y1": 4,
+            "y2": 370
+          },
+          {
+            "box": "box4",
+            "x1": 620,
+            "x2": 732,
+            "y1": 4,
+            "y2": 370
+          }
+        ],
+        "width": 752,
+        "minX": 0,
+        "height": 384,
+        "headH": 40,
+        "bandBottom": 74,
+        "top": 34,
+        "end": 320,
+        "y0": 92
+      }
+    },
+    {
+      "name": "kinds",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    participant A@{ \"type\": \"boundary\" }\n    participant B@{ \"type\": \"control\" }\n    participant C@{ \"type\": \"entity\" }\n    participant D@{ \"type\": \"collections\" }\n    participant E@{ \"type\": \"queue\" }\n    A->>E: hi\n",
+      "expected": {
+        "title": "",
+        "titleX": 362,
+        "cols": [
+          {
+            "id": "A",
+            "x": 62,
+            "w": 64,
+            "top": 14,
+            "y": 14,
+            "h": 54,
+            "lifeTop": 68,
+            "lifeBottom": 176,
+            "isDestroyed": false,
+            "footY": 176
+          },
+          {
+            "id": "B",
+            "x": 212,
+            "w": 64,
+            "top": 14,
+            "y": 14,
+            "h": 54,
+            "lifeTop": 68,
+            "lifeBottom": 176,
+            "isDestroyed": false,
+            "footY": 176
+          },
+          {
+            "id": "C",
+            "x": 362,
+            "w": 64,
+            "top": 14,
+            "y": 14,
+            "h": 54,
+            "lifeTop": 68,
+            "lifeBottom": 176,
+            "isDestroyed": false,
+            "footY": 176
+          },
+          {
+            "id": "D",
+            "x": 512,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 54,
+            "lifeTop": 68,
+            "lifeBottom": 176,
+            "isDestroyed": false,
+            "footY": 176
+          },
+          {
+            "id": "E",
+            "x": 662,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 54,
+            "lifeTop": 68,
+            "lifeBottom": 176,
+            "isDestroyed": false,
+            "footY": 176
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 86,
+            "depth": 0,
+            "h": 46,
+            "ay": 118,
+            "x1": 62,
+            "x2": 662,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 86,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 132,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 738,
+        "minX": 0,
+        "height": 254,
+        "headH": 54,
+        "bandBottom": 68,
+        "top": 14,
+        "end": 176,
+        "y0": 86
+      }
+    },
+    {
+      "name": "lifecycle",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>B: hello\n    create participant C as Carl\n    B->>C: make\n    create actor D\n    A->>D: make actor\n    destroy C\n    C->>B: bye\n",
+      "expected": {
+        "title": "",
+        "titleX": 301,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 446,
+            "isDestroyed": false,
+            "footY": 446
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 446,
+            "isDestroyed": false,
+            "footY": 446
+          },
+          {
+            "id": "C",
+            "x": 376,
+            "w": 92,
+            "top": 14,
+            "y": 168,
+            "h": 62,
+            "lifeTop": 208,
+            "lifeBottom": 388,
+            "isDestroyed": true,
+            "footY": 446
+          },
+          {
+            "id": "D",
+            "x": 526,
+            "w": 64,
+            "top": 14,
+            "y": 276,
+            "h": 62,
+            "lifeTop": 338,
+            "lifeBottom": 446,
+            "isDestroyed": false,
+            "footY": 446
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 94,
+            "depth": 0,
+            "h": 46,
+            "ay": 126,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 140,
+            "depth": 0,
+            "h": 108,
+            "ay": 199,
+            "x1": 226,
+            "x2": 330,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 248,
+            "depth": 0,
+            "h": 108,
+            "ay": 307,
+            "x1": 76,
+            "x2": 494,
+            "labelLines": 1
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 356,
+            "depth": 0,
+            "h": 46,
+            "ay": 388,
+            "x1": 376,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 94,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 140,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 248,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 356,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 402,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 588,
+        "minX": 0,
+        "height": 532,
+        "headH": 62,
+        "bandBottom": 76,
+        "top": 14,
+        "end": 446,
+        "y0": 94
+      }
+    },
+    {
+      "name": "autonumber",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    autonumber 10 5\n    A->>B: one\n    autonumber off\n    A->>B: two\n    autonumber 3\n    A->>B: three\n    autonumber\n    A->>B: four\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 360,
+            "isDestroyed": false,
+            "footY": 360
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 360,
+            "isDestroyed": false,
+            "footY": 360
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1,
+            "num": 10
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0,
+            "h": 20
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 138,
+            "depth": 0,
+            "h": 46,
+            "ay": 170,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 184,
+            "depth": 0,
+            "h": 20
+          },
+          {
+            "item": "i4",
+            "key": "root",
+            "index": 4,
+            "y": 204,
+            "depth": 0,
+            "h": 46,
+            "ay": 236,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1,
+            "num": 3
+          },
+          {
+            "item": "i5",
+            "key": "root",
+            "index": 5,
+            "y": 250,
+            "depth": 0,
+            "h": 20
+          },
+          {
+            "item": "i6",
+            "key": "root",
+            "index": 6,
+            "y": 270,
+            "depth": 0,
+            "h": 46,
+            "ay": 302,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1,
+            "num": 4
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 138,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 184,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 204,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 5,
+            "y": 250,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 6,
+            "y": 270,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 7,
+            "y": 316,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 424,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 360,
+        "y0": 72
+      }
+    },
+    {
+      "name": "wrapping",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>B: wrap:long text here\n    A->>B: nowrap:short\n    Note over A: wrap:a note\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 250,
+            "isDestroyed": false,
+            "footY": 250
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 250,
+            "isDestroyed": false,
+            "footY": 250
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0,
+            "h": 46,
+            "ay": 150,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 164,
+            "depth": 0,
+            "h": 42,
+            "ny": 170,
+            "nh": 30,
+            "nx1": 36,
+            "nx2": 116
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 164,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 206,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 314,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 250,
+        "y0": 72
+      }
+    },
+    {
+      "name": "text",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    title Login flow\n    accTitle: Accessible title\n    accDescr {\n        Long\n        description\n    }\n    A->>B: I #9829; you #35; 1#59;2\n    A->>B: say #quot;hi#quot;\n    link A: Dashboard @ https://example.com\n    links B: {\"Repo\": \"https://example.com\"}\n",
+      "expected": {
+        "title": "Login flow",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 44,
+            "y": 44,
+            "h": 40,
+            "lifeTop": 84,
+            "lifeBottom": 238,
+            "isDestroyed": false,
+            "footY": 238
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 44,
+            "y": 44,
+            "h": 40,
+            "lifeTop": 84,
+            "lifeBottom": 238,
+            "isDestroyed": false,
+            "footY": 238
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 102,
+            "depth": 0,
+            "h": 46,
+            "ay": 134,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 148,
+            "depth": 0,
+            "h": 46,
+            "ay": 180,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 102,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 148,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 194,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 302,
+        "headH": 40,
+        "bandBottom": 84,
+        "top": 44,
+        "end": 238,
+        "y0": 102
+      }
+    },
+    {
+      "name": "preamble",
+      "kind": "sequence",
+      "code": "---\ntitle: Calls\n---\nsequenceDiagram\n    A->>B: hi\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 226,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 162,
+        "y0": 72
+      }
+    },
+    {
+      "name": "v1 template blank",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n",
+      "expected": {
+        "title": "",
+        "titleX": 100,
+        "cols": [],
+        "rows": [],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 40,
+        "minX": 0,
+        "height": 180,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 116,
+        "y0": 72
+      }
+    },
+    {
+      "name": "box with color word title",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    box Aqua\n        participant A\n    end\n    A->>A: x\n",
+      "expected": {
+        "title": "",
+        "titleX": 76,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 18,
+            "y": 18,
+            "h": 40,
+            "lifeTop": 58,
+            "lifeBottom": 180,
+            "isDestroyed": false,
+            "footY": 180
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 76,
+            "depth": 0,
+            "h": 60,
+            "ay": 104,
+            "x1": 76,
+            "x2": 76,
+            "isSelf": true,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 76,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 136,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [
+          {
+            "box": "box1",
+            "x1": 20,
+            "x2": 132,
+            "y1": 4,
+            "y2": 230
+          }
+        ],
+        "width": 163,
+        "minX": 0,
+        "height": 244,
+        "headH": 40,
+        "bandBottom": 58,
+        "top": 18,
+        "end": 180,
+        "y0": 76
+      }
+    },
+    {
+      "name": "nested blocks with notes",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    loop outer\n        alt a\n            Note over A: x\n        else b\n            A->>B: y\n        end\n    end\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 314,
+            "isDestroyed": false,
+            "footY": 314
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 314,
+            "isDestroyed": false,
+            "footY": 314
+          }
+        ],
+        "rows": [
+          {
+            "item": "i2",
+            "key": "i1:0",
+            "index": 0,
+            "y": 132,
+            "depth": 2,
+            "h": 42,
+            "ny": 138,
+            "nh": 30,
+            "nx1": 36,
+            "nx2": 116
+          },
+          {
+            "item": "i3",
+            "key": "i1:1",
+            "index": 0,
+            "y": 200,
+            "depth": 2,
+            "h": 46,
+            "ay": 232,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y1": 76,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 76,
+                "label": "outer",
+                "k": 0
+              }
+            ],
+            "x1": 12,
+            "x2": 260,
+            "y2": 264,
+            "tabW": 46
+          },
+          {
+            "item": "i1",
+            "key": "i0:0",
+            "index": 0,
+            "y1": 106,
+            "depth": 1,
+            "sections": [
+              {
+                "y": 106,
+                "label": "a",
+                "k": 0
+              },
+              {
+                "y": 174,
+                "label": "b",
+                "k": 1
+              }
+            ],
+            "x1": 24,
+            "x2": 248,
+            "y2": 252,
+            "tabW": 39
+          }
+        ],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "i0:0",
+            "index": 0,
+            "y": 102,
+            "depth": 1
+          },
+          {
+            "key": "i1:0",
+            "index": 0,
+            "y": 132,
+            "depth": 2
+          },
+          {
+            "key": "i1:0",
+            "index": 1,
+            "y": 174,
+            "depth": 2
+          },
+          {
+            "key": "i1:1",
+            "index": 0,
+            "y": 200,
+            "depth": 2
+          },
+          {
+            "key": "i1:1",
+            "index": 1,
+            "y": 246,
+            "depth": 2
+          },
+          {
+            "key": "i0:0",
+            "index": 1,
+            "y": 258,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 270,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": -8,
+        "height": 378,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 314,
+        "y0": 72
+      }
+    },
+    {
+      "name": "message with semicolon text",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>B: a #59; b\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 226,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 162,
+        "y0": 72
+      }
+    },
+    {
+      "name": "quoted participant labels",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    participant A as \"Quoted name\"\n    actor B as User #1\n    A->>B: hi\n",
+      "expected": {
+        "title": "",
+        "titleX": 165.5,
+        "cols": [
+          {
+            "id": "A",
+            "x": 90.5,
+            "w": 121,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 184,
+            "isDestroyed": false,
+            "footY": 184
+          },
+          {
+            "id": "B",
+            "x": 240.5,
+            "w": 64,
+            "top": 14,
+            "y": 14,
+            "h": 62,
+            "lifeTop": 76,
+            "lifeBottom": 184,
+            "isDestroyed": false,
+            "footY": 184
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 94,
+            "depth": 0,
+            "h": 46,
+            "ay": 126,
+            "x1": 90.5,
+            "x2": 240.5,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 94,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 140,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302.5,
+        "minX": 0,
+        "height": 270,
+        "headH": 62,
+        "bandBottom": 76,
+        "top": 14,
+        "end": 184,
+        "y0": 94
+      }
+    },
+    {
+      "name": "rect with rgba",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    rect rgba(0, 0, 255, 0.1)\n        A->>B: x\n    end\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 204,
+            "isDestroyed": false,
+            "footY": 204
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 204,
+            "isDestroyed": false,
+            "footY": 204
+          }
+        ],
+        "rows": [
+          {
+            "item": "i1",
+            "key": "i0:0",
+            "index": 0,
+            "y": 102,
+            "depth": 1,
+            "h": 46,
+            "ay": 134,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y1": 76,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 76,
+                "label": "rgba(0, 0, 255, 0.1)",
+                "k": 0
+              }
+            ],
+            "x1": 54,
+            "x2": 248,
+            "y2": 154,
+            "tabW": 46
+          }
+        ],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "i0:0",
+            "index": 0,
+            "y": 102,
+            "depth": 1
+          },
+          {
+            "key": "i0:0",
+            "index": 1,
+            "y": 148,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 160,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 268,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 204,
+        "y0": 72
+      }
+    },
+    {
+      "name": "critical without options",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    critical alone\n        A->>B: x\n    end\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 204,
+            "isDestroyed": false,
+            "footY": 204
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 204,
+            "isDestroyed": false,
+            "footY": 204
+          }
+        ],
+        "rows": [
+          {
+            "item": "i1",
+            "key": "i0:0",
+            "index": 0,
+            "y": 102,
+            "depth": 1,
+            "h": 46,
+            "ay": 134,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y1": 76,
+            "depth": 0,
+            "sections": [
+              {
+                "y": 76,
+                "label": "alone",
+                "k": 0
+              }
+            ],
+            "x1": 54,
+            "x2": 248,
+            "y2": 154,
+            "tabW": 74
+          }
+        ],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "i0:0",
+            "index": 0,
+            "y": 102,
+            "depth": 1
+          },
+          {
+            "key": "i0:0",
+            "index": 1,
+            "y": 148,
+            "depth": 1
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 160,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 268,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 204,
+        "y0": 72
+      }
+    },
+    {
+      "name": "box without a name",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    box\n        participant A\n    end\n    participant B\n    A->>B: x\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 18,
+            "y": 18,
+            "h": 40,
+            "lifeTop": 58,
+            "lifeBottom": 166,
+            "isDestroyed": false,
+            "footY": 166
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 18,
+            "y": 18,
+            "h": 40,
+            "lifeTop": 58,
+            "lifeBottom": 166,
+            "isDestroyed": false,
+            "footY": 166
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 76,
+            "depth": 0,
+            "h": 46,
+            "ay": 108,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 76,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 122,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [
+          {
+            "box": "box1",
+            "x1": 20,
+            "x2": 132,
+            "y1": 4,
+            "y2": 216
+          }
+        ],
+        "width": 302,
+        "minX": 0,
+        "height": 230,
+        "headH": 40,
+        "bandBottom": 58,
+        "top": 18,
+        "end": 166,
+        "y0": 76
+      }
+    },
+    {
+      "name": "autonumber off first",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    autonumber off\n    A->>B: x\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 226,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 162,
+        "y0": 72
+      }
+    },
+    {
+      "name": "activation shorthand with create",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>+B: go\n    create participant C\n    B->>+C: make\n    C-->>-B: done\n    B-->>-A: back\n",
+      "expected": {
+        "title": "",
+        "titleX": 226,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 340,
+            "isDestroyed": false,
+            "footY": 340
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 340,
+            "isDestroyed": false,
+            "footY": 340
+          },
+          {
+            "id": "C",
+            "x": 376,
+            "w": 92,
+            "top": 14,
+            "y": 146,
+            "h": 40,
+            "lifeTop": 186,
+            "lifeBottom": 340,
+            "isDestroyed": false,
+            "footY": 340
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 221,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0,
+            "h": 86,
+            "ay": 166,
+            "x1": 231,
+            "x2": 330,
+            "labelLines": 1
+          },
+          {
+            "item": "i2",
+            "key": "root",
+            "index": 2,
+            "y": 204,
+            "depth": 0,
+            "h": 46,
+            "ay": 236,
+            "x1": 371,
+            "x2": 231,
+            "labelLines": 1
+          },
+          {
+            "item": "i3",
+            "key": "root",
+            "index": 3,
+            "y": 250,
+            "depth": 0,
+            "h": 46,
+            "ay": 282,
+            "x1": 221,
+            "x2": 76,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 204,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 3,
+            "y": 250,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 4,
+            "y": 296,
+            "depth": 0
+          }
+        ],
+        "bars": [
+          {
+            "actor": "C",
+            "x": 371,
+            "y1": 166,
+            "y2": 236,
+            "isOpen": false
+          },
+          {
+            "actor": "B",
+            "x": 221,
+            "y1": 104,
+            "y2": 282,
+            "isOpen": false
+          }
+        ],
+        "boxes": [],
+        "width": 452,
+        "minX": 0,
+        "height": 404,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 340,
+        "y0": 72
+      }
+    },
+    {
+      "name": "notes across many participants",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    participant A\n    participant B\n    participant C\n    Note over A,C: wide note\n    Note left of A: far left\n",
+      "expected": {
+        "title": "",
+        "titleX": 254,
+        "cols": [
+          {
+            "id": "A",
+            "x": 104,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 200,
+            "isDestroyed": false,
+            "footY": 200
+          },
+          {
+            "id": "B",
+            "x": 254,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 200,
+            "isDestroyed": false,
+            "footY": 200
+          },
+          {
+            "id": "C",
+            "x": 404,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 200,
+            "isDestroyed": false,
+            "footY": 200
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 42,
+            "ny": 78,
+            "nh": 30,
+            "nx1": 79,
+            "nx2": 429
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 114,
+            "depth": 0,
+            "h": 42,
+            "ny": 120,
+            "nh": 30,
+            "nx2": 96,
+            "nx1": 16
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 114,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 156,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 480,
+        "minX": -4,
+        "height": 264,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 200,
+        "y0": 72
+      }
+    },
+    {
+      "name": "unicode text",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>B: Größe ✓ 日本\n",
+      "expected": {
+        "title": "",
+        "titleX": 151,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          },
+          {
+            "id": "B",
+            "x": 226,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 162,
+            "isDestroyed": false,
+            "footY": 162
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 226,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 302,
+        "minX": 0,
+        "height": 226,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 162,
+        "y0": 72
+      }
+    },
+    {
+      "name": "long message widens the gap",
+      "kind": "sequence",
+      "code": "sequenceDiagram\n    A->>B: a very long message text that is much wider than the default participant gap\n    B->>B: and a long self message as well\n",
+      "expected": {
+        "title": "",
+        "titleX": 362,
+        "cols": [
+          {
+            "id": "A",
+            "x": 76,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 222,
+            "isDestroyed": false,
+            "footY": 222
+          },
+          {
+            "id": "B",
+            "x": 648,
+            "w": 92,
+            "top": 14,
+            "y": 14,
+            "h": 40,
+            "lifeTop": 54,
+            "lifeBottom": 222,
+            "isDestroyed": false,
+            "footY": 222
+          }
+        ],
+        "rows": [
+          {
+            "item": "i0",
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0,
+            "h": 46,
+            "ay": 104,
+            "x1": 76,
+            "x2": 648,
+            "labelLines": 1
+          },
+          {
+            "item": "i1",
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0,
+            "h": 60,
+            "ay": 146,
+            "x1": 648,
+            "x2": 648,
+            "isSelf": true,
+            "labelLines": 1
+          }
+        ],
+        "blocks": [],
+        "slots": [
+          {
+            "key": "root",
+            "index": 0,
+            "y": 72,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 1,
+            "y": 118,
+            "depth": 0
+          },
+          {
+            "key": "root",
+            "index": 2,
+            "y": 178,
+            "depth": 0
+          }
+        ],
+        "bars": [],
+        "boxes": [],
+        "width": 945,
+        "minX": 0,
+        "height": 286,
+        "headH": 40,
+        "bandBottom": 54,
+        "top": 14,
+        "end": 222,
+        "y0": 72
+      }
+    }
+  ]
+}

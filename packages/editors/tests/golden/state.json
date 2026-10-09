@@ -1,0 +1,2179 @@
+{
+  "editor": "state",
+  "source": {
+    "repo": "mermaid-chat (Nautink v1)",
+    "commit": "7fee72d628b262962cbc8830961247fcf19b6364",
+    "note": "Generated from v1 by a script kept outside the repo; see README.md in this folder."
+  },
+  "mappings": [
+    "v1 parse result `{ ok: true, model }` -> `{ kind: \"ok\" }`; `{ ok: false, kind, message }` -> `{ kind, message }`.",
+    "State field `composite` -> `isComposite` (op args use the port names).",
+    "Op args are written in the port's signatures; the generator maps them to v1's positional arguments (addTransition(m, from, to, label), addNote(m, target, side, text)).",
+    "Ops returning `{ model, id }` are compared on the model; `expected` is the serialized code after the step.",
+    "Layout positions are top-left corners rounded to 2 decimals; `l` is the label tag. Place cases start from v1's dagre layout of the previous code (rounded), stored in `start`."
+  ],
+  "roundTrip": [
+    {
+      "name": "template",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+      }
+    },
+    {
+      "name": "blank",
+      "code": "stateDiagram-v2\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n"
+      }
+    },
+    {
+      "name": "v1Header",
+      "code": "stateDiagram\n    direction LR\n    A --> B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram\n    direction LR\n    A --> B\n"
+      }
+    },
+    {
+      "name": "pseudoStates",
+      "code": "stateDiagram-v2\n    state fork_state <<fork>>\n    state join_state <<join>>\n    state if_state <<choice>>\n    [*] --> fork_state\n    fork_state --> A\n    fork_state --> B\n    A --> join_state\n    B --> join_state\n    join_state --> if_state\n    if_state --> C : yes\n    if_state --> [*] : no\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state fork_state <<fork>>\n    state join_state <<join>>\n    state if_state <<choice>>\n    [*] --> fork_state\n    fork_state --> A\n    fork_state --> B\n    A --> join_state\n    B --> join_state\n    join_state --> if_state\n    if_state --> C : yes\n    if_state --> [*] : no\n"
+      }
+    },
+    {
+      "name": "descriptions",
+      "code": "stateDiagram-v2\n    state \"Waiting for input\" as Waiting\n    Idle : The idle state\n    Idle : second line\n    state \"Same\" as Same\n    Same : with a description\n    Plain\n    Waiting --> Idle\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state \"Waiting for input\" as Waiting\n    state \"The idle state\" as Idle\n    Idle : second line\n    state \"Same\" as Same\n    Same : with a description\n    Plain\n    Waiting --> Idle\n"
+      }
+    },
+    {
+      "name": "nested",
+      "code": "stateDiagram-v2\n    direction TB\n    [*] --> Outer\n    state Outer {\n        direction LR\n        [*] --> Inner\n        state Inner {\n            [*] --> Deep\n            Deep --> [*]\n        }\n        Inner --> Done\n    }\n    Outer --> [*]\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    direction TB\n    state Outer {\n        direction LR\n        state Inner {\n            [*] --> Deep\n            Deep --> [*]\n        }\n        [*] --> Inner\n        Inner --> Done\n    }\n    [*] --> Outer\n    Outer --> [*]\n"
+      }
+    },
+    {
+      "name": "regions",
+      "code": "stateDiagram-v2\n    [*] --> Active\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n    [*] --> Active\n"
+      }
+    },
+    {
+      "name": "notes",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state \"A description\" as State1\n    State1 --> State2\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    note left of State2 : This is the note to the left.\n"
+      }
+    },
+    {
+      "name": "styling",
+      "code": "stateDiagram-v2\n    %% a comment that is dropped\n    classDef badBadEvent fill:#f00,color:white\n    classDef movement font-style:italic\n    [*] --> Still\n    Still --> Moving:::movement\n    Moving --> Crash\n    class Crash badBadEvent\n    style Still fill:#0f0\n    click Still href \"https://example.com\"\n    accTitle: Title\n    accDescr {\n        Long\n        description\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    [*] --> Still\n    Still --> Moving\n    Moving --> Crash\n    classDef badBadEvent fill:#f00,color:white\n    classDef movement font-style:italic\n    click Still href \"https://example.com\"\n    accTitle: Title\n    accDescr {\nLong\ndescription\n}\n    class Moving movement\n    class Crash badBadEvent\n    style Still fill:#0f0\n"
+      }
+    },
+    {
+      "name": "preamble",
+      "code": "---\ntitle: Machine\n---\nstateDiagram-v2\n    [*] --> A\n",
+      "expected": {
+        "kind": "ok",
+        "code": "---\ntitle: Machine\n---\nstateDiagram-v2\n    [*] --> A\n"
+      }
+    },
+    {
+      "name": "empty code",
+      "code": "",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n"
+      }
+    },
+    {
+      "name": "another diagram type",
+      "code": "pie title Traffic sources\n    \"Search\" : 45\n    \"Direct\" : 25\n    \"Social\" : 20\n    \"Email\" : 10\n",
+      "expected": {
+        "kind": "unsupported",
+        "message": "pie"
+      }
+    },
+    {
+      "name": "invalid code",
+      "code": "stateDiagram-v2\n    state A {\n",
+      "expected": {
+        "kind": "error",
+        "message": "Parse error on line 2:\n...m-v2    state A {\n--------------------^\nExpecting 'SPACE', 'NL', 'HIDE_EMPTY', 'scale', 'COMPOSIT_STATE', 'STRUCT_STOP', 'STATE_DESCR', 'ID', 'FORK', 'JOIN', 'CHOICE', 'CONCURRENT', 'note', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'CLICK', 'classDef', 'style', 'class', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', 'EDGE_STATE', got '1'"
+      }
+    },
+    {
+      "name": "direction RL",
+      "code": "stateDiagram-v2\n    direction RL\n    A --> B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    direction RL\n    A --> B\n"
+      }
+    },
+    {
+      "name": "composite with description",
+      "code": "stateDiagram-v2\n    state \"Long name\" as L {\n        [*] --> X\n    }\n    L : about L\n",
+      "expected": {
+        "kind": "error",
+        "message": "Group nodes can only have label. Remove the additional description for node [L]"
+      }
+    },
+    {
+      "name": "transition label with colon",
+      "code": "stateDiagram-v2\n    A --> B : when: now\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    A --> B : when: now\n"
+      }
+    },
+    {
+      "name": "self transition",
+      "code": "stateDiagram-v2\n    A --> A : retry\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    A --> A : retry\n"
+      }
+    },
+    {
+      "name": "choice inside a composite",
+      "code": "stateDiagram-v2\n    state C {\n        state pick <<choice>>\n        [*] --> pick\n        pick --> X : a\n        pick --> Y : b\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state C {\n        state pick <<choice>>\n        [*] --> pick\n        pick --> X : a\n        pick --> Y : b\n    }\n"
+      }
+    },
+    {
+      "name": "class lines with several states",
+      "code": "stateDiagram-v2\n    classDef warm fill:#fc0\n    A --> B\n    class A, B warm\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    A --> B\n    classDef warm fill:#fc0\n    class A,B warm\n"
+      }
+    },
+    {
+      "name": "note on a composite",
+      "code": "stateDiagram-v2\n    state C {\n        X\n    }\n    note left of C\n        about C\n    end note\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state C {\n        X\n    }\n    note left of C : about C\n"
+      }
+    },
+    {
+      "name": "unicode state names",
+      "code": "stateDiagram-v2\n    state \"Größe ✓\" as G\n    [*] --> G\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state \"Größe ✓\" as G\n    [*] --> G\n"
+      }
+    },
+    {
+      "name": "deep nesting",
+      "code": "stateDiagram-v2\n    state A {\n        state B {\n            state C {\n                [*] --> D\n            }\n        }\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    state A {\n        state B {\n            state C {\n                [*] --> D\n            }\n        }\n    }\n"
+      }
+    },
+    {
+      "name": "fork and join in LR",
+      "code": "stateDiagram-v2\n    direction LR\n    state f <<fork>>\n    state j <<join>>\n    [*] --> f\n    f --> A\n    f --> B\n    A --> j\n    B --> j\n    j --> [*]\n",
+      "expected": {
+        "kind": "ok",
+        "code": "stateDiagram-v2\n    direction LR\n    state f <<fork>>\n    state j <<join>>\n    [*] --> f\n    f --> A\n    f --> B\n    A --> j\n    B --> j\n    j --> [*]\n"
+      }
+    }
+  ],
+  "ops": [
+    {
+      "name": "addState plain",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "Rejected"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    Rejected\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addState in composite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "Paused"
+            },
+            "Published"
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        Paused\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addState choice",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "Check",
+              "type": "choice"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Check <<choice>>\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addState fork",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "Split",
+              "type": "fork"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Split <<fork>>\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addState composite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "Box",
+              "isComposite": true
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    state Box {\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addState with name",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "Waiting",
+              "name": "Waiting for input"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"Waiting for input\" as Waiting\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addState in region",
+      "code": "stateDiagram-v2\n    [*] --> Active\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "ScrollLockOff"
+            },
+            "Active#1"
+          ],
+          "expected": "stateDiagram-v2\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        ScrollLockOff\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n    [*] --> Active\n"
+        }
+      ]
+    },
+    {
+      "name": "updateState name",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "updateState",
+          "args": [
+            "Draft",
+            {
+              "name": "Draft copy"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"Draft copy\" as Draft\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "updateState description",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "updateState",
+          "args": [
+            "Review",
+            {
+              "desc": ["line one", "line two"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"Review\" as Review\n    Review : line one\n    Review : line two\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "updateState direction",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "updateState",
+          "args": [
+            "Published",
+            {
+              "dir": "LR"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        direction LR\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "updateState classes",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "updateState",
+          "args": [
+            "Draft",
+            {
+              "classes": ["hot"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    class Draft hot\n"
+        }
+      ]
+    },
+    {
+      "name": "renameState",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "renameState",
+          "args": ["Draft", "Writing"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Writing\n    Writing --> Review : submit\n    Review --> Writing : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "renameState composite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "renameState",
+          "args": ["Published", "Released"],
+          "expected": "stateDiagram-v2\n    state Released {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Released : approve\n    Released --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "renameState with styling",
+      "code": "stateDiagram-v2\n    %% a comment that is dropped\n    classDef badBadEvent fill:#f00,color:white\n    classDef movement font-style:italic\n    [*] --> Still\n    Still --> Moving:::movement\n    Moving --> Crash\n    class Crash badBadEvent\n    style Still fill:#0f0\n    click Still href \"https://example.com\"\n    accTitle: Title\n    accDescr {\n        Long\n        description\n    }\n",
+      "steps": [
+        {
+          "op": "renameState",
+          "args": ["Still", "Calm"],
+          "expected": "stateDiagram-v2\n    [*] --> Calm\n    Calm --> Moving\n    Moving --> Crash\n    classDef badBadEvent fill:#f00,color:white\n    classDef movement font-style:italic\n    click Still href \"https://example.com\"\n    accTitle: Title\n    accDescr {\nLong\ndescription\n}\n    class Moving movement\n    class Crash badBadEvent\n    style Calm fill:#0f0\n"
+        }
+      ]
+    },
+    {
+      "name": "renameState with notes",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "steps": [
+        {
+          "op": "renameState",
+          "args": ["State1", "First"],
+          "expected": "stateDiagram-v2\n    state \"A description\" as First\n    First --> State2\n    note right of First\n        Important information!\n        You can write\n        notes.\n    end note\n    note left of State2 : This is the note to the left.\n"
+        }
+      ]
+    },
+    {
+      "name": "renameState invalid",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "renameState",
+          "args": ["Draft", "Review"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        },
+        {
+          "op": "renameState",
+          "args": ["Draft", "Draft 2"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft 2\n    Draft 2 --> Review : submit\n    Review --> Draft 2 : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "setParent into composite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "setParent",
+          "args": ["Draft", "Published"],
+          "expected": "stateDiagram-v2\n    state Published {\n        Draft\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "setParent to top level",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "setParent",
+          "args": ["Live", null],
+          "expected": "stateDiagram-v2\n    state Published {\n        Archived\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    [*] --> Live\n    Live --> Archived : expire\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "setParent into nested composite",
+      "code": "stateDiagram-v2\n    direction TB\n    [*] --> Outer\n    state Outer {\n        direction LR\n        [*] --> Inner\n        state Inner {\n            [*] --> Deep\n            Deep --> [*]\n        }\n        Inner --> Done\n    }\n    Outer --> [*]\n",
+      "steps": [
+        {
+          "op": "setParent",
+          "args": ["Done", "Inner"],
+          "expected": "stateDiagram-v2\n    direction TB\n    state Outer {\n        direction LR\n        state Inner {\n            Done\n            [*] --> Deep\n            Deep --> [*]\n        }\n        [*] --> Inner\n    }\n    [*] --> Outer\n    Inner --> Done\n    Outer --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems state",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "stateIds": ["Review"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems composite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "stateIds": ["Published"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems transition",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "transitionIds": ["t1"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems note",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "noteIds": ["note:State1:0"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"A description\" as State1\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems state with note",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "stateIds": ["State2"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"A description\" as State1\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems state in region",
+      "code": "stateDiagram-v2\n    [*] --> Active\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "stateIds": ["CapsLockOff", "CapsLockOn"]
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n    }\n    [*] --> Active\n"
+        }
+      ]
+    },
+    {
+      "name": "addTransition",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "Published",
+              "to": "Draft",
+              "label": "unpublish"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    Published --> Draft : unpublish\n"
+        }
+      ]
+    },
+    {
+      "name": "addTransition from start",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "start:",
+              "to": "Review"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    [*] --> Review\n"
+        }
+      ]
+    },
+    {
+      "name": "addTransition to nested end",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "Live",
+              "to": "end:Published"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n        Live --> [*]\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addTransition into composite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "Draft",
+              "to": "Live"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    Draft --> Live\n"
+        }
+      ]
+    },
+    {
+      "name": "updateTransition",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "updateTransition",
+          "args": [
+            "t1",
+            {
+              "label": "send it"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : send it\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "updateTransition clears label",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "updateTransition",
+          "args": [
+            "t1",
+            {
+              "label": ""
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseTransition",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "reverseTransition",
+          "args": ["t1"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Review --> Draft : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseTransition with pseudo state",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "reverseTransition",
+          "args": ["t0"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Draft --> [*]\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addPseudo then link it",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addPseudo",
+          "args": ["end:"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        },
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "Draft",
+              "to": "end:"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    Draft --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapInComposite",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "wrapInComposite",
+          "args": [["Draft", "Review"]],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    state Composite1 {\n        Draft --> Review : submit\n        Review --> Draft : changes requested\n    }\n    [*] --> Draft\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapInComposite nested",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "wrapInComposite",
+          "args": [["Live"]],
+          "expected": "stateDiagram-v2\n    state Published {\n        Archived\n        [*] --> Live\n        state Composite1 {\n            Live\n        }\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Live --> Archived : expire\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapInComposite across scopes",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "wrapInComposite",
+          "args": [["Draft", "Live"]],
+          "expected": "stateDiagram-v2\n    state Published {\n        Archived\n    }\n    state Composite1 {\n        Draft\n        [*] --> Live\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Live --> Archived : expire\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "wrapInComposite nothing",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "wrapInComposite",
+          "args": [["Nope"]],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["Published"],
+          "expected": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Live --> Archived : expire\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup inner",
+      "code": "stateDiagram-v2\n    direction TB\n    [*] --> Outer\n    state Outer {\n        direction LR\n        [*] --> Inner\n        state Inner {\n            [*] --> Deep\n            Deep --> [*]\n        }\n        Inner --> Done\n    }\n    Outer --> [*]\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["Inner"],
+          "expected": "stateDiagram-v2\n    direction TB\n    state Outer {\n        direction LR\n        Deep\n        Done\n    }\n    [*] --> Outer\n    Outer --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup outer",
+      "code": "stateDiagram-v2\n    direction TB\n    [*] --> Outer\n    state Outer {\n        direction LR\n        [*] --> Inner\n        state Inner {\n            [*] --> Deep\n            Deep --> [*]\n        }\n        Inner --> Done\n    }\n    Outer --> [*]\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["Outer"],
+          "expected": "stateDiagram-v2\n    direction TB\n    state Inner {\n        [*] --> Deep\n        Deep --> [*]\n    }\n    Inner --> Done\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup regions",
+      "code": "stateDiagram-v2\n    [*] --> Active\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["Active"],
+          "expected": "stateDiagram-v2\n    NumLockOff --> NumLockOn : EvNumLockPressed\n    NumLockOn --> NumLockOff : EvNumLockPressed\n    CapsLockOff --> CapsLockOn : EvCapsLockPressed\n    CapsLockOn --> CapsLockOff : EvCapsLockPressed\n"
+        }
+      ]
+    },
+    {
+      "name": "addRegion",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addRegion",
+          "args": ["Published", "Paused"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n        --\n        Paused\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addRegion to regions",
+      "code": "stateDiagram-v2\n    [*] --> Active\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n",
+      "steps": [
+        {
+          "op": "addRegion",
+          "args": ["Active", "ScrollLockOff"],
+          "expected": "stateDiagram-v2\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n        --\n        ScrollLockOff\n    }\n    [*] --> Active\n"
+        }
+      ]
+    },
+    {
+      "name": "addRegion on a plain state",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addRegion",
+          "args": ["Draft", "X"],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "addNote default",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "target": "Draft"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    note right of Draft : Note\n"
+        }
+      ]
+    },
+    {
+      "name": "addNote left multi-line",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "target": "Review",
+              "side": "left",
+              "text": "multi\nline"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n    note left of Review\n        multi\n        line\n    end note\n"
+        }
+      ]
+    },
+    {
+      "name": "addNote twice",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "target": "State1",
+              "text": "Another"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"A description\" as State1\n    State1 --> State2\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    note left of State2 : This is the note to the left.\n    note right of State1 : Another\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNote text",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "steps": [
+        {
+          "op": "updateNote",
+          "args": [
+            "note:State1:0",
+            {
+              "text": "Changed"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"A description\" as State1\n    State1 --> State2\n    note right of State1 : Changed\n    note left of State2 : This is the note to the left.\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNote side",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "steps": [
+        {
+          "op": "updateNote",
+          "args": [
+            "note:State2:0",
+            {
+              "side": "right"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state \"A description\" as State1\n    State1 --> State2\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    note right of State2 : This is the note to the left.\n"
+        }
+      ]
+    },
+    {
+      "name": "normalize a clean model",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "steps": [
+        {
+          "op": "normalize",
+          "args": [],
+          "expected": "stateDiagram-v2\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    Published --> [*]\n"
+        }
+      ]
+    },
+    {
+      "name": "build from blank",
+      "code": "stateDiagram-v2\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "A"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    A\n"
+        },
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "B"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    A\n    B\n"
+        },
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "start:",
+              "to": "A"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    B\n    [*] --> A\n"
+        },
+        {
+          "op": "addTransition",
+          "args": [
+            {
+              "from": "A",
+              "to": "B",
+              "label": "go"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    [*] --> A\n    A --> B : go\n"
+        },
+        {
+          "op": "wrapInComposite",
+          "args": [["A", "B"]],
+          "expected": "stateDiagram-v2\n    state Composite1 {\n        A --> B : go\n    }\n    [*] --> A\n"
+        },
+        {
+          "op": "addRegion",
+          "args": ["Composite1", "C"],
+          "expected": "stateDiagram-v2\n    state Composite1 {\n        A --> B : go\n        --\n        C\n    }\n    [*] --> A\n"
+        },
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "target": "B",
+              "text": "hello"
+            }
+          ],
+          "expected": "stateDiagram-v2\n    state Composite1 {\n        A --> B : go\n        note right of B : hello\n        --\n        C\n    }\n    [*] --> A\n"
+        },
+        {
+          "op": "renameState",
+          "args": ["Composite1", "Machine"],
+          "expected": "stateDiagram-v2\n    state Machine {\n        A --> B : go\n        note right of B : hello\n        --\n        C\n    }\n    [*] --> A\n"
+        }
+      ]
+    },
+    {
+      "name": "preamble survives edits",
+      "code": "---\ntitle: Machine\n---\nstateDiagram-v2\n    [*] --> A\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "B"
+            }
+          ],
+          "expected": "---\ntitle: Machine\n---\nstateDiagram-v2\n    B\n    [*] --> A\n"
+        }
+      ]
+    },
+    {
+      "name": "v1 header survives edits",
+      "code": "stateDiagram\n    direction LR\n    A --> B\n",
+      "steps": [
+        {
+          "op": "addState",
+          "args": [
+            {
+              "id": "C"
+            }
+          ],
+          "expected": "stateDiagram\n    direction LR\n    C\n    A --> B\n"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "template",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "expected": {
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96
+          },
+          "Live": {
+            "x": 38,
+            "y": 400
+          },
+          "Review": {
+            "x": 38,
+            "y": 190
+          },
+          "end:": {
+            "x": 73,
+            "y": 606
+          },
+          "start:": {
+            "x": 75,
+            "y": 20
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324
+          }
+        }
+      }
+    },
+    {
+      "name": "v1Header",
+      "kind": "dagre",
+      "code": "stateDiagram\n    direction LR\n    A --> B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 170,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "pseudoStates",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    state fork_state <<fork>>\n    state join_state <<join>>\n    state if_state <<choice>>\n    [*] --> fork_state\n    fork_state --> A\n    fork_state --> B\n    A --> join_state\n    B --> join_state\n    join_state --> if_state\n    if_state --> C : yes\n    if_state --> [*] : no\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 156,
+            "y": 160
+          },
+          "B": {
+            "x": 20,
+            "y": 160
+          },
+          "C": {
+            "x": 138.5,
+            "y": 406
+          },
+          "end:": {
+            "x": 72.5,
+            "y": 413
+          },
+          "fork_state": {
+            "x": 91,
+            "y": 96
+          },
+          "if_state": {
+            "x": 119,
+            "y": 318
+          },
+          "join_state": {
+            "x": 91,
+            "y": 254
+          },
+          "start:": {
+            "x": 125,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "descriptions",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    state \"Waiting for input\" as Waiting\n    Idle : The idle state\n    Idle : second line\n    state \"Same\" as Same\n    Same : with a description\n    Plain\n    Waiting --> Idle\n",
+      "expected": {
+        "positions": {
+          "Idle": {
+            "x": 31,
+            "y": 142
+          },
+          "Plain": {
+            "x": 413,
+            "y": 34
+          },
+          "Same": {
+            "x": 220,
+            "y": 20
+          },
+          "Waiting": {
+            "x": 20,
+            "y": 34
+          }
+        }
+      }
+    },
+    {
+      "name": "nested",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    direction TB\n    [*] --> Outer\n    state Outer {\n        direction LR\n        [*] --> Inner\n        state Inner {\n            [*] --> Deep\n            Deep --> [*]\n        }\n        Inner --> Done\n    }\n    Outer --> [*]\n",
+      "expected": {
+        "positions": {
+          "Deep": {
+            "x": 208,
+            "y": 176
+          },
+          "Done": {
+            "x": 456,
+            "y": 165
+          },
+          "end:": {
+            "x": 282,
+            "y": 306
+          },
+          "end:Inner": {
+            "x": 358,
+            "y": 183
+          },
+          "start:": {
+            "x": 284,
+            "y": 20
+          },
+          "start:Inner": {
+            "x": 132,
+            "y": 185
+          },
+          "start:Outer": {
+            "x": 38,
+            "y": 174
+          }
+        }
+      }
+    },
+    {
+      "name": "regions",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    [*] --> Active\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n    }\n",
+      "expected": {
+        "positions": {
+          "CapsLockOff": {
+            "x": 174,
+            "y": 216
+          },
+          "CapsLockOn": {
+            "x": 177.5,
+            "y": 310
+          },
+          "NumLockOff": {
+            "x": 36,
+            "y": 216
+          },
+          "NumLockOn": {
+            "x": 39.5,
+            "y": 310
+          },
+          "start:": {
+            "x": 151.5,
+            "y": 20
+          },
+          "start:Active#0": {
+            "x": 79,
+            "y": 140
+          },
+          "start:Active#1": {
+            "x": 220.5,
+            "y": 140
+          }
+        }
+      }
+    },
+    {
+      "name": "notes",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    State1 : A description\n    note right of State1\n        Important information!\n        You can write\n        notes.\n    end note\n    State1 --> State2\n    note left of State2 : This is the note to the left.\n",
+      "expected": {
+        "positions": {
+          "State1": {
+            "x": 26,
+            "y": 32
+          },
+          "State2": {
+            "x": 263,
+            "y": 138
+          },
+          "note:State1:0": {
+            "x": 182,
+            "y": 20
+          },
+          "note:State2:0": {
+            "x": 20,
+            "y": 142
+          }
+        }
+      }
+    },
+    {
+      "name": "styling",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    %% a comment that is dropped\n    classDef badBadEvent fill:#f00,color:white\n    classDef movement font-style:italic\n    [*] --> Still\n    Still --> Moving:::movement\n    Moving --> Crash\n    class Crash badBadEvent\n    style Still fill:#0f0\n    click Still href \"https://example.com\"\n    accTitle: Title\n    accDescr {\n        Long\n        description\n    }\n",
+      "expected": {
+        "positions": {
+          "Crash": {
+            "x": 20,
+            "y": 284
+          },
+          "Moving": {
+            "x": 20,
+            "y": 190
+          },
+          "Still": {
+            "x": 20,
+            "y": 96
+          },
+          "start:": {
+            "x": 57,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "preamble",
+      "kind": "dagre",
+      "code": "---\ntitle: Machine\n---\nstateDiagram-v2\n    [*] --> A\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 96
+          },
+          "start:": {
+            "x": 57,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "direction RL",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    direction RL\n    A --> B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 170,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "transition label with colon",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    A --> B : when: now\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 114
+          }
+        }
+      }
+    },
+    {
+      "name": "self transition",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    A --> A : retry\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "choice inside a composite",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    state C {\n        state pick <<choice>>\n        [*] --> pick\n        pick --> X : a\n        pick --> Y : b\n    }\n",
+      "expected": {
+        "positions": {
+          "X": {
+            "x": 174,
+            "y": 224
+          },
+          "Y": {
+            "x": 38,
+            "y": 224
+          },
+          "pick": {
+            "x": 137,
+            "y": 136
+          },
+          "start:C": {
+            "x": 143,
+            "y": 60
+          }
+        }
+      }
+    },
+    {
+      "name": "class lines with several states",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    classDef warm fill:#fc0\n    A --> B\n    class A, B warm\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 114
+          }
+        }
+      }
+    },
+    {
+      "name": "note on a composite",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    state C {\n        X\n    }\n    note left of C\n        about C\n    end note\n",
+      "expected": {
+        "positions": {
+          "X": {
+            "x": 144,
+            "y": 60
+          },
+          "note:C:0": {
+            "x": 20,
+            "y": 53
+          }
+        }
+      }
+    },
+    {
+      "name": "unicode state names",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    state \"Größe ✓\" as G\n    [*] --> G\n",
+      "expected": {
+        "positions": {
+          "G": {
+            "x": 20,
+            "y": 96
+          },
+          "start:": {
+            "x": 57,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "deep nesting",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    state A {\n        state B {\n            state C {\n                [*] --> D\n            }\n        }\n    }\n",
+      "expected": {
+        "positions": {
+          "D": {
+            "x": 74,
+            "y": 216
+          },
+          "start:C": {
+            "x": 111,
+            "y": 140
+          }
+        }
+      }
+    },
+    {
+      "name": "fork and join in LR",
+      "kind": "dagre",
+      "code": "stateDiagram-v2\n    direction LR\n    state f <<fork>>\n    state j <<join>>\n    [*] --> f\n    f --> A\n    f --> B\n    A --> j\n    B --> j\n    j --> [*]\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 160,
+            "y": 100
+          },
+          "B": {
+            "x": 160,
+            "y": 20
+          },
+          "end:": {
+            "x": 374,
+            "y": 67
+          },
+          "f": {
+            "x": 96,
+            "y": 35
+          },
+          "j": {
+            "x": 310,
+            "y": 35
+          },
+          "start:": {
+            "x": 20,
+            "y": 69
+          }
+        }
+      }
+    },
+    {
+      "name": "place one new linked state",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n    Published --> Retired : retire\n",
+      "start": {
+        "Archived": {
+          "x": 38,
+          "y": 494,
+          "l": "Archived"
+        },
+        "Draft": {
+          "x": 38,
+          "y": 96,
+          "l": "Draft"
+        },
+        "Live": {
+          "x": 38,
+          "y": 400,
+          "l": "Live"
+        },
+        "Review": {
+          "x": 38,
+          "y": 190,
+          "l": "Review"
+        },
+        "end:": {
+          "x": 73,
+          "y": 606,
+          "l": "end"
+        },
+        "start:": {
+          "x": 75,
+          "y": 20,
+          "l": "start"
+        },
+        "start:Published": {
+          "x": 75,
+          "y": 324,
+          "l": "start"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "Retired": {
+            "x": 184,
+            "y": 20,
+            "l": "Retired"
+          },
+          "Review": {
+            "x": 38,
+            "y": 190,
+            "l": "Review"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    },
+    {
+      "name": "place a new source state",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n    Idea --> Draft\n",
+      "start": {
+        "Archived": {
+          "x": 38,
+          "y": 494,
+          "l": "Archived"
+        },
+        "Draft": {
+          "x": 38,
+          "y": 96,
+          "l": "Draft"
+        },
+        "Live": {
+          "x": 38,
+          "y": 400,
+          "l": "Live"
+        },
+        "Review": {
+          "x": 38,
+          "y": 190,
+          "l": "Review"
+        },
+        "end:": {
+          "x": 73,
+          "y": 606,
+          "l": "end"
+        },
+        "start:": {
+          "x": 75,
+          "y": 20,
+          "l": "start"
+        },
+        "start:Published": {
+          "x": 75,
+          "y": 324,
+          "l": "start"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Idea": {
+            "x": -10,
+            "y": -52,
+            "l": "Idea"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "Review": {
+            "x": 38,
+            "y": 190,
+            "l": "Review"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    },
+    {
+      "name": "place an unlinked state",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n    Lonely\n",
+      "start": {
+        "Archived": {
+          "x": 38,
+          "y": 494,
+          "l": "Archived"
+        },
+        "Draft": {
+          "x": 38,
+          "y": 96,
+          "l": "Draft"
+        },
+        "Live": {
+          "x": 38,
+          "y": 400,
+          "l": "Live"
+        },
+        "Review": {
+          "x": 38,
+          "y": 190,
+          "l": "Review"
+        },
+        "end:": {
+          "x": 73,
+          "y": 606,
+          "l": "end"
+        },
+        "start:": {
+          "x": 75,
+          "y": 20,
+          "l": "start"
+        },
+        "start:Published": {
+          "x": 75,
+          "y": 324,
+          "l": "start"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "Lonely": {
+            "x": 184,
+            "y": 20,
+            "l": "Lonely"
+          },
+          "Review": {
+            "x": 38,
+            "y": 190,
+            "l": "Review"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    },
+    {
+      "name": "place a new note",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n    note right of Review : check twice\n",
+      "start": {
+        "Archived": {
+          "x": 38,
+          "y": 494,
+          "l": "Archived"
+        },
+        "Draft": {
+          "x": 38,
+          "y": 96,
+          "l": "Draft"
+        },
+        "Live": {
+          "x": 38,
+          "y": 400,
+          "l": "Live"
+        },
+        "Review": {
+          "x": 38,
+          "y": 190,
+          "l": "Review"
+        },
+        "end:": {
+          "x": 73,
+          "y": 606,
+          "l": "end"
+        },
+        "start:": {
+          "x": 75,
+          "y": 20,
+          "l": "start"
+        },
+        "start:Published": {
+          "x": 75,
+          "y": 324,
+          "l": "start"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "Review": {
+            "x": 38,
+            "y": 190,
+            "l": "Review"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "note:Review:0": {
+            "x": 160,
+            "y": 194,
+            "l": "note:Review"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    },
+    {
+      "name": "place a state in a composite",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n        Live --> Paused\n    }\n    Published --> [*]\n",
+      "start": {
+        "Archived": {
+          "x": 38,
+          "y": 494,
+          "l": "Archived"
+        },
+        "Draft": {
+          "x": 38,
+          "y": 96,
+          "l": "Draft"
+        },
+        "Live": {
+          "x": 38,
+          "y": 400,
+          "l": "Live"
+        },
+        "Review": {
+          "x": 38,
+          "y": 190,
+          "l": "Review"
+        },
+        "end:": {
+          "x": 73,
+          "y": 606,
+          "l": "end"
+        },
+        "start:": {
+          "x": 75,
+          "y": 20,
+          "l": "start"
+        },
+        "start:Published": {
+          "x": 75,
+          "y": 324,
+          "l": "start"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "Paused": {
+            "x": -10,
+            "y": 548,
+            "l": "Paused"
+          },
+          "Review": {
+            "x": 38,
+            "y": 190,
+            "l": "Review"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in LR",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    direction LR\n    A --> B\n    B --> C\n    C --> D\n    E --> A\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 20,
+          "l": "A"
+        },
+        "B": {
+          "x": 170,
+          "y": 20,
+          "l": "B"
+        },
+        "C": {
+          "x": 320,
+          "y": 20,
+          "l": "C"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20,
+            "l": "A"
+          },
+          "B": {
+            "x": 170,
+            "y": 20,
+            "l": "B"
+          },
+          "C": {
+            "x": 320,
+            "y": 20,
+            "l": "C"
+          },
+          "D": {
+            "x": 476,
+            "y": 20,
+            "l": "D"
+          },
+          "E": {
+            "x": -136,
+            "y": 20,
+            "l": "E"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in BT",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    direction BT\n    A --> B\n    B --> C\n    C --> D\n    E --> A\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 208,
+          "l": "A"
+        },
+        "B": {
+          "x": 20,
+          "y": 114,
+          "l": "B"
+        },
+        "C": {
+          "x": 20,
+          "y": 20,
+          "l": "C"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 208,
+            "l": "A"
+          },
+          "B": {
+            "x": 20,
+            "y": 114,
+            "l": "B"
+          },
+          "C": {
+            "x": 20,
+            "y": 20,
+            "l": "C"
+          },
+          "D": {
+            "x": 20,
+            "y": -80,
+            "l": "D"
+          },
+          "E": {
+            "x": 20,
+            "y": 308,
+            "l": "E"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in RL",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    direction RL\n    A --> B\n    B --> C\n    C --> D\n    E --> A\n",
+      "start": {
+        "A": {
+          "x": 320,
+          "y": 20,
+          "l": "A"
+        },
+        "B": {
+          "x": 170,
+          "y": 20,
+          "l": "B"
+        },
+        "C": {
+          "x": 20,
+          "y": 20,
+          "l": "C"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "A": {
+            "x": 320,
+            "y": 20,
+            "l": "A"
+          },
+          "B": {
+            "x": 170,
+            "y": 20,
+            "l": "B"
+          },
+          "C": {
+            "x": 20,
+            "y": 20,
+            "l": "C"
+          },
+          "D": {
+            "x": -136,
+            "y": 20,
+            "l": "D"
+          },
+          "E": {
+            "x": 476,
+            "y": 20,
+            "l": "E"
+          }
+        }
+      }
+    },
+    {
+      "name": "renamed state is placed again",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Check : submit\n    Check --> Draft : changes requested\n    Check --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "start": {
+        "Archived": {
+          "x": 38,
+          "y": 494,
+          "l": "Archived"
+        },
+        "Draft": {
+          "x": 38,
+          "y": 96,
+          "l": "Draft"
+        },
+        "Live": {
+          "x": 38,
+          "y": 400,
+          "l": "Live"
+        },
+        "Review": {
+          "x": 38,
+          "y": 190,
+          "l": "Review"
+        },
+        "end:": {
+          "x": 73,
+          "y": 606,
+          "l": "end"
+        },
+        "start:": {
+          "x": 75,
+          "y": 20,
+          "l": "start"
+        },
+        "start:Published": {
+          "x": 75,
+          "y": 324,
+          "l": "start"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Check": {
+            "x": 38,
+            "y": 196,
+            "l": "Check"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    },
+    {
+      "name": "mostly unknown lays out again",
+      "kind": "place",
+      "code": "stateDiagram-v2\n    [*] --> Draft\n    Draft --> Review : submit\n    Review --> Draft : changes requested\n    Review --> Published : approve\n    state Published {\n        [*] --> Live\n        Live --> Archived : expire\n    }\n    Published --> [*]\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 20,
+          "l": "A"
+        },
+        "B": {
+          "x": 20,
+          "y": 114,
+          "l": "B"
+        }
+      },
+      "expected": {
+        "isFullLayout": true,
+        "positions": {
+          "Archived": {
+            "x": 38,
+            "y": 494,
+            "l": "Archived"
+          },
+          "Draft": {
+            "x": 38,
+            "y": 96,
+            "l": "Draft"
+          },
+          "Live": {
+            "x": 38,
+            "y": 400,
+            "l": "Live"
+          },
+          "Review": {
+            "x": 38,
+            "y": 190,
+            "l": "Review"
+          },
+          "end:": {
+            "x": 73,
+            "y": 606,
+            "l": "end"
+          },
+          "start:": {
+            "x": 75,
+            "y": 20,
+            "l": "start"
+          },
+          "start:Published": {
+            "x": 75,
+            "y": 324,
+            "l": "start"
+          }
+        }
+      }
+    }
+  ]
+}

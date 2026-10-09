@@ -1,0 +1,1513 @@
+{
+  "editor": "er",
+  "source": {
+    "repo": "mermaid-chat (Nautink v1)",
+    "commit": "7fee72d628b262962cbc8830961247fcf19b6364",
+    "note": "Generated from v1 by a script kept outside the repo; see README.md in this folder."
+  },
+  "mappings": [
+    "v1 parse result `{ ok: true, model }` -> `{ kind: \"ok\" }`; `{ ok: false, kind, message }` -> `{ kind, message }`.",
+    "Relationship field `identifying` -> `isIdentifying` (op args use the port names).",
+    "Op args are written in the port's signatures; the generator maps them to v1's positional arguments (addRel(m, from, to, extra), updateAttribute(m, entityName, index, patch), ...).",
+    "Ops returning `{ model, id }` are compared on the model; ops returning null (renameEntity on an invalid name) expect `null`.",
+    "Text is measured at 7px per character (v1's DOM-free fallback = approximateTextWidth in the port).",
+    "Layout positions are top-left corners rounded to 2 decimals. Place cases start from v1's dagre layout of the previous code (rounded), stored in `start`."
+  ],
+  "roundTrip": [
+    {
+      "name": "template",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+      }
+    },
+    {
+      "name": "blank",
+      "code": "erDiagram\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n"
+      }
+    },
+    {
+      "name": "cardinalities",
+      "code": "erDiagram\n    direction LR\n    A |o--o| B : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    P u--o{ Q : parent\n    A ||--o{ B : again\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    direction LR\n    A |o--o| B : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    P u--o{ Q : parent\n    A ||--o{ B : again\n"
+      }
+    },
+    {
+      "name": "entities",
+      "code": "erDiagram\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    Lonely\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n"
+      }
+    },
+    {
+      "name": "subgraphs",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+      }
+    },
+    {
+      "name": "styling",
+      "code": "erDiagram\n    %% a comment that is dropped\n    A ||--o{ B : has\n    classDef hot fill:#f00\n    style A fill:#0f0\n    accTitle: Title\n    accDescr: Short description\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    A ||--o{ B : has\n    classDef hot fill:#f00\n    style A fill:#0f0\n    accTitle: Title\n    accDescr: Short description\n"
+      }
+    },
+    {
+      "name": "accDescrBlock",
+      "code": "erDiagram\n    accDescr {\n        Long\n        description\n    }\n    A ||--o{ B : has\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    accDescr {\n        Long\n        description\n    }\n    A ||--o{ B : has\n"
+      }
+    },
+    {
+      "name": "preamble",
+      "code": "---\ntitle: Shop\n---\nerDiagram\n    A ||--o{ B : has\n",
+      "expected": {
+        "kind": "ok",
+        "code": "---\ntitle: Shop\n---\nerDiagram\n    A ||--o{ B : has\n"
+      }
+    },
+    {
+      "name": "empty code",
+      "code": "",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n"
+      }
+    },
+    {
+      "name": "another diagram type",
+      "code": "pie title Traffic sources\n    \"Search\" : 45\n    \"Direct\" : 25\n    \"Social\" : 20\n    \"Email\" : 10\n",
+      "expected": {
+        "kind": "unsupported",
+        "message": "pie"
+      }
+    },
+    {
+      "name": "invalid code",
+      "code": "erDiagram\n    A ||--o{\n",
+      "expected": {
+        "kind": "error",
+        "message": "Parse error on line 2:\n...Diagram    A ||--o{\n----------------------^\nExpecting 'UNICODE_TEXT', 'NUM', 'ENTITY_NAME', 'DECIMAL_NUM', 'ENTITY_ONE', 'NON_IDENTIFYING', 'IDENTIFYING', got 'NEWLINE'"
+      }
+    },
+    {
+      "name": "direction keyword",
+      "code": "erDiagram\n    direction RL\n    A ||--|{ B : has\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    direction RL\n    A ||--|{ B : has\n"
+      }
+    },
+    {
+      "name": "non-identifying lines",
+      "code": "erDiagram\n    A }|..|{ B : \"many to many\"\n    B |o..o| C : maybe\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    A }|..|{ B : \"many to many\"\n    B |o..o| C : maybe\n"
+      }
+    },
+    {
+      "name": "word cardinalities",
+      "code": "erDiagram\n    A one or zero to many B : uses\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    A |o--o{ B : uses\n"
+      }
+    },
+    {
+      "name": "attribute comments and keys",
+      "code": "erDiagram\n    A {\n        string name UK \"unique name\"\n        int b_id FK\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    A {\n        string name UK \"unique name\"\n        int b_id FK\n    }\n"
+      }
+    },
+    {
+      "name": "entity with only an alias",
+      "code": "erDiagram\n    p[\"Person\"]\n    p ||--o{ q[\"Pet\"] : owns\n",
+      "expected": {
+        "kind": "error",
+        "message": "Parse error on line 3:\n...son\"]    p ||--o{ q[\"Pet\"] : owns\n----------------------^\nExpecting 'COLON', 'STYLE_SEPARATOR', got 'SQS'"
+      }
+    },
+    {
+      "name": "unicode names",
+      "code": "erDiagram\n    \"Größe\" ||--o{ \"日本\" : \"ü label\"\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    \"Größe\" ||--o{ \"日本\" : \"ü label\"\n"
+      }
+    },
+    {
+      "name": "empty attribute block",
+      "code": "erDiagram\n    A {\n    }\n    A ||--|| B : x\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    A ||--|| B : x\n"
+      }
+    },
+    {
+      "name": "many attributes",
+      "code": "erDiagram\n    WIDE {\n        string a_very_long_attribute_name_for_width PK \"and a long comment that might be clipped by the box width\"\n        int b\n        int c FK\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    WIDE {\n        string a_very_long_attribute_name_for_width PK \"and a long comment that might be clipped by the box width\"\n        int b\n        int c FK\n    }\n"
+      }
+    },
+    {
+      "name": "label with quotes",
+      "code": "erDiagram\n    A ||--o{ B : \"say #quot;hi#quot;\"\n",
+      "expected": {
+        "kind": "ok",
+        "code": "erDiagram\n    A ||--o{ B : \"say #quot;hi#quot;\"\n"
+      }
+    }
+  ],
+  "ops": [
+    {
+      "name": "addEntity plain",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "SHIPMENT"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    SHIPMENT\n"
+        }
+      ]
+    },
+    {
+      "name": "addEntity with alias",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "NOTE",
+              "alias": "Side note"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    NOTE[\"Side note\"]\n"
+        }
+      ]
+    },
+    {
+      "name": "addEntity with attributes",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "TAG",
+              "attributes": [
+                {
+                  "type": "int",
+                  "name": "id",
+                  "keys": ["PK"],
+                  "comment": "the key"
+                }
+              ]
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    TAG {\n        int id PK \"the key\"\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "addEntity into group",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "PAYMENT"
+            },
+            "Billing"
+          ],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n            PAYMENT\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "addEntity name needing quotes",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "Line item"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    \"Line item\"\n"
+        }
+      ]
+    },
+    {
+      "name": "updateEntity alias",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateEntity",
+          "args": [
+            "CUSTOMER",
+            {
+              "alias": "Client 100%\nnew\\"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER[\"Client 100 new\"] {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "updateEntity clears alias",
+      "code": "erDiagram\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    Lonely\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n",
+      "steps": [
+        {
+          "op": "updateEntity",
+          "args": [
+            "WithAlias",
+            {
+              "alias": ""
+            }
+          ],
+          "expected": "erDiagram\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    WithAlias\n    Styled:::hot\n"
+        }
+      ]
+    },
+    {
+      "name": "updateEntity classes",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateEntity",
+          "args": [
+            "ORDER",
+            {
+              "classes": ["hot"]
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER:::hot {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "renameEntity",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "renameEntity",
+          "args": ["ORDER", "PURCHASE"],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ PURCHASE : places\n    PURCHASE ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    PURCHASE {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "renameEntity rewrites style lines",
+      "code": "erDiagram\n    %% a comment that is dropped\n    A ||--o{ B : has\n    classDef hot fill:#f00\n    style A fill:#0f0\n    accTitle: Title\n    accDescr: Short description\n",
+      "steps": [
+        {
+          "op": "renameEntity",
+          "args": ["A", "Alpha"],
+          "expected": "erDiagram\n    Alpha ||--o{ B : has\n    classDef hot fill:#f00\n    style Alpha fill:#0f0\n    accTitle: Title\n    accDescr: Short description\n"
+        }
+      ]
+    },
+    {
+      "name": "renameEntity in a group",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "renameEntity",
+          "args": ["ORDER", "SALE"],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        SALE\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ SALE : places\n    SALE ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "renameEntity cleans the name",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "renameEntity",
+          "args": ["PRODUCT", "Big \"item\"%"],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    \"Big item\" ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    \"Big item\" {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "renameEntity invalid",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "renameEntity",
+          "args": ["ORDER", "CUSTOMER"],
+          "expected": null
+        },
+        {
+          "op": "renameEntity",
+          "args": ["ORDER", "  "],
+          "expected": null
+        },
+        {
+          "op": "renameEntity",
+          "args": ["ORDER", "ORDER"],
+          "expected": null
+        }
+      ]
+    },
+    {
+      "name": "renameEntity to a group id",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "renameEntity",
+          "args": ["ORDER", "Sales"],
+          "expected": null
+        }
+      ]
+    },
+    {
+      "name": "addRel default",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addRel",
+          "args": [
+            {
+              "from": "PRODUCT",
+              "to": "CUSTOMER"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    PRODUCT ||--o{ CUSTOMER : relates\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "addRel given",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addRel",
+          "args": [
+            {
+              "from": "ORDER",
+              "to": "PRODUCT",
+              "fromCard": "ZERO_OR_ONE",
+              "toCard": "ONE_OR_MORE",
+              "isIdentifying": false,
+              "label": "lists"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    ORDER |o..|{ PRODUCT : lists\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "addRel self",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addRel",
+          "args": [
+            {
+              "from": "ORDER",
+              "to": "ORDER",
+              "label": "replaces"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    ORDER ||--o{ ORDER : replaces\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "addRel twice",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addRel",
+          "args": [
+            {
+              "from": "CUSTOMER",
+              "to": "ORDER"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER ||--o{ ORDER : relates\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        },
+        {
+          "op": "addRel",
+          "args": [
+            {
+              "from": "CUSTOMER",
+              "to": "ORDER",
+              "label": "returns"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER ||--o{ ORDER : relates\n    CUSTOMER ||--o{ ORDER : returns\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "updateRel label and line",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateRel",
+          "args": [
+            "R_CUSTOMER_ORDER_0",
+            {
+              "label": "puts\nin",
+              "isIdentifying": false
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||..o{ ORDER : \"puts in\"\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "updateRel cardinalities",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateRel",
+          "args": [
+            "R_ORDER_ORDER_ITEM_0",
+            {
+              "fromCard": "ZERO_OR_MORE",
+              "toCard": "ZERO_OR_ONE"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER }o--o| ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "updateRel empty label",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateRel",
+          "args": [
+            "R_PRODUCT_ORDER_ITEM_0",
+            {
+              "label": ""
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseRel",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "reverseRel",
+          "args": ["R_CUSTOMER_ORDER_0"],
+          "expected": "erDiagram\n    ORDER }o--|| CUSTOMER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseRel with MD_PARENT",
+      "code": "erDiagram\n    direction LR\n    A |o--o| B : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    P u--o{ Q : parent\n    A ||--o{ B : again\n",
+      "steps": [
+        {
+          "op": "reverseRel",
+          "args": ["R_P_Q_0"],
+          "expected": "erDiagram\n    direction LR\n    A |o--o| B : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    Q }o--|| P : parent\n    A ||--o{ B : again\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseRel renumbers parallel ids",
+      "code": "erDiagram\n    direction LR\n    A |o--o| B : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    P u--o{ Q : parent\n    A ||--o{ B : again\n",
+      "steps": [
+        {
+          "op": "reverseRel",
+          "args": ["R_A_B_0"],
+          "expected": "erDiagram\n    direction LR\n    B |o--o| A : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    P u--o{ Q : parent\n    A ||--o{ B : again\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup outer",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["Sales"],
+          "expected": "erDiagram\n    subgraph Billing\n        INVOICE\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroup inner",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "ungroup",
+          "args": ["Billing"],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        INVOICE\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems entity",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "entityNames": ["ORDER"]
+            }
+          ],
+          "expected": "erDiagram\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems relationship",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "relIds": ["R_PRODUCT_ORDER_ITEM_0"]
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems group",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "groupIds": ["Billing"]
+            }
+          ],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        INVOICE\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems entity in group",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "entityNames": ["INVOICE"]
+            }
+          ],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "updateGroup",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "updateGroup",
+          "args": [
+            "Sales",
+            {
+              "title": "Sales \"team\"",
+              "dir": "LR"
+            }
+          ],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales #quot;team#quot;\"]\n        direction LR\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "updateGroup clears title",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "updateGroup",
+          "args": [
+            "Sales",
+            {
+              "title": "",
+              "dir": ""
+            }
+          ],
+          "expected": "erDiagram\n    subgraph Sales\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "setEntityGroup into group",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "setEntityGroup",
+          "args": ["CUSTOMER", "Billing"],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n            CUSTOMER\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "setEntityGroup to top level",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "steps": [
+        {
+          "op": "setEntityGroup",
+          "args": ["ORDER", null],
+          "expected": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n"
+        }
+      ]
+    },
+    {
+      "name": "addAttribute",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "addAttribute",
+          "args": ["CUSTOMER"],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n        string field\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "addAttribute to an empty entity",
+      "code": "erDiagram\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    Lonely\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n",
+      "steps": [
+        {
+          "op": "addAttribute",
+          "args": ["Lonely"],
+          "expected": "erDiagram\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n    Lonely {\n        int id PK\n    }\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n"
+        },
+        {
+          "op": "addAttribute",
+          "args": ["Lonely"],
+          "expected": "erDiagram\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n    Lonely {\n        int id PK\n        string field\n    }\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n"
+        },
+        {
+          "op": "addAttribute",
+          "args": ["Lonely"],
+          "expected": "erDiagram\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n    Lonely {\n        int id PK\n        string field\n        string field2\n    }\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n"
+        }
+      ]
+    },
+    {
+      "name": "updateAttribute",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateAttribute",
+          "args": [
+            {
+              "entityName": "CUSTOMER",
+              "index": 1,
+              "patch": {
+                "type": "varchar(255)",
+                "name": "e mail",
+                "comment": "line\nbreak",
+                "keys": ["UK", "PK"]
+              }
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        varchar(255) e_mail PK, UK \"line break\"\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "updateAttribute fallbacks",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateAttribute",
+          "args": [
+            {
+              "entityName": "CUSTOMER",
+              "index": 2,
+              "patch": {
+                "type": "",
+                "name": "!!!"
+              }
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string field\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "updateAttribute comment with quotes",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "updateAttribute",
+          "args": [
+            {
+              "entityName": "ORDER",
+              "index": 0,
+              "patch": {
+                "comment": "say \"hi\""
+              }
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK \"say #quot;hi#quot;\"\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "toggleKey on",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "toggleKey",
+          "args": [
+            {
+              "entityName": "CUSTOMER",
+              "index": 2,
+              "key": "FK"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name FK\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "toggleKey off",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "toggleKey",
+          "args": [
+            {
+              "entityName": "ORDER_ITEM",
+              "index": 0,
+              "key": "PK"
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "removeAttribute",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "removeAttribute",
+          "args": ["ORDER", 1],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "moveAttribute",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "moveAttribute",
+          "args": [
+            {
+              "entityName": "ORDER",
+              "index": 2,
+              "delta": -1
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        date created_at\n        int customer_id FK\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "moveAttribute out of range",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "steps": [
+        {
+          "op": "moveAttribute",
+          "args": [
+            {
+              "entityName": "ORDER",
+              "index": 2,
+              "delta": 1
+            }
+          ],
+          "expected": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "build from blank",
+      "code": "erDiagram\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "ENTITY1"
+            }
+          ],
+          "expected": "erDiagram\n    ENTITY1\n"
+        },
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "ENTITY2"
+            }
+          ],
+          "expected": "erDiagram\n    ENTITY1\n    ENTITY2\n"
+        },
+        {
+          "op": "addAttribute",
+          "args": ["ENTITY1"],
+          "expected": "erDiagram\n    ENTITY1 {\n        int id PK\n    }\n    ENTITY2\n"
+        },
+        {
+          "op": "addAttribute",
+          "args": ["ENTITY1"],
+          "expected": "erDiagram\n    ENTITY1 {\n        int id PK\n        string field\n    }\n    ENTITY2\n"
+        },
+        {
+          "op": "addRel",
+          "args": [
+            {
+              "from": "ENTITY1",
+              "to": "ENTITY2"
+            }
+          ],
+          "expected": "erDiagram\n    ENTITY1 ||--o{ ENTITY2 : relates\n    ENTITY1 {\n        int id PK\n        string field\n    }\n"
+        },
+        {
+          "op": "renameEntity",
+          "args": ["ENTITY2", "ITEM"],
+          "expected": "erDiagram\n    ENTITY1 ||--o{ ITEM : relates\n    ENTITY1 {\n        int id PK\n        string field\n    }\n"
+        },
+        {
+          "op": "toggleKey",
+          "args": [
+            {
+              "entityName": "ENTITY1",
+              "index": 1,
+              "key": "UK"
+            }
+          ],
+          "expected": "erDiagram\n    ENTITY1 ||--o{ ITEM : relates\n    ENTITY1 {\n        int id PK\n        string field UK\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "preamble survives edits",
+      "code": "---\ntitle: Shop\n---\nerDiagram\n    A ||--o{ B : has\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "C"
+            }
+          ],
+          "expected": "---\ntitle: Shop\n---\nerDiagram\n    A ||--o{ B : has\n    C\n"
+        }
+      ]
+    },
+    {
+      "name": "accDescr block survives edits",
+      "code": "erDiagram\n    accDescr {\n        Long\n        description\n    }\n    A ||--o{ B : has\n",
+      "steps": [
+        {
+          "op": "addEntity",
+          "args": [
+            {
+              "name": "C"
+            }
+          ],
+          "expected": "erDiagram\n    accDescr {\n        Long\n        description\n    }\n    A ||--o{ B : has\n    C\n"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "template",
+      "kind": "dagre",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "expected": {
+        "positions": {
+          "CUSTOMER": {
+            "x": 34,
+            "y": 20
+          },
+          "ORDER": {
+            "x": 20,
+            "y": 244
+          },
+          "ORDER_ITEM": {
+            "x": 134,
+            "y": 468
+          },
+          "PRODUCT": {
+            "x": 267,
+            "y": 244
+          }
+        }
+      }
+    },
+    {
+      "name": "cardinalities",
+      "kind": "dagre",
+      "code": "erDiagram\n    direction LR\n    A |o--o| B : \"zero or one\"\n    C }o..|{ A : \"many\"\n    A ||--|| D : single\n    P u--o{ Q : parent\n    A ||--o{ B : again\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 358,
+            "y": 64
+          },
+          "B": {
+            "x": 731,
+            "y": 108
+          },
+          "C": {
+            "x": 20,
+            "y": 64
+          },
+          "D": {
+            "x": 731,
+            "y": 20
+          },
+          "P": {
+            "x": 20,
+            "y": 152
+          },
+          "Q": {
+            "x": 358,
+            "y": 152
+          }
+        }
+      }
+    },
+    {
+      "name": "entities",
+      "kind": "dagre",
+      "code": "erDiagram\n    \"Big Entity\"[\"The big one\"] {\n        string~T~ items \"a #quot;quoted#quot; comment\"\n        int? maybe\n        style kind\n    }\n    Lonely\n    WithAlias[\"Alias x\"]\n    Styled:::hot\n    \"one-two\" ||--o{ \"end\" : \"a label\"\n    x-y ||--|| Lonely : link\n",
+      "expected": {
+        "positions": {
+          "Big Entity": {
+            "x": 20,
+            "y": 20
+          },
+          "Lonely": {
+            "x": 1040,
+            "y": 244
+          },
+          "Styled": {
+            "x": 600,
+            "y": 52
+          },
+          "WithAlias": {
+            "x": 374,
+            "y": 52
+          },
+          "end": {
+            "x": 820,
+            "y": 244
+          },
+          "one-two": {
+            "x": 820,
+            "y": 52
+          },
+          "x-y": {
+            "x": 1040,
+            "y": 52
+          }
+        }
+      }
+    },
+    {
+      "name": "subgraphs",
+      "kind": "dagre",
+      "code": "erDiagram\n    subgraph Sales [\"Sales area\"]\n        direction TB\n        ORDER\n        subgraph Billing\n            INVOICE\n        end\n    end\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|| INVOICE : bills\n    class Sales hot,cold\n",
+      "expected": {
+        "positions": {
+          "CUSTOMER": {
+            "x": 100,
+            "y": 20
+          },
+          "INVOICE": {
+            "x": 100,
+            "y": 440
+          },
+          "ORDER": {
+            "x": 100,
+            "y": 230
+          }
+        }
+      }
+    },
+    {
+      "name": "styling",
+      "kind": "dagre",
+      "code": "erDiagram\n    %% a comment that is dropped\n    A ||--o{ B : has\n    classDef hot fill:#f00\n    style A fill:#0f0\n    accTitle: Title\n    accDescr: Short description\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "accDescrBlock",
+      "kind": "dagre",
+      "code": "erDiagram\n    accDescr {\n        Long\n        description\n    }\n    A ||--o{ B : has\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "preamble",
+      "kind": "dagre",
+      "code": "---\ntitle: Shop\n---\nerDiagram\n    A ||--o{ B : has\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "direction keyword",
+      "kind": "dagre",
+      "code": "erDiagram\n    direction RL\n    A ||--|{ B : has\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 337,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "non-identifying lines",
+      "kind": "dagre",
+      "code": "erDiagram\n    A }|..|{ B : \"many to many\"\n    B |o..o| C : maybe\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          },
+          "C": {
+            "x": 20,
+            "y": 340
+          }
+        }
+      }
+    },
+    {
+      "name": "word cardinalities",
+      "kind": "dagre",
+      "code": "erDiagram\n    A one or zero to many B : uses\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "attribute comments and keys",
+      "kind": "dagre",
+      "code": "erDiagram\n    A {\n        string name UK \"unique name\"\n        int b_id FK\n    }\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "unicode names",
+      "kind": "dagre",
+      "code": "erDiagram\n    \"Größe\" ||--o{ \"日本\" : \"ü label\"\n",
+      "expected": {
+        "positions": {
+          "Größe": {
+            "x": 20,
+            "y": 20
+          },
+          "日本": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "empty attribute block",
+      "kind": "dagre",
+      "code": "erDiagram\n    A {\n    }\n    A ||--|| B : x\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "many attributes",
+      "kind": "dagre",
+      "code": "erDiagram\n    WIDE {\n        string a_very_long_attribute_name_for_width PK \"and a long comment that might be clipped by the box width\"\n        int b\n        int c FK\n    }\n",
+      "expected": {
+        "positions": {
+          "WIDE": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "label with quotes",
+      "kind": "dagre",
+      "code": "erDiagram\n    A ||--o{ B : \"say #quot;hi#quot;\"\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 180
+          }
+        }
+      }
+    },
+    {
+      "name": "place one new related entity",
+      "kind": "place",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    ORDER ||--o{ SHIPMENT : ships\n",
+      "start": {
+        "CUSTOMER": {
+          "x": 34,
+          "y": 20
+        },
+        "ORDER": {
+          "x": 20,
+          "y": 244
+        },
+        "ORDER_ITEM": {
+          "x": 134,
+          "y": 468
+        },
+        "PRODUCT": {
+          "x": 267,
+          "y": 244
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "CUSTOMER": {
+            "x": 34,
+            "y": 20
+          },
+          "ORDER": {
+            "x": 20,
+            "y": 244
+          },
+          "ORDER_ITEM": {
+            "x": 134,
+            "y": 468
+          },
+          "PRODUCT": {
+            "x": 267,
+            "y": 244
+          },
+          "SHIPMENT": {
+            "x": 394,
+            "y": 436
+          }
+        }
+      }
+    },
+    {
+      "name": "place a new parent entity",
+      "kind": "place",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    REGION ||--o{ CUSTOMER : has\n",
+      "start": {
+        "CUSTOMER": {
+          "x": 34,
+          "y": 20
+        },
+        "ORDER": {
+          "x": 20,
+          "y": 244
+        },
+        "ORDER_ITEM": {
+          "x": 134,
+          "y": 468
+        },
+        "PRODUCT": {
+          "x": 267,
+          "y": 244
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "CUSTOMER": {
+            "x": 34,
+            "y": 20
+          },
+          "ORDER": {
+            "x": 20,
+            "y": 244
+          },
+          "ORDER_ITEM": {
+            "x": 134,
+            "y": 468
+          },
+          "PRODUCT": {
+            "x": 267,
+            "y": 244
+          },
+          "REGION": {
+            "x": 574,
+            "y": 212
+          }
+        }
+      }
+    },
+    {
+      "name": "place an unrelated entity",
+      "kind": "place",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n    AUDIT\n",
+      "start": {
+        "CUSTOMER": {
+          "x": 34,
+          "y": 20
+        },
+        "ORDER": {
+          "x": 20,
+          "y": 244
+        },
+        "ORDER_ITEM": {
+          "x": 134,
+          "y": 468
+        },
+        "PRODUCT": {
+          "x": 267,
+          "y": 244
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "AUDIT": {
+            "x": 513,
+            "y": 20
+          },
+          "CUSTOMER": {
+            "x": 34,
+            "y": 20
+          },
+          "ORDER": {
+            "x": 20,
+            "y": 244
+          },
+          "ORDER_ITEM": {
+            "x": 134,
+            "y": 468
+          },
+          "PRODUCT": {
+            "x": 267,
+            "y": 244
+          }
+        }
+      }
+    },
+    {
+      "name": "place in LR",
+      "kind": "place",
+      "code": "erDiagram\n    direction LR\n    A ||--o{ B : x\n    B ||--o{ C : y\n    C ||--o{ D : z\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 20
+        },
+        "B": {
+          "x": 323,
+          "y": 20
+        },
+        "C": {
+          "x": 626,
+          "y": 20
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 323,
+            "y": 20
+          },
+          "C": {
+            "x": 626,
+            "y": 20
+          },
+          "D": {
+            "x": 906,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "removed entities are dropped",
+      "kind": "place",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n",
+      "start": {
+        "CUSTOMER": {
+          "x": 34,
+          "y": 20
+        },
+        "ORDER": {
+          "x": 20,
+          "y": 244
+        },
+        "ORDER_ITEM": {
+          "x": 134,
+          "y": 468
+        },
+        "PRODUCT": {
+          "x": 267,
+          "y": 244
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "CUSTOMER": {
+            "x": 34,
+            "y": 20
+          },
+          "ORDER": {
+            "x": 20,
+            "y": 244
+          },
+          "ORDER_ITEM": {
+            "x": 134,
+            "y": 468
+          }
+        }
+      }
+    },
+    {
+      "name": "mostly unknown lays out again",
+      "kind": "place",
+      "code": "erDiagram\n    CUSTOMER ||--o{ ORDER : places\n    ORDER ||--|{ ORDER_ITEM : contains\n    PRODUCT ||--o{ ORDER_ITEM : \"ordered in\"\n    CUSTOMER {\n        int id PK\n        string email UK\n        string name\n    }\n    ORDER {\n        int id PK\n        int customer_id FK\n        date created_at\n    }\n    ORDER_ITEM {\n        int order_id PK, FK\n        int product_id PK, FK\n        int quantity\n    }\n    PRODUCT {\n        int id PK\n        string name\n        decimal price\n    }\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 20
+        },
+        "B": {
+          "x": 20,
+          "y": 180
+        }
+      },
+      "expected": {
+        "isFullLayout": true,
+        "positions": {
+          "CUSTOMER": {
+            "x": 34,
+            "y": 20
+          },
+          "ORDER": {
+            "x": 20,
+            "y": 244
+          },
+          "ORDER_ITEM": {
+            "x": 134,
+            "y": 468
+          },
+          "PRODUCT": {
+            "x": 267,
+            "y": 244
+          }
+        }
+      }
+    }
+  ]
+}

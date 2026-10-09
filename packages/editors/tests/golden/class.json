@@ -1,0 +1,2473 @@
+{
+  "editor": "class",
+  "source": {
+    "repo": "mermaid-chat (Nautink v1)",
+    "commit": "7fee72d628b262962cbc8830961247fcf19b6364",
+    "note": "Generated from v1 by a script kept outside the repo; see README.md in this folder."
+  },
+  "mappings": [
+    "v1 parse result `{ ok: true, model }` -> `{ kind: \"ok\" }`; `{ ok: false, kind, message }` -> `{ kind, message }`.",
+    "Model field `dirExplicit` -> `isDirExplicit` (op args use the port names).",
+    "Op args are written in the port's signatures; the generator maps them to v1's positional arguments (updateAttr(g, classId, index, patch), addRelation(g, from, to, kindId), addNote(g, text, forId, ns), ...).",
+    "Ops returning `{ model, id }` are compared on the model; `expected` is the serialized code after the step.",
+    "Text is measured at 7px per character (v1's DOM-free fallback = approximateTextWidth in the port).",
+    "Layout positions are top-left corners rounded to 2 decimals; `l` is the note text tag. Place cases start from v1's dagre layout of the previous code (rounded), stored in `start`."
+  ],
+  "roundTrip": [
+    {
+      "name": "template",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+      }
+    },
+    {
+      "name": "blank",
+      "code": "classDiagram\n    class Class1\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class Class1\n"
+      }
+    },
+    {
+      "name": "v2Header",
+      "code": "classDiagram-v2\n    direction LR\n    A --> B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram-v2\n    direction LR\n    A --> B\n"
+      }
+    },
+    {
+      "name": "directionTB",
+      "code": "classDiagram\n    direction TB\n    class A\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    direction TB\n    class A\n"
+      }
+    },
+    {
+      "name": "members",
+      "code": "classDiagram\n    class Shape~T~ {\n        <<interface>>\n        <<service>>\n        -List~List~int~~ points$\n        #area() double*\n        ~resize(int w, int h) bool\n        +static() int$\n    }\n    class `My Class`[\"A label\"] {\n        +x\n    }\n    class Plain\n    class Tinted:::hot\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class Shape~T~ {\n        <<interface>>\n        <<service>>\n        -List~List~int~~ points$\n        #area()* double\n        ~resize(int w, int h) bool\n        +static()$ int\n    }\n    class `My Class`[\"A label\"] {\n        +x\n    }\n    class Plain\n    class Tinted:::hot\n"
+      }
+    },
+    {
+      "name": "relations",
+      "code": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say \"hi\"\n    A <|-- B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say #quot;hi#quot;\n    A <|-- B\n"
+      }
+    },
+    {
+      "name": "lollipops",
+      "code": "classDiagram\n    Bar ()-- Foo\n    Baz --() Qux\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    Bar ()-- Foo\n    Baz --() Qux\n"
+      }
+    },
+    {
+      "name": "namespaces",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+      }
+    },
+    {
+      "name": "notes",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n"
+      }
+    },
+    {
+      "name": "styling",
+      "code": "classDiagram\n    %% a comment that is dropped\n    class A:::hot {\n        +x\n    }\n    class B\n    cssClass \"A,B\" cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style B fill:#0f0\n    click A href \"https://example.com\"\n    link B \"https://example.com\"\n    callback A \"cb\"\n    accTitle: Title\n    accDescr {\n        Long\n        description\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class A:::hot {\n        +x\n    }\n    class B\n    cssClass \"A,B\" cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style B fill:#0f0\n    click A href \"https://example.com\"\n    link B \"https://example.com\"\n    callback A \"cb\"\n    accTitle: Title\n    accDescr {\n    Long\n    description\n    }\n"
+      }
+    },
+    {
+      "name": "preamble",
+      "code": "---\ntitle: Classes\n---\nclassDiagram\n    A --> B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "---\ntitle: Classes\n---\nclassDiagram\n    A --> B\n"
+      }
+    },
+    {
+      "name": "empty code",
+      "code": "",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n"
+      }
+    },
+    {
+      "name": "another diagram type",
+      "code": "pie title Traffic sources\n    \"Search\" : 45\n    \"Direct\" : 25\n    \"Social\" : 20\n    \"Email\" : 10\n",
+      "expected": {
+        "kind": "unsupported",
+        "message": "pie"
+      }
+    },
+    {
+      "name": "invalid code",
+      "code": "classDiagram\n    class A {\n",
+      "expected": {
+        "kind": "error",
+        "message": "Parse error on line 2:\n...gram    class A {\n--------------------^\nExpecting 'STRUCT_STOP', 'MEMBER', got 'EOF_IN_STRUCT'"
+      }
+    },
+    {
+      "name": "direction RL",
+      "code": "classDiagram\n    direction RL\n    A <|-- B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    direction RL\n    A <|-- B\n"
+      }
+    },
+    {
+      "name": "generic class and members",
+      "code": "classDiagram\n    class Map~K, V~ {\n        +get(K key) V\n        +Map~K,V~ entries$\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class Map~K, V~ {\n        +Map~K,V~ entries$\n        +get(K key) V\n    }\n"
+      }
+    },
+    {
+      "name": "annotation line",
+      "code": "classDiagram\n    class A\n    <<interface>> A\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class A {\n        <<interface>>\n    }\n"
+      }
+    },
+    {
+      "name": "relation labels and cardinalities",
+      "code": "classDiagram\n    A \"1..*\" *-- \"0..1\" B : parts\n    C ..> D\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    A \"1..*\" *-- \"0..1\" B : parts\n    C ..> D\n"
+      }
+    },
+    {
+      "name": "namespace with labelled class",
+      "code": "classDiagram\n    namespace Core {\n        class A[\"Alpha\"]\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    namespace Core {\n        class A[\"Alpha\"]\n    }\n"
+      }
+    },
+    {
+      "name": "two-ended relations",
+      "code": "classDiagram\n    A *--* B\n    C o--o D\n    E <|..|> F\n    G <..> H\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    A *--* B\n    C o--o D\n    E <|..|> F\n    G <..> H\n"
+      }
+    },
+    {
+      "name": "direction BT",
+      "code": "classDiagram\n    direction BT\n    A <|-- B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    direction BT\n    A <|-- B\n"
+      }
+    },
+    {
+      "name": "quotes in labels and notes",
+      "code": "classDiagram\n    class A[\"Label with 'single' quotes\"]\n    note for A \"say #quot;hi#quot;\"\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class A[\"Label with 'single' quotes\"]\n    note for A \"say #quot;hi#quot;\"\n"
+      }
+    },
+    {
+      "name": "methods with generics and classifiers",
+      "code": "classDiagram\n    class Repo~T~ {\n        +findAll() List~T~\n        +count()$ int\n        #save(T item)* void\n        -cache Map~String,T~\n    }\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class Repo~T~ {\n        -cache Map~String,T~\n        +findAll() List~T~\n        +count()$ int\n        #save(T item)* void\n    }\n"
+      }
+    },
+    {
+      "name": "unicode class labels",
+      "code": "classDiagram\n    class Größe[\"Größe ✓\"]\n    Größe --> B\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    class Größe[\"Größe ✓\"]\n    Größe --> B\n"
+      }
+    },
+    {
+      "name": "nested namespaces with notes",
+      "code": "classDiagram\n    namespace A.B.C {\n        class X\n    }\n    namespace A.D {\n        class Y\n    }\n    X --> Y\n    note for X \"deep\"\n",
+      "expected": {
+        "kind": "ok",
+        "code": "classDiagram\n    namespace A {\n        namespace B {\n            namespace C {\n                class X\n            }\n        }\n        namespace D {\n            class Y\n        }\n    }\n    X --> Y\n    note for X \"deep\"\n"
+      }
+    }
+  ],
+  "ops": [
+    {
+      "name": "addClass plain",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addClass",
+          "args": [
+            {
+              "id": "Bird"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    class Bird\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addClass full",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addClass",
+          "args": [
+            {
+              "id": "Box",
+              "generic": "T",
+              "annotations": ["interface"],
+              "attrs": [
+                {
+                  "vis": "+",
+                  "text": "int size",
+                  "cls": ""
+                }
+              ],
+              "methods": [
+                {
+                  "vis": "+",
+                  "name": "open",
+                  "params": "int x",
+                  "ret": "bool",
+                  "cls": ""
+                }
+              ]
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    class Box~T~ {\n        <<interface>>\n        +int size\n        +open(int x) bool\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addClass in namespace",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "addClass",
+          "args": [
+            {
+              "id": "Triangle",
+              "ns": "Shapes"
+            }
+          ],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n        class Triangle\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "addClass with label",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addClass",
+          "args": [
+            {
+              "id": "Fish",
+              "label": "Gold fish"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    class Fish[\"Gold fish\"]\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateClass label",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateClass",
+          "args": [
+            "Dog",
+            {
+              "label": "Good dog"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog[\"Good dog\"] {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateClass generic",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateClass",
+          "args": [
+            "Cat",
+            {
+              "generic": "K,V"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat~K,V~ {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "renameClass",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "renameClass",
+          "args": ["Animal", "Creature"],
+          "expected": "classDiagram\n    class Creature {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Creature <|-- Dog\n    Creature <|-- Cat\n    Owner \"1\" o-- \"0..*\" Creature : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "renameClass rewrites kept lines",
+      "code": "classDiagram\n    %% a comment that is dropped\n    class A:::hot {\n        +x\n    }\n    class B\n    cssClass \"A,B\" cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style B fill:#0f0\n    click A href \"https://example.com\"\n    link B \"https://example.com\"\n    callback A \"cb\"\n    accTitle: Title\n    accDescr {\n        Long\n        description\n    }\n",
+      "steps": [
+        {
+          "op": "renameClass",
+          "args": ["A", "Alpha"],
+          "expected": "classDiagram\n    class Alpha:::hot {\n        +x\n    }\n    class B\n    cssClass \"Alpha,B\" cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style B fill:#0f0\n    click Alpha href \"https://example.com\"\n    link B \"https://example.com\"\n    callback Alpha \"cb\"\n    accTitle: Title\n    accDescr {\n    Long\n    description\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "renameClass in notes",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "renameClass",
+          "args": ["A", "Z"],
+          "expected": "classDiagram\n    class Z\n    note \"A free note\"\n    note for Z \"Line one\\nLine two\"\n    note for Z \"Second note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "renameClass with lollipop",
+      "code": "classDiagram\n    Bar ()-- Foo\n    Baz --() Qux\n",
+      "steps": [
+        {
+          "op": "renameClass",
+          "args": ["Foo", "Foo2"],
+          "expected": "classDiagram\n    Bar ()-- Foo2\n    Baz --() Qux\n"
+        }
+      ]
+    },
+    {
+      "name": "renameClass to a taken id",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "renameClass",
+          "args": ["Dog", "Cat"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        },
+        {
+          "op": "renameClass",
+          "args": ["Dog", "  "],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addAttr default",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addAttr",
+          "args": ["Dog"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +attribute\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addAttr given",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addAttr",
+          "args": [
+            "Dog",
+            {
+              "vis": "-",
+              "text": "int legs",
+              "cls": "$"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        -int legs$\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addMethod default",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addMethod",
+          "args": ["Cat"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n        +method()\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addMethod given",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addMethod",
+          "args": [
+            "Cat",
+            {
+              "vis": "#",
+              "name": "purr",
+              "params": "int times",
+              "ret": "void",
+              "cls": "*"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n        #purr(int times)* void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateAttr from text",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateAttr",
+          "args": [
+            {
+              "classId": "Dog",
+              "index": 0,
+              "patch": {
+                "text": "-List~int~ ids$"
+              }
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        -List~int~ ids$\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateAttr visibility",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateAttr",
+          "args": [
+            {
+              "classId": "Animal",
+              "index": 1,
+              "patch": {
+                "vis": "#"
+              }
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        #int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateAttr strips brackets",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateAttr",
+          "args": [
+            {
+              "classId": "Dog",
+              "index": 0,
+              "patch": {
+                "text": "name(x){y}"
+              }
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +namexy\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateMethod",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateMethod",
+          "args": [
+            {
+              "classId": "Animal",
+              "index": 0,
+              "patch": {
+                "name": "speak()",
+                "params": "(int x)",
+                "ret": "String$"
+              }
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +speak(int x)* String\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "updateMethod multi-line text",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateMethod",
+          "args": [
+            {
+              "classId": "Owner",
+              "index": 0,
+              "patch": {
+                "params": "Animal a,\nint n",
+                "ret": "bool*"
+              }
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a, int n) bool\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "removeMember attr",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "removeMember",
+          "args": [
+            {
+              "classId": "Animal",
+              "list": "attrs",
+              "index": 0
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "removeMember method",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "removeMember",
+          "args": [
+            {
+              "classId": "Animal",
+              "list": "methods",
+              "index": 0
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setMemberText attr",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setMemberText",
+          "args": [
+            {
+              "classId": "Dog",
+              "list": "attrs",
+              "index": 0,
+              "text": "+String color"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String color\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setMemberText attr becomes method",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setMemberText",
+          "args": [
+            {
+              "classId": "Dog",
+              "list": "attrs",
+              "index": 0,
+              "text": "bark() void"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +fetch() void\n        bark() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setMemberText method becomes attr",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setMemberText",
+          "args": [
+            {
+              "classId": "Cat",
+              "list": "methods",
+              "index": 0,
+              "text": "+int lives"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +int lives\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setMemberText method",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setMemberText",
+          "args": [
+            {
+              "classId": "Cat",
+              "list": "methods",
+              "index": 0,
+              "text": "-climb(int h)$ bool"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        -climb(int h)$ bool\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setMemberText empty removes",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setMemberText",
+          "args": [
+            {
+              "classId": "Dog",
+              "list": "attrs",
+              "index": 0,
+              "text": "  "
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "moveMember down",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "moveMember",
+          "args": [
+            {
+              "classId": "Animal",
+              "list": "attrs",
+              "index": 0,
+              "delta": 1
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +int age\n        +String name\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "moveMember out of range",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "moveMember",
+          "args": [
+            {
+              "classId": "Animal",
+              "list": "attrs",
+              "index": 0,
+              "delta": -1
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setStereotype",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setStereotype",
+          "args": ["Dog", "interface"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        <<interface>>\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setStereotype replace with brackets",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setStereotype",
+          "args": ["Animal", "<<service>>"],
+          "expected": "classDiagram\n    class Animal {\n        <<service>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setStereotype remove",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setStereotype",
+          "args": ["Animal", ""],
+          "expected": "classDiagram\n    class Animal {\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation inheritance",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "inheritance"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog --|> Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation composition",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "composition"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog *-- Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation aggregation",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "aggregation"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog o-- Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation association",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "association"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog --> Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation link",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "link"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog -- Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation dependency",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "dependency"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog ..> Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation realization",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "realization"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog ..|> Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation dashed",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Dog",
+              "to": "Cat",
+              "kindId": "dashed"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog .. Cat\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation default kind",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Owner",
+              "to": "Dog"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Owner --> Dog\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation unknown kind",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Owner",
+              "to": "Dog",
+              "kindId": "bogus"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Owner --> Dog\n"
+        }
+      ]
+    },
+    {
+      "name": "addRelation twice",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Owner",
+              "to": "Animal"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Owner --> Animal\n"
+        },
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Owner",
+              "to": "Animal",
+              "kindId": "link"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Owner --> Animal\n    Owner -- Animal\n"
+        }
+      ]
+    },
+    {
+      "name": "updateRelation",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateRelation",
+          "args": [
+            "R:Owner:Animal:0",
+            {
+              "label": "has",
+              "m1": "one",
+              "m2": "many"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"one\" o-- \"many\" Animal : has\n"
+        }
+      ]
+    },
+    {
+      "name": "updateRelation marks",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "updateRelation",
+          "args": [
+            "R:Animal:Dog:0",
+            {
+              "t1": "comp",
+              "t2": "dep",
+              "line": "dashed"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal *..> Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to composition",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "composition"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal --* Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to aggregation",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "aggregation"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal --o Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to association",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "association"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to link",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "link"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal -- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to dependency",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "dependency"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <.. Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to realization",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "realization"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|.. Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind inheritance to dashed",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "dashed"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal .. Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to inheritance",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "inheritance"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" --|> \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to composition",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "composition"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" *-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to association",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "association"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" --> \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to link",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "link"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" -- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to dependency",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "dependency"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" ..> \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to realization",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "realization"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" ..|> \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind aggregation to dashed",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Owner:Animal:0", "dashed"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" .. \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind on a plain link",
+      "code": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say \"hi\"\n    A <|-- B\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:I:J:0", "composition"],
+          "expected": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I *-- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say #quot;hi#quot;\n    A <|-- B\n"
+        },
+        {
+          "op": "setRelationKind",
+          "args": ["R:I:J:0", "dependency"],
+          "expected": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I ..> J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say #quot;hi#quot;\n    A <|-- B\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind on a two-ended relation",
+      "code": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say \"hi\"\n    A <|-- B\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Q:R:0", "aggregation"],
+          "expected": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q o-- R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say #quot;hi#quot;\n    A <|-- B\n"
+        }
+      ]
+    },
+    {
+      "name": "setRelationKind unknown",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setRelationKind",
+          "args": ["R:Animal:Dog:0", "bogus"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseRelation",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "reverseRelation",
+          "args": ["R:Owner:Animal:0"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Animal \"0..*\" --o \"1\" Owner : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "reverseRelation with labels",
+      "code": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say \"hi\"\n    A <|-- B\n",
+      "steps": [
+        {
+          "op": "reverseRelation",
+          "args": ["R:S:T:0"],
+          "expected": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    T \"1\" <-- \"many\" S : label with #colon; colon\n    U --> V : say #quot;hi#quot;\n    A <|-- B\n"
+        }
+      ]
+    },
+    {
+      "name": "addNote free",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "text": "Free note"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    note \"Free note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "addNote for class",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "text": "About \"dog\"\nsecond line",
+              "forId": "Dog"
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    note for Dog \"About #quot;dog#quot;\nsecond line\"\n"
+        }
+      ]
+    },
+    {
+      "name": "addNote in namespace",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "text": "In ns",
+              "ns": "Shapes"
+            }
+          ],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n        note \"In ns\"\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNote text",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "updateNote",
+          "args": [
+            "note:A:0",
+            {
+              "text": "Changed"
+            }
+          ],
+          "expected": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Changed\"\n    note for A \"Second note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNote attach",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "updateNote",
+          "args": [
+            "note:-:0",
+            {
+              "for": "A"
+            }
+          ],
+          "expected": "classDiagram\n    class A\n    note for A \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "updateNote detach",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "updateNote",
+          "args": [
+            "note:A:1",
+            {
+              "for": ""
+            }
+          ],
+          "expected": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note \"Second note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "setClassNamespace to top level",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "setClassNamespace",
+          "args": ["Square", ""],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "setClassNamespace existing",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "setClassNamespace",
+          "args": ["Deep", "Shapes"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n        class Deep\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "setClassNamespace new",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setClassNamespace",
+          "args": ["Dog", "Pets"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    namespace Pets {\n        class Dog {\n            +String breed\n            +fetch() void\n        }\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setClassNamespace new nested",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "setClassNamespace",
+          "args": ["Dog", "Zoo.Pets"],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    namespace Zoo {\n        namespace Pets {\n            class Dog {\n                +String breed\n                +fetch() void\n            }\n        }\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "setNoteNamespace",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "text": "n"
+            }
+          ],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n    note \"n\"\n"
+        },
+        {
+          "op": "setNoteNamespace",
+          "args": ["note:-:0", "Shapes"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n        note \"n\"\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "groupInNamespace classes",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "groupInNamespace",
+          "args": [["Dog", "Cat"]],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    namespace Namespace1 {\n        class Dog {\n            +String breed\n            +fetch() void\n        }\n        class Cat {\n            +bool indoor\n            +climb() void\n        }\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "groupInNamespace with notes",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "groupInNamespace",
+          "args": [["A"], ["note:A:0"]],
+          "expected": "classDiagram\n    namespace Namespace1 {\n        class A\n        note for A \"Line one\\nLine two\"\n    }\n    note \"A free note\"\n    note for A \"Second note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "groupInNamespace twice",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "groupInNamespace",
+          "args": [["Dog"]],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    namespace Namespace1 {\n        class Dog {\n            +String breed\n            +fetch() void\n        }\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        },
+        {
+          "op": "groupInNamespace",
+          "args": [["Cat"]],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    namespace Namespace1 {\n        class Dog {\n            +String breed\n            +fetch() void\n        }\n    }\n    namespace Namespace2 {\n        class Cat {\n            +bool indoor\n            +climb() void\n        }\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroupNamespace",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "ungroupNamespace",
+          "args": ["Shapes"],
+          "expected": "classDiagram\n    class Circle {\n        +radius\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroupNamespace parent",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "ungroupNamespace",
+          "args": ["Outer"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Inner {\n        class Deep\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "ungroupNamespace child",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "ungroupNamespace",
+          "args": ["Outer.Inner"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        class Deep\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "renameNamespace",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "renameNamespace",
+          "args": ["Shapes", "Forms"],
+          "expected": "classDiagram\n    namespace Forms {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "renameNamespace parent",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "renameNamespace",
+          "args": ["Outer", "Top"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Top {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "renameNamespace cleans the name",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "renameNamespace",
+          "args": ["Outer.Inner", "Core x.y"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Core_x_y {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "renameNamespace to a taken id",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "renameNamespace",
+          "args": ["Shapes", "Outer"],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        },
+        {
+          "op": "renameNamespace",
+          "args": ["Shapes", " "],
+          "expected": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems class",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "classIds": ["Animal"]
+            }
+          ],
+          "expected": "classDiagram\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems relation",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "relationIds": ["R:Animal:Cat:0"]
+            }
+          ],
+          "expected": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound()* void\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Owner \"1\" o-- \"0..*\" Animal : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems note",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "noteIds": ["note:A:1"]
+            }
+          ],
+          "expected": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems class with notes",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "classIds": ["A"]
+            }
+          ],
+          "expected": "classDiagram\n    note \"A free note\"\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems namespace",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "nsIds": ["Shapes"]
+            }
+          ],
+          "expected": "classDiagram\n    class Circle {\n        +radius\n    }\n    namespace Outer {\n        namespace Inner {\n            class Deep\n        }\n    }\n    Square --> Circle\n"
+        }
+      ]
+    },
+    {
+      "name": "deleteItems lollipop class",
+      "code": "classDiagram\n    Bar ()-- Foo\n    Baz --() Qux\n",
+      "steps": [
+        {
+          "op": "deleteItems",
+          "args": [
+            {
+              "classIds": ["Foo"]
+            }
+          ],
+          "expected": "classDiagram\n    Baz --() Qux\n"
+        }
+      ]
+    },
+    {
+      "name": "build from blank",
+      "code": "classDiagram\n    class Class1\n",
+      "steps": [
+        {
+          "op": "addClass",
+          "args": [
+            {
+              "id": "Class2"
+            }
+          ],
+          "expected": "classDiagram\n    class Class1\n    class Class2\n"
+        },
+        {
+          "op": "addAttr",
+          "args": ["Class1"],
+          "expected": "classDiagram\n    class Class1 {\n        +attribute\n    }\n    class Class2\n"
+        },
+        {
+          "op": "addMethod",
+          "args": ["Class2"],
+          "expected": "classDiagram\n    class Class1 {\n        +attribute\n    }\n    class Class2 {\n        +method()\n    }\n"
+        },
+        {
+          "op": "addRelation",
+          "args": [
+            {
+              "from": "Class1",
+              "to": "Class2",
+              "kindId": "composition"
+            }
+          ],
+          "expected": "classDiagram\n    class Class1 {\n        +attribute\n    }\n    class Class2 {\n        +method()\n    }\n    Class1 *-- Class2\n"
+        },
+        {
+          "op": "updateRelation",
+          "args": [
+            "R:Class1:Class2:0",
+            {
+              "label": "owns",
+              "m2": "*"
+            }
+          ],
+          "expected": "classDiagram\n    class Class1 {\n        +attribute\n    }\n    class Class2 {\n        +method()\n    }\n    Class1 *-- \"*\" Class2 : owns\n"
+        },
+        {
+          "op": "groupInNamespace",
+          "args": [["Class1", "Class2"]],
+          "expected": "classDiagram\n    namespace Namespace1 {\n        class Class1 {\n            +attribute\n        }\n        class Class2 {\n            +method()\n        }\n    }\n    Class1 *-- \"*\" Class2 : owns\n"
+        },
+        {
+          "op": "renameNamespace",
+          "args": ["Namespace1", "Core"],
+          "expected": "classDiagram\n    namespace Core {\n        class Class1 {\n            +attribute\n        }\n        class Class2 {\n            +method()\n        }\n    }\n    Class1 *-- \"*\" Class2 : owns\n"
+        },
+        {
+          "op": "addNote",
+          "args": [
+            {
+              "text": "Note",
+              "forId": "Class2",
+              "ns": "Core"
+            }
+          ],
+          "expected": "classDiagram\n    namespace Core {\n        class Class1 {\n            +attribute\n        }\n        class Class2 {\n            +method()\n        }\n        note for Class2 \"Note\"\n    }\n    Class1 *-- \"*\" Class2 : owns\n"
+        },
+        {
+          "op": "renameClass",
+          "args": ["Class2", "Part"],
+          "expected": "classDiagram\n    namespace Core {\n        class Class1 {\n            +attribute\n        }\n        class Part {\n            +method()\n        }\n        note for Part \"Note\"\n    }\n    Class1 *-- \"*\" Part : owns\n"
+        }
+      ]
+    },
+    {
+      "name": "preamble survives edits",
+      "code": "---\ntitle: Classes\n---\nclassDiagram\n    A --> B\n",
+      "steps": [
+        {
+          "op": "addClass",
+          "args": [
+            {
+              "id": "C"
+            }
+          ],
+          "expected": "---\ntitle: Classes\n---\nclassDiagram\n    class C\n    A --> B\n"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "template",
+      "kind": "dagre",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "expected": {
+        "positions": {
+          "Animal": {
+            "x": 99,
+            "y": 187
+          },
+          "Cat": {
+            "x": 20,
+            "y": 387
+          },
+          "Dog": {
+            "x": 205,
+            "y": 387
+          },
+          "Owner": {
+            "x": 85,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "blank",
+      "kind": "dagre",
+      "code": "classDiagram\n    class Class1\n",
+      "expected": {
+        "positions": {
+          "Class1": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "v2Header",
+      "kind": "dagre",
+      "code": "classDiagram-v2\n    direction LR\n    A --> B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 220,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "directionTB",
+      "kind": "dagre",
+      "code": "classDiagram\n    direction TB\n    class A\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "members",
+      "kind": "dagre",
+      "code": "classDiagram\n    class Shape~T~ {\n        <<interface>>\n        <<service>>\n        -List~List~int~~ points$\n        #area() double*\n        ~resize(int w, int h) bool\n        +static() int$\n    }\n    class `My Class`[\"A label\"] {\n        +x\n    }\n    class Plain\n    class Tinted:::hot\n",
+      "expected": {
+        "positions": {
+          "My Class": {
+            "x": 296,
+            "y": 62
+          },
+          "Plain": {
+            "x": 466,
+            "y": 71
+          },
+          "Shape": {
+            "x": 20,
+            "y": 20
+          },
+          "Tinted": {
+            "x": 636,
+            "y": 71
+          }
+        }
+      }
+    },
+    {
+      "name": "relations",
+      "kind": "dagre",
+      "code": "classDiagram\n    A <|-- B\n    C *-- D\n    E o-- F\n    G <-- H\n    I -- J\n    K ..> L\n    M ..|> N\n    O .. P\n    Q <|--|> R : both ends\n    S \"many\" --> \"1\" T : label with #colon; colon\n    U --> V : say \"hi\"\n    A <|-- B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 151
+          },
+          "C": {
+            "x": 190,
+            "y": 20
+          },
+          "D": {
+            "x": 190,
+            "y": 151
+          },
+          "E": {
+            "x": 360,
+            "y": 20
+          },
+          "F": {
+            "x": 360,
+            "y": 151
+          },
+          "G": {
+            "x": 530,
+            "y": 20
+          },
+          "H": {
+            "x": 530,
+            "y": 151
+          },
+          "I": {
+            "x": 700,
+            "y": 20
+          },
+          "J": {
+            "x": 700,
+            "y": 151
+          },
+          "K": {
+            "x": 870,
+            "y": 20
+          },
+          "L": {
+            "x": 870,
+            "y": 151
+          },
+          "M": {
+            "x": 1040,
+            "y": 151
+          },
+          "N": {
+            "x": 1040,
+            "y": 20
+          },
+          "O": {
+            "x": 1210,
+            "y": 20
+          },
+          "P": {
+            "x": 1210,
+            "y": 151
+          },
+          "Q": {
+            "x": 1380,
+            "y": 20
+          },
+          "R": {
+            "x": 1380,
+            "y": 151
+          },
+          "S": {
+            "x": 1550,
+            "y": 20
+          },
+          "T": {
+            "x": 1550,
+            "y": 151
+          },
+          "U": {
+            "x": 1720,
+            "y": 20
+          },
+          "V": {
+            "x": 1720,
+            "y": 151
+          }
+        }
+      }
+    },
+    {
+      "name": "lollipops",
+      "kind": "dagre",
+      "code": "classDiagram\n    Bar ()-- Foo\n    Baz --() Qux\n",
+      "expected": {
+        "positions": {
+          "Baz": {
+            "x": 20,
+            "y": 20
+          },
+          "Foo": {
+            "x": 141,
+            "y": 151
+          },
+          "lolli:R:Bar:Foo:0": {
+            "x": 190,
+            "y": 35
+          },
+          "lolli:R:Baz:Qux:0": {
+            "x": 69,
+            "y": 166
+          }
+        }
+      }
+    },
+    {
+      "name": "namespaces",
+      "kind": "dagre",
+      "code": "classDiagram\n    namespace Shapes {\n        class Square\n        class Circle {\n            +radius\n        }\n    }\n    namespace Outer.Inner {\n        class Deep\n    }\n    Square --> Circle\n",
+      "expected": {
+        "positions": {
+          "Circle": {
+            "x": 55,
+            "y": 311
+          },
+          "Deep": {
+            "x": 285,
+            "y": 100
+          },
+          "Square": {
+            "x": 55,
+            "y": 100
+          }
+        }
+      }
+    },
+    {
+      "name": "notes",
+      "kind": "dagre",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Second note\"\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 256,
+            "y": 154
+          },
+          "note:-:0": {
+            "x": 20,
+            "y": 29
+          },
+          "note:A:0": {
+            "x": 346,
+            "y": 20
+          },
+          "note:A:1": {
+            "x": 183,
+            "y": 29
+          }
+        }
+      }
+    },
+    {
+      "name": "styling",
+      "kind": "dagre",
+      "code": "classDiagram\n    %% a comment that is dropped\n    class A:::hot {\n        +x\n    }\n    class B\n    cssClass \"A,B\" cool\n    classDef hot fill:#f00\n    classDef cool stroke:#00f\n    style B fill:#0f0\n    click A href \"https://example.com\"\n    link B \"https://example.com\"\n    callback A \"cb\"\n    accTitle: Title\n    accDescr {\n        Long\n        description\n    }\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 190,
+            "y": 29
+          }
+        }
+      }
+    },
+    {
+      "name": "preamble",
+      "kind": "dagre",
+      "code": "---\ntitle: Classes\n---\nclassDiagram\n    A --> B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 151
+          }
+        }
+      }
+    },
+    {
+      "name": "direction RL",
+      "kind": "dagre",
+      "code": "classDiagram\n    direction RL\n    A <|-- B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 220,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "generic class and members",
+      "kind": "dagre",
+      "code": "classDiagram\n    class Map~K, V~ {\n        +get(K key) V\n        +Map~K,V~ entries$\n    }\n",
+      "expected": {
+        "positions": {
+          "Map": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "annotation line",
+      "kind": "dagre",
+      "code": "classDiagram\n    class A\n    <<interface>> A\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "relation labels and cardinalities",
+      "kind": "dagre",
+      "code": "classDiagram\n    A \"1..*\" *-- \"0..1\" B : parts\n    C ..> D\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 151
+          },
+          "C": {
+            "x": 190,
+            "y": 20
+          },
+          "D": {
+            "x": 190,
+            "y": 151
+          }
+        }
+      }
+    },
+    {
+      "name": "namespace with labelled class",
+      "kind": "dagre",
+      "code": "classDiagram\n    namespace Core {\n        class A[\"Alpha\"]\n    }\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 55,
+            "y": 60
+          }
+        }
+      }
+    },
+    {
+      "name": "two-ended relations",
+      "kind": "dagre",
+      "code": "classDiagram\n    A *--* B\n    C o--o D\n    E <|..|> F\n    G <..> H\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 20,
+            "y": 151
+          },
+          "C": {
+            "x": 190,
+            "y": 20
+          },
+          "D": {
+            "x": 190,
+            "y": 151
+          },
+          "E": {
+            "x": 360,
+            "y": 20
+          },
+          "F": {
+            "x": 360,
+            "y": 151
+          },
+          "G": {
+            "x": 530,
+            "y": 20
+          },
+          "H": {
+            "x": 530,
+            "y": 151
+          }
+        }
+      }
+    },
+    {
+      "name": "direction BT",
+      "kind": "dagre",
+      "code": "classDiagram\n    direction BT\n    A <|-- B\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 151
+          },
+          "B": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "quotes in labels and notes",
+      "kind": "dagre",
+      "code": "classDiagram\n    class A[\"Label with 'single' quotes\"]\n    note for A \"say #quot;hi#quot;\"\n",
+      "expected": {
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 137
+          },
+          "note:A:0": {
+            "x": 77,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "methods with generics and classifiers",
+      "kind": "dagre",
+      "code": "classDiagram\n    class Repo~T~ {\n        +findAll() List~T~\n        +count()$ int\n        #save(T item)* void\n        -cache Map~String,T~\n    }\n",
+      "expected": {
+        "positions": {
+          "Repo": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "unicode class labels",
+      "kind": "dagre",
+      "code": "classDiagram\n    class Größe[\"Größe ✓\"]\n    Größe --> B\n",
+      "expected": {
+        "positions": {
+          "B": {
+            "x": 20,
+            "y": 151
+          },
+          "Größe": {
+            "x": 20,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "nested namespaces with notes",
+      "kind": "dagre",
+      "code": "classDiagram\n    namespace A.B.C {\n        class X\n    }\n    namespace A.D {\n        class Y\n    }\n    X --> Y\n    note for X \"deep\"\n",
+      "expected": {
+        "positions": {
+          "X": {
+            "x": 95,
+            "y": 257
+          },
+          "Y": {
+            "x": 95,
+            "y": 508
+          },
+          "note:X:0": {
+            "x": 110,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "place one new related class",
+      "kind": "place",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog <|-- Puppy\n",
+      "start": {
+        "Animal": {
+          "x": 99,
+          "y": 187
+        },
+        "Cat": {
+          "x": 20,
+          "y": 387
+        },
+        "Dog": {
+          "x": 205,
+          "y": 387
+        },
+        "Owner": {
+          "x": 85,
+          "y": 20
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Animal": {
+            "x": 99,
+            "y": 187
+          },
+          "Cat": {
+            "x": 20,
+            "y": 387
+          },
+          "Dog": {
+            "x": 205,
+            "y": 387
+          },
+          "Owner": {
+            "x": 85,
+            "y": 20
+          },
+          "Puppy": {
+            "x": 213,
+            "y": 554
+          }
+        }
+      }
+    },
+    {
+      "name": "place a new note for a class",
+      "kind": "place",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    note for Dog \"Good boy\"\n",
+      "start": {
+        "Animal": {
+          "x": 99,
+          "y": 187
+        },
+        "Cat": {
+          "x": 20,
+          "y": 387
+        },
+        "Dog": {
+          "x": 205,
+          "y": 387
+        },
+        "Owner": {
+          "x": 85,
+          "y": 20
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Animal": {
+            "x": 99,
+            "y": 187
+          },
+          "Cat": {
+            "x": 20,
+            "y": 387
+          },
+          "Dog": {
+            "x": 205,
+            "y": 387
+          },
+          "Owner": {
+            "x": 85,
+            "y": 20
+          },
+          "note:Dog:0": {
+            "x": 227,
+            "y": 554,
+            "l": "Good boy"
+          }
+        }
+      }
+    },
+    {
+      "name": "place a lollipop",
+      "kind": "place",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    Dog ()-- Walkable\n",
+      "start": {
+        "Animal": {
+          "x": 99,
+          "y": 187
+        },
+        "Cat": {
+          "x": 20,
+          "y": 387
+        },
+        "Dog": {
+          "x": 205,
+          "y": 387
+        },
+        "Owner": {
+          "x": 85,
+          "y": 20
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Animal": {
+            "x": 99,
+            "y": 187
+          },
+          "Cat": {
+            "x": 20,
+            "y": 387
+          },
+          "Dog": {
+            "x": 205,
+            "y": 387
+          },
+          "Owner": {
+            "x": 85,
+            "y": 20
+          },
+          "Walkable": {
+            "x": 420,
+            "y": 20
+          },
+          "lolli:R:Dog:Walkable:0": {
+            "x": 469,
+            "y": 151
+          }
+        }
+      }
+    },
+    {
+      "name": "place an unrelated class",
+      "kind": "place",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n    class Lone\n",
+      "start": {
+        "Animal": {
+          "x": 99,
+          "y": 187
+        },
+        "Cat": {
+          "x": 20,
+          "y": 387
+        },
+        "Dog": {
+          "x": 205,
+          "y": 387
+        },
+        "Owner": {
+          "x": 85,
+          "y": 20
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "Animal": {
+            "x": 99,
+            "y": 187
+          },
+          "Cat": {
+            "x": 20,
+            "y": 387
+          },
+          "Dog": {
+            "x": 205,
+            "y": 387
+          },
+          "Lone": {
+            "x": 420,
+            "y": 20
+          },
+          "Owner": {
+            "x": 85,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "changed note text is placed again",
+      "kind": "place",
+      "code": "classDiagram\n    class A\n    note \"A free note\"\n    note for A \"Line one\\nLine two\"\n    note for A \"Other note\"\n",
+      "start": {
+        "A": {
+          "x": 256,
+          "y": 154
+        },
+        "note:-:0": {
+          "x": 20,
+          "y": 29,
+          "l": "A free note"
+        },
+        "note:A:0": {
+          "x": 346,
+          "y": 20,
+          "l": "Line one\\nLine two"
+        },
+        "note:A:1": {
+          "x": 183,
+          "y": 29,
+          "l": "Second note"
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "A": {
+            "x": 256,
+            "y": 154
+          },
+          "note:-:0": {
+            "x": 20,
+            "y": 29,
+            "l": "A free note"
+          },
+          "note:A:0": {
+            "x": 346,
+            "y": 20,
+            "l": "Line one\\nLine two"
+          },
+          "note:A:1": {
+            "x": 263,
+            "y": 285,
+            "l": "Other note"
+          }
+        }
+      }
+    },
+    {
+      "name": "place in LR",
+      "kind": "place",
+      "code": "classDiagram\n    direction LR\n    A --> B\n    B --> C\n    C --> D\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 20
+        },
+        "B": {
+          "x": 220,
+          "y": 20
+        },
+        "C": {
+          "x": 420,
+          "y": 20
+        }
+      },
+      "expected": {
+        "isFullLayout": false,
+        "positions": {
+          "A": {
+            "x": 20,
+            "y": 20
+          },
+          "B": {
+            "x": 220,
+            "y": 20
+          },
+          "C": {
+            "x": 420,
+            "y": 20
+          },
+          "D": {
+            "x": 640,
+            "y": 20
+          }
+        }
+      }
+    },
+    {
+      "name": "mostly unknown lays out again",
+      "kind": "place",
+      "code": "classDiagram\n    class Animal {\n        <<abstract>>\n        +String name\n        +int age\n        +makeSound() void*\n    }\n    class Dog {\n        +String breed\n        +fetch() void\n    }\n    class Cat {\n        +bool indoor\n        +climb() void\n    }\n    class Owner {\n        +String name\n        +adopt(Animal a) void\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n    Owner \"1\" o-- \"0..*\" Animal : owns\n",
+      "start": {
+        "A": {
+          "x": 20,
+          "y": 20
+        },
+        "B": {
+          "x": 20,
+          "y": 151
+        }
+      },
+      "expected": {
+        "isFullLayout": true,
+        "positions": {
+          "Animal": {
+            "x": 99,
+            "y": 187
+          },
+          "Cat": {
+            "x": 20,
+            "y": 387
+          },
+          "Dog": {
+            "x": 205,
+            "y": 387
+          },
+          "Owner": {
+            "x": 85,
+            "y": 20
+          }
+        }
+      }
+    }
+  ]
+}
