@@ -1,11 +1,11 @@
-# Merrow (Mermaid Chat v2): product spec
+# Nautink (Mermaid Chat v2): product spec
 
 | | |
 |---|---|
-| Status | Accepted as the v2.0 scope; tracked on the Merrow project board |
+| Status | Accepted as the v2.0 scope |
 | Date | 2026-10-09 |
 | Baseline (v1) | `~/dev/mermaid-chat` (local only), commit `dd9c011` ("Add unified undo/redo history per diagram") |
-| Target (v2) | This repository (`NatanGer97/merrow`, working name Merrow), TypeScript, intended for open-source release |
+| Target (v2) | This repository (`NatanGer97/nautink`), TypeScript, intended for open-source release |
 | Design reference | Mockup canvas: https://claude.ai/artifact/4w9jxWVEL22BWP6BVi39Gf (8 screens, referenced below as **M1–M8**) |
 
 All `src/…` and `server/…` paths below are v1 paths in `~/dev/mermaid-chat`. The mockups are a design reference, not code. v2 is built fresh in TypeScript, porting v1's logic where this spec says so and replacing its UI shell.
@@ -344,7 +344,7 @@ Keep v1's endpoints and Server-Sent Events (SSE), typed with Zod.
 ## 10. Open-source readiness
 - **License:** MIT (as v1), plus THIRD_PARTY_NOTICES carried over from v1's README. Font Awesome (CC BY 4.0) needs attribution.
 - **Repository files:** CONTRIBUTING, CODE_OF_CONDUCT, SECURITY (local-only threat model: the server drives the user's Claude login), issue templates.
-- **Name:** decide before publishing; "Mermaid Chat" may be confused with official Mermaid products (§11).
+- **Name:** Nautink (decided 2026-10-09). "Mermaid Chat" was dropped because it could be confused with official Mermaid products.
 - **No telemetry.**
 
 ---
@@ -357,7 +357,7 @@ Keep v1's endpoints and Server-Sent Events (SSE), typed with Zod.
 | D2 | Split view = visual editor beside the real render (option 2) | Decided |
 | D3 | shadcn/ui + Tailwind v4 + TypeScript; Motion; no React Bits in the app | Decided |
 | D4 | New repository; v1 stays as the reference until parity | Decided |
-| Q1 | Product name for publishing | Open (working name: Merrow) |
+| Q1 | Product name for publishing | Decided: Nautink |
 | Q2 | Review-before-apply default on or off | Proposed: on |
 | Q3 | Keep visual edits in place (edit only the changed lines, preserving comments) instead of re-serializing | Proposed for v2.1 |
 | Q4 | Edge routing that avoids crossing boxes (ELK or custom router) | Proposed for v2.1 |

@@ -1,6 +1,6 @@
-# AGENTS.md — Merrow
+# AGENTS.md — Nautink
 
-Merrow (working name, may change) is a local-first, open-source web app for building Mermaid diagrams:
+Nautink is a local-first, open-source web app for building Mermaid diagrams:
 a canvas you edit by hand or by chatting with a coding agent, with every agent change shown as an
 accept/reject review. It is a rebuild of `~/dev/mermaid-chat` in TypeScript.
 

@@ -1,6 +1,4 @@
-# Merrow
-
-> Working name — may change.
+# Nautink
 
 A local-first, open-source web app for building [Mermaid](https://mermaid.js.org) diagrams: one canvas
 you edit by hand or by chatting with a coding agent, with every agent change shown as an

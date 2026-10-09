@@ -17,7 +17,7 @@ is published to a registry — see `.changeset/config.json`.
 
 `pnpm changeset status` lists what is pending. On `main`, the release workflow turns the pending
 changesets into a "Version Packages" pull request; merging that pull request is what bumps the versions.
-The run after the merge tags each bumped workspace (`@merrow/web@0.1.0`) and creates a GitHub Release from
+The run after the merge tags each bumped workspace (`@nautink/web@0.1.0`) and creates a GitHub Release from
 its changelog entry.
 
 The full documentation lives in
