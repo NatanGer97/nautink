@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createApp } from './app.ts';
 import { createProcessLogger } from './logger.ts';
-import { HOST, listen, startServer } from './server.ts';
+import { HOST, REPO_ROOT, listen, startServer } from './server.ts';
 import { FAKE_CLAUDE, makeTempDir } from '../tests/test-server.ts';
 
 import type { Logger } from './logger.ts';
@@ -80,6 +80,7 @@ describe('listen', () => {
       claudeBin: FAKE_CLAUDE,
       repoDir: null,
       homeDir: '/',
+      workDir: REPO_ROOT,
       healthTimeoutMs: 1000,
     });
     await expect(listen(app, 70_000)).rejects.toThrow(/^Cannot listen on 127\.0\.0\.1:70000: /);

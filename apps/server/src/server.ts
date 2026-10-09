@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import path from 'node:path';
 
 import { createApp } from './app.ts';
 import { loadConfig } from './config.ts';
@@ -12,6 +13,9 @@ import type { AddressInfo } from 'node:net';
 
 /** Localhost only: this server drives the user's personal Claude Code login. */
 export const HOST: string = '127.0.0.1';
+
+/** The monorepo root: the CLI's working directory when no codebase is selected. */
+export const REPO_ROOT: string = path.resolve(import.meta.dirname, '..', '..', '..');
 
 function describeListenError(port: number, err: unknown): string {
   const code: unknown = typeof err === 'object' && err !== null && 'code' in err ? err.code : null;
@@ -47,6 +51,7 @@ function createAppFromConfig(config: ServerConfig, homeDir: string): Express {
     claudeBin: config.claudeBin,
     repoDir: config.repoDir,
     homeDir,
+    workDir: REPO_ROOT,
     healthTimeoutMs: HEALTH_TIMEOUT_MS,
   });
 }

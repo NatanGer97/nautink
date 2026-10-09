@@ -1,12 +1,15 @@
 import { errorResponseSchema, healthResponseSchema } from '@nautink/contracts/server-info';
+import { createChatStreamDecoder } from '@nautink/contracts/sse';
 import { mkdtemp, realpath } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import process from 'node:process';
 
 import { createApp } from '../src/app.ts';
 import { listen } from '../src/server.ts';
 
 import type { AppOptions } from '../src/app.ts';
+import type { ChatEvent } from '@nautink/contracts/chat';
 import type { HealthResponse } from '@nautink/contracts/server-info';
 import type { AddressInfo } from 'node:net';
 
@@ -24,6 +27,7 @@ export async function startTestServer(overrides: Partial<AppOptions> = {}): Prom
     claudeBin: FAKE_CLAUDE,
     repoDir: null,
     homeDir: os.tmpdir(),
+    workDir: process.cwd(),
     healthTimeoutMs: 5000,
     ...overrides,
   });
@@ -48,6 +52,11 @@ export async function postJson(url: string, body: unknown): Promise<Response> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+}
+
+/** Reads a whole SSE response into its events. */
+export async function readEvents(response: Response): Promise<ChatEvent[]> {
+  return createChatStreamDecoder().push(await response.text());
 }
 
 /** A fresh temp folder, with symlinks resolved (macOS's /var is /private/var). */

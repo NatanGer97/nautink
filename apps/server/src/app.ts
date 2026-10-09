@@ -1,5 +1,7 @@
+import { API_ROUTES } from '@nautink/contracts/routes';
 import express from 'express';
 
+import { createChatHandler } from './chat-route.ts';
 import { NOT_FOUND, sendError } from './http-errors.ts';
 import { createInfoRouter } from './info-routes.ts';
 import { parseJsonBody } from './json-body.ts';
@@ -12,6 +14,8 @@ export interface AppOptions {
   /** The codebase Claude may read until `POST /api/repo` changes it; `null` turns repo-aware mode off. */
   repoDir: string | null;
   homeDir: string;
+  /** The CLI's working directory when no codebase is selected. */
+  workDir: string;
   healthTimeoutMs: number;
 }
 
@@ -22,6 +26,7 @@ export function createApp(options: AppOptions): Express {
   app.disable('x-powered-by');
   app.use(parseJsonBody);
   app.use(createInfoRouter({ ...options, repoSelection }));
+  app.post(API_ROUTES.chat, createChatHandler({ ...options, repoSelection }));
   app.use('/api', (req: Request, res: Response) => {
     sendError(res, NOT_FOUND, `Not found: ${req.method} ${req.originalUrl}`);
   });
