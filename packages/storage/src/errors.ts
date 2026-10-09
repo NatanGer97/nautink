@@ -17,3 +17,11 @@ export function requireRecord<T>(
   }
   return record;
 }
+
+/** Thrown when a backup file cannot be read; the message says what is wrong, for the user. */
+export class InvalidBackupError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidBackupError';
+  }
+}
