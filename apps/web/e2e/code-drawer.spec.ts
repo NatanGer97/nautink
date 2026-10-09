@@ -1,15 +1,18 @@
 import { expect, test } from '@playwright/test';
 
+import { focusCodeEditor, pressInEditor, skipFirstRun } from './helpers.ts';
+
 import type { Page } from '@playwright/test';
 
 /** Opens the code drawer and puts the cursor at the end of the code. */
 async function openCodeAtEnd(page: Page): Promise<void> {
-  await page.getByRole('banner').getByRole('button', { name: 'Code', exact: true }).click();
-  const editor = page.locator('.monaco-editor');
-  await expect(editor).toBeVisible();
-  await editor.locator('.view-lines').click();
-  await page.keyboard.press('ControlOrMeta+End');
+  await focusCodeEditor(page);
+  await pressInEditor(page, 'End');
 }
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
 
 test.describe('code drawer', () => {
   test.beforeEach(async ({ page }) => {

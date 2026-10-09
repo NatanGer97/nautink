@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
+import { skipFirstRun } from './helpers.ts';
+
+test.beforeEach(async ({ context }) => {
+  await skipFirstRun(context);
+});
+
 test.describe('export', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');

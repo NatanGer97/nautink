@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { editCode, readCode, skipFirstRun } from './helpers.ts';
+import { readCode, replaceCodeInEditor, skipFirstRun } from './helpers.ts';
 
 test.beforeEach(async ({ context }) => {
   await skipFirstRun(context);
@@ -11,13 +11,13 @@ test('saves a version with ⌘S, restores it, and undoes the restore', async ({ 
   await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   await page.getByRole('button', { name: 'History', exact: true }).click();
   const panel = page.getByRole('complementary', { name: 'History' });
-  await editCode(page, 'flowchart TD\n  A --> B\n');
+  await replaceCodeInEditor(page, 'flowchart TD\n  A --> B\n');
   await page.keyboard.press('ControlOrMeta+s');
   const dialog = page.getByRole('dialog', { name: 'Save version' });
   await dialog.getByLabel('Version name').fill('First draft');
   await page.keyboard.press('Enter');
   await expect(panel.getByRole('option', { name: /^Saved, .*First draft$/ })).toBeVisible();
-  await editCode(page, 'flowchart TD\n  A --> C\n');
+  await replaceCodeInEditor(page, 'flowchart TD\n  A --> C\n');
   await expect.poll(async () => readCode(page)).toMatch(/A --> C/);
   await panel.getByRole('option', { name: /First draft$/ }).click();
   await expect(panel.getByLabel('Version code')).toHaveText(/A --> B/);
