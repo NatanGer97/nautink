@@ -9,7 +9,15 @@ const QUOTED_RE: RegExp = /^(['"])(.*)\1$/;
 const TITLE_LINE_RE: RegExp = /^title\s+(.+)$/;
 const PIE_HEADER_TITLE_RE: RegExp = /^pie\b.*?\btitle\s+(.+)$/;
 // Diagram types whose code names the diagram with a `title …` line (PRD §11: a v1 gap).
-const TITLED_KEYWORDS: ReadonlySet<string> = new Set(['pie', 'gantt']);
+const TITLED_KEYWORDS: ReadonlySet<string> = new Set([
+  'pie',
+  'gantt',
+  'journey',
+  'timeline',
+  'xychart',
+  'xychart-beta',
+  'quadrantChart',
+]);
 const DATE_FORMAT: Intl.DateTimeFormat = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
@@ -32,7 +40,7 @@ export function frontMatterTitle(code: string): string {
   return title === undefined ? '' : title.replace(QUOTED_RE, '$2').trim();
 }
 
-/** The title a pie or gantt chart gives itself (`pie title Pets`, a `title …` line), or ''. */
+/** The title a chart gives itself (`pie title Pets`, a `title …` line, `title "Sales"`), or ''. */
 export function codeTitle(code: string): string {
   if (!TITLED_KEYWORDS.has(diagramKeyword(code))) {
     return '';
@@ -42,7 +50,7 @@ export function codeTitle(code: string): string {
   const fromLine: string | undefined = body
     .map((text) => TITLE_LINE_RE.exec(text)?.[1])
     .find((text) => text !== undefined);
-  return (inline ?? fromLine ?? '').trim();
+  return (inline ?? fromLine ?? '').trim().replace(QUOTED_RE, '$2');
 }
 
 function firstTypedMessage(source: AutoTitleSource): string {

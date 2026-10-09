@@ -97,9 +97,24 @@ describe('diagram CRUD', () => {
     expect(await getDiagram(db, 'p')).toEqual(diagram);
   });
 
+  it('bumps updatedAt on a code, chat or title change, not on pin, view or draft', async () => {
+    const created = await createDiagram(db, { code: 'pie title A', updatedAt: 5 });
+    const pinned = await updateDiagram(db, created.id, { pinned: true, view: 'edit', draft: 'x' });
+    expect(pinned.updatedAt).toBe(5);
+    const same = await updateDiagram(db, created.id, { code: 'pie title A' });
+    expect(same.updatedAt).toBe(5);
+    const before = Date.now();
+    const edited = await updateDiagram(db, created.id, { messages: [] });
+    expect(edited.updatedAt).toBeGreaterThanOrEqual(before);
+  });
+
   it('updates with a patch, recomputing an automatic title only', async () => {
     const created = await createDiagram(db, { code: 'pie title A', updatedAt: 5 });
-    const updated = await updateDiagram(db, created.id, { code: 'pie title B', draft: 'hi' });
+    const updated = await updateDiagram(db, created.id, {
+      code: 'pie title B',
+      draft: 'hi',
+      updatedAt: 5,
+    });
     expect(updated).toMatchObject({ code: 'pie title B', title: 'B', draft: 'hi', updatedAt: 5 });
     const renamed = await updateDiagram(db, created.id, { title: 'Named', titleAuto: false });
     const recoded = await updateDiagram(db, created.id, { code: 'pie title C', updatedAt: 9 });

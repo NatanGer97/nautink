@@ -66,9 +66,18 @@ export async function putDiagrams(db: NautinkDb, diagrams: readonly Diagram[]): 
   await Promise.all([...diagrams.map(async (diagram) => tx.store.put(diagram)), tx.done]);
 }
 
+// Fields whose change counts as an edit, so the diagram moves up the "most recent" list.
+const CONTENT_FIELDS: readonly (keyof DiagramPatch)[] = ['code', 'messages', 'title'];
+
+/** True when the patch changes the code, the chat or the title. */
+export function isContentChange(current: Diagram, patch: DiagramPatch): boolean {
+  return CONTENT_FIELDS.some((field) => field in patch && patch[field] !== current[field]);
+}
+
 /**
- * Merges `patch` into the saved diagram and returns the result. An automatic title is recomputed;
- * `updatedAt` changes only when the patch sets it. Throws `RecordNotFoundError` for an unknown id.
+ * Merges `patch` into the saved diagram and returns the result. An automatic title is recomputed.
+ * `updatedAt` is set to now when the code, chat or title changes, unless the patch sets it itself;
+ * pinning, view, draft and session changes keep it. Throws `RecordNotFoundError` for an unknown id.
  */
 export async function updateDiagram(
   db: NautinkDb,
@@ -77,7 +86,8 @@ export async function updateDiagram(
 ): Promise<Diagram> {
   const tx: NautinkTx<['diagrams']> = db.transaction('diagrams', 'readwrite');
   const current: Diagram = requireRecord(await tx.store.get(id), 'diagram', id);
-  const next: Diagram = withAutoTitle({ ...current, ...patch, id });
+  const touched: DiagramPatch = isContentChange(current, patch) ? { updatedAt: Date.now() } : {};
+  const next: Diagram = withAutoTitle({ ...current, ...touched, ...patch, id });
   await Promise.all([tx.store.put(next), tx.done]);
   return next;
 }

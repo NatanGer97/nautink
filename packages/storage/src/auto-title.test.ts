@@ -31,6 +31,13 @@ describe('autoTitle', () => {
 
   it('ignores title lines in other diagram types and untitled pies', () => {
     expect(codeTitle('flowchart TD\n  title Not a title')).toBe('');
+  });
+
+  it('reads the title of journey, timeline, xychart and quadrant charts', () => {
+    expect(codeTitle('journey\n  title My working day\n  section Go')).toBe('My working day');
+    expect(codeTitle('timeline\n  title History\n  2002 : LinkedIn')).toBe('History');
+    expect(codeTitle('xychart-beta\n  title "Sales"\n  x-axis [a, b]')).toBe('Sales');
+    expect(codeTitle('quadrantChart\n  title Reach\n  x-axis Low --> High')).toBe('Reach');
     expect(autoTitle(source('pie\n  "A": 1'))).toBe('Pie · Oct 9');
   });
 
