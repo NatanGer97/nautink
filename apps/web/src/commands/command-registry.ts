@@ -11,6 +11,11 @@ export interface AppCommand {
   /** Extra words the palette search should match. */
   keywords?: readonly string[];
   isDisabled?: boolean;
+  /**
+   * Runs once the palette has closed and let go of focus, not while it closes. For commands that
+   * move focus into a field (rename, search), which the closing dialog would otherwise take back.
+   */
+  isDeferred?: boolean;
   run: () => void;
 }
 

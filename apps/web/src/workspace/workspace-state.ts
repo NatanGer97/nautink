@@ -21,8 +21,8 @@ export interface WorkspaceData {
   histories: Readonly<Record<string, EditStack>>;
   /** The diagram whose title is being edited in the diagrams panel. */
   renamingId: string | null;
-  /** Bumped to ask the diagrams panel to focus its search box. */
-  searchFocusRequest: number;
+  /** True until the diagrams panel has focused its search box for ⌘K "Search diagrams". */
+  isSearchFocusRequested: boolean;
 }
 
 /** A code change through the history; `diagramId` defaults to the open diagram. */
@@ -73,6 +73,8 @@ export interface RequestActions {
   startRename: (id: string) => void;
   endRename: () => void;
   requestSearchFocus: () => void;
+  /** The panel calls this once it has focused the search box. */
+  takeSearchFocusRequest: () => void;
   /** Closes the database and forgets everything, unsaved changes included. For tests. */
   reset: () => void;
 }
@@ -101,5 +103,5 @@ export const INITIAL_WORKSPACE: WorkspaceData = {
   saveState: 'saved',
   histories: {},
   renamingId: null,
-  searchFocusRequest: 0,
+  isSearchFocusRequested: false,
 };

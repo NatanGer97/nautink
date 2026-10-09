@@ -372,7 +372,8 @@ describe('edit actions', () => {
 describe('panel requests', () => {
   it('starts and ends a rename, and asks for search focus', async () => {
     const workspace = await loadedWorkspace();
-    const { startRename, endRename, requestSearchFocus } = workspace.store.getState();
+    const { startRename, endRename, requestSearchFocus, takeSearchFocusRequest } =
+      workspace.store.getState();
     startRename(active(workspace).id);
     expect(workspace.store.getState().renamingId).toBe(active(workspace).id);
     endRename();
@@ -381,6 +382,8 @@ describe('panel requests', () => {
       startRename('missing');
     }).toThrow('No diagram with id "missing"');
     requestSearchFocus();
-    expect(workspace.store.getState().searchFocusRequest).toBe(1);
+    expect(workspace.store.getState().isSearchFocusRequested).toBe(true);
+    takeSearchFocusRequest();
+    expect(workspace.store.getState().isSearchFocusRequested).toBe(false);
   });
 });

@@ -26,6 +26,7 @@ globalThis.ResizeObserver = ResizeObserverStub;
 Element.prototype.scrollIntoView = (): undefined => undefined;
 Element.prototype.hasPointerCapture = (): boolean => false;
 Element.prototype.releasePointerCapture = (): undefined => undefined;
+Element.prototype.setPointerCapture = (): undefined => undefined;
 installMatchMedia();
 
 beforeEach(() => {

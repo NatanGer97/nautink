@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './app.tsx';
 import { NARROW_QUERY } from './lib/use-media-query.ts';
 import { useUiStore } from './state/ui-store.ts';
+import { useWorkspaceStore } from './workspace/use-workspace.ts';
 import { setMediaQuery } from '../tests/media.ts';
 
 beforeEach(() => {
@@ -149,8 +150,10 @@ describe('App shell', () => {
   it('starts new diagrams from the diagrams panel', async () => {
     useUiStore.getState().setActivePanel('diagrams');
     const user = renderApp();
-    await user.click(screen.getByRole('button', { name: 'Create a diagram' }));
-    expect(useUiStore.getState().isTemplatesOpen).toBe(true);
+    await screen.findByRole('option');
+    await user.click(screen.getByRole('button', { name: 'New diagram' }));
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(useWorkspaceStore.getState().diagrams).toHaveLength(2);
   });
 });
 

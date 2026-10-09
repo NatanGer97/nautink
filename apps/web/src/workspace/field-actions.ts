@@ -27,14 +27,16 @@ export function fieldActions(ctx: StoreContext): FieldActions {
 export function requestActions(ctx: StoreContext, initial: () => void): RequestActions {
   return {
     startRename: (id: string): void => {
-      findDiagram(ctx.get(), id);
-      ctx.set({ renamingId: id });
+      ctx.set({ renamingId: findDiagram(ctx.get(), id).id });
     },
     endRename: (): void => {
       ctx.set({ renamingId: null });
     },
     requestSearchFocus: (): void => {
-      ctx.set((state) => ({ searchFocusRequest: state.searchFocusRequest + 1 }));
+      ctx.set({ isSearchFocusRequested: true });
+    },
+    takeSearchFocusRequest: (): void => {
+      ctx.set({ isSearchFocusRequested: false });
     },
     reset: (): void => {
       ctx.runtime.disconnect();

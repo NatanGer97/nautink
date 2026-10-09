@@ -30,31 +30,53 @@ export function groupCommands(commands: readonly AppCommand[]): Map<string, AppC
   return groups;
 }
 
+interface PaletteRunner {
+  runCommand: (command: AppCommand) => void;
+  onOpenAutoFocus: () => void;
+  onCloseAutoFocus: (event: Event) => void;
+}
+
+/** Runs commands from the palette, and deferred ones once it has closed. */
+function usePaletteRunner(setOpen: (isOpen: boolean) => void): PaletteRunner {
+  // A command may move focus (⌘/ focuses the composer); the dialog must not pull it back on close.
+  const didRunRef: RefObject<boolean> = useRef<boolean>(false);
+  const deferredRef: RefObject<AppCommand | null> = useRef<AppCommand>(null);
+  return {
+    runCommand: (command: AppCommand): void => {
+      didRunRef.current = true;
+      setOpen(false);
+      if (command.isDeferred === true) {
+        deferredRef.current = command;
+        return;
+      }
+      command.run();
+    },
+    onOpenAutoFocus: (): void => {
+      didRunRef.current = false;
+    },
+    onCloseAutoFocus: (event: Event): void => {
+      if (didRunRef.current) {
+        event.preventDefault();
+      }
+      deferredRef.current?.run();
+      deferredRef.current = null;
+    },
+  };
+}
+
 /** The ⌘K palette: every registered command, searchable, grouped (PRD §3.6). */
 export function CommandPalette(): ReactElement {
   const isOpen: boolean = useUiStore((state) => state.isPaletteOpen);
   const setOpen: (isOpen: boolean) => void = useUiStore((state) => state.setPaletteOpen);
   const commands: readonly AppCommand[] = useCommands();
-  // A command may move focus (⌘/ focuses the composer); the dialog must not pull it back on close.
-  const didRunRef: RefObject<boolean> = useRef<boolean>(false);
-  const runCommand = (command: AppCommand): void => {
-    didRunRef.current = true;
-    setOpen(false);
-    command.run();
-  };
+  const { runCommand, onOpenAutoFocus, onCloseAutoFocus } = usePaletteRunner(setOpen);
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent
         showCloseButton={false}
         className="top-[18%] translate-y-0 gap-0 overflow-hidden rounded-dialog bg-panel p-0 shadow-dialog sm:max-w-[560px]"
-        onOpenAutoFocus={() => {
-          didRunRef.current = false;
-        }}
-        onCloseAutoFocus={(event: Event) => {
-          if (didRunRef.current) {
-            event.preventDefault();
-          }
-        }}
+        onOpenAutoFocus={onOpenAutoFocus}
+        onCloseAutoFocus={onCloseAutoFocus}
       >
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <DialogDescription className="sr-only">Search for a command to run.</DialogDescription>
