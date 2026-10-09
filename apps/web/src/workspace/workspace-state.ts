@@ -1,0 +1,105 @@
+import type { SaveState } from './autosave.ts';
+import type { EditEntry, EditMeta, EditStack } from './edit-history.ts';
+import type { WorkspaceDeps } from './workspace-deps.ts';
+import type { WorkspaceRuntime } from './workspace-runtime.ts';
+import type { DeletedDiagram } from '@nautink/storage/diagram-delete';
+import type { ChatMessage, Diagram, DiagramView } from '@nautink/storage/records';
+import type { StoreApi, UseBoundStore } from 'zustand';
+
+/** Where opening the database stands. */
+export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
+
+/** The workspace: every diagram, the open one, save state and each diagram's edit history. */
+export interface WorkspaceData {
+  status: LoadStatus;
+  loadError: string | null;
+  /** In no particular order; `sortDiagrams` gives the list order. */
+  diagrams: readonly Diagram[];
+  activeId: string | null;
+  saveState: SaveState;
+  /** Undo/redo stacks by diagram id, kept for the session only. */
+  histories: Readonly<Record<string, EditStack>>;
+  /** The diagram whose title is being edited in the diagrams panel. */
+  renamingId: string | null;
+  /** Bumped to ask the diagrams panel to focus its search box. */
+  searchFocusRequest: number;
+}
+
+/** A code change through the history; `diagramId` defaults to the open diagram. */
+export type EditRequest = EditMeta & { diagramId?: string };
+
+/** Diagram library actions: the diagrams panel and ⌘K use these. */
+export interface LibraryActions {
+  /** Opens the database and the remembered diagram, creating a first diagram when there is none. */
+  load: () => Promise<void>;
+  createDiagram: () => Promise<void>;
+  selectDiagram: (id: string) => void;
+  /** Throws for a blank title. */
+  renameDiagram: (id: string, title: string) => void;
+  togglePin: (id: string) => void;
+  duplicateDiagram: (id: string) => Promise<void>;
+  /** Deletes with an Undo notice. */
+  deleteDiagram: (id: string) => Promise<void>;
+  restoreDiagram: (deleted: DeletedDiagram, shouldOpen: boolean) => Promise<void>;
+  downloadDiagram: (id: string) => void;
+}
+
+/** Code changes and undo/redo. Every feature changes code through `applyEdit`. */
+export interface EditActions {
+  /** Records `code` as a labelled step and saves it. Returns the step that now holds the code. */
+  applyEdit: (code: string, request: EditRequest) => EditEntry;
+  /** Replaces the code of the newest step if it still is one (a Claude auto-fix retry). */
+  amendEdit: (entryId: number, code: string) => boolean;
+  /** Ends the typing group: call on a cursor jump, a paste or when the editor loses focus. */
+  closeEditGroup: () => void;
+  undo: () => void;
+  redo: () => void;
+  /** Moves the open diagram to state `index` of its stack. */
+  jumpTo: (index: number) => void;
+}
+
+/** The other saved fields of a diagram. */
+export interface FieldActions {
+  updateMessages: (id: string, update: (messages: readonly ChatMessage[]) => ChatMessage[]) => void;
+  setSessionId: (id: string, sessionId: string | null) => void;
+  setDraft: (id: string, draft: string) => void;
+  setView: (id: string, view: DiagramView) => void;
+  /** Writes every queued change now. */
+  flushSaves: () => Promise<void>;
+}
+
+/** Requests from ⌘K to the diagrams panel, and teardown. */
+export interface RequestActions {
+  startRename: (id: string) => void;
+  endRename: () => void;
+  requestSearchFocus: () => void;
+  /** Closes the database and forgets everything, unsaved changes included. For tests. */
+  reset: () => void;
+}
+
+export type WorkspaceState = WorkspaceData &
+  LibraryActions &
+  EditActions &
+  FieldActions &
+  RequestActions;
+
+export type WorkspaceStore = UseBoundStore<StoreApi<WorkspaceState>>;
+
+/** What every action is built from. */
+export interface StoreContext {
+  set: StoreApi<WorkspaceState>['setState'];
+  get: () => WorkspaceState;
+  deps: WorkspaceDeps;
+  runtime: WorkspaceRuntime;
+}
+
+export const INITIAL_WORKSPACE: WorkspaceData = {
+  status: 'idle',
+  loadError: null,
+  diagrams: [],
+  activeId: null,
+  saveState: 'saved',
+  histories: {},
+  renamingId: null,
+  searchFocusRequest: 0,
+};

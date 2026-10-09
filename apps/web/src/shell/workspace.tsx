@@ -13,6 +13,7 @@ import { focusOverlayContainer } from './focus-overlay.ts';
 import { PANEL_WIDTHS, SidePanel } from './side-panel.tsx';
 import { PANEL_LABELS } from '../commands/shell-commands.ts';
 import { useUiStore } from '../state/ui-store.ts';
+import { ActiveCodeStandIn } from '../workspace/active-code-stand-in.tsx';
 
 import type { PanelId } from '../state/ui-prefs.ts';
 import type { ReactElement } from 'react';
@@ -48,7 +49,9 @@ export function WideWorkspace(): ReactElement {
         </>
       )}
       <ResizablePanel id="canvas" minSize={320}>
-        <CanvasArea />
+        <CanvasArea>
+          <ActiveCodeStandIn />
+        </CanvasArea>
       </ResizablePanel>
       {isCodeDrawerOpen ? (
         <>
@@ -81,7 +84,9 @@ export function NarrowWorkspace(): ReactElement {
   }, [setActivePanel, setCodeDrawerOpen]);
   return (
     <div className="flex min-w-0 flex-1">
-      <CanvasArea />
+      <CanvasArea>
+        <ActiveCodeStandIn />
+      </CanvasArea>
       <Sheet
         open={activePanel !== null}
         onOpenChange={(isOpen: boolean) => {

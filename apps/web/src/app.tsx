@@ -9,6 +9,7 @@ import { TemplatesDialog } from './shell/templates-dialog.tsx';
 import { useAppliedTheme } from './shell/use-applied-theme.ts';
 import { useGlobalShortcuts } from './shell/use-global-shortcuts.ts';
 import { useUiStore } from './state/ui-store.ts';
+import { useWorkspaceLifecycle } from './workspace/use-workspace-lifecycle.ts';
 
 import type { AppCommand } from './commands/command-registry.ts';
 import type { ResolvedTheme, ThemePreference } from '@nautink/ui/theme';
@@ -25,6 +26,7 @@ export function App(): ReactElement {
   const preference: ThemePreference = useUiStore((state) => state.themePreference);
   const theme: ResolvedTheme = useAppliedTheme(preference);
   useGlobalShortcuts();
+  useWorkspaceLifecycle();
   useRegisterCommands(SHELL_COMMANDS);
   return (
     <TooltipProvider delayDuration={TOOLTIP_DELAY_MS}>

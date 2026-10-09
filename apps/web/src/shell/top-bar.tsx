@@ -10,15 +10,9 @@ import { CanvasModeToggle } from './canvas-mode-toggle.tsx';
 import { LogoMark } from './logo-mark.tsx';
 import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
 import { useUiStore } from '../state/ui-store.ts';
+import { DiagramTitle, SaveStatus } from '../workspace/diagram-title.tsx';
 
 import type { ReactElement } from 'react';
-
-export interface TopBarProps {
-  /** The open diagram's title. Placeholder until storage lands. */
-  title?: string;
-  /** "Saved", "Saving…" or "Unsaved changes". */
-  saveState?: string;
-}
 
 function PaletteButton(): ReactElement {
   const setPaletteOpen: (isOpen: boolean) => void = useUiStore((state) => state.setPaletteOpen);
@@ -53,22 +47,19 @@ function PaletteButton(): ReactElement {
 }
 
 /** The 48 px top bar: identity, canvas mode, code drawer, history, palette and export (PRD §5). */
-export function TopBar({
-  title = 'Untitled diagram',
-  saveState = 'Saved',
-}: TopBarProps): ReactElement {
+export function TopBar(): ReactElement {
   const isCodeDrawerOpen: boolean = useUiStore((state) => state.isCodeDrawerOpen);
   const toggleCodeDrawer: () => void = useUiStore((state) => state.toggleCodeDrawer);
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-panel px-3">
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <LogoMark />
         <span className="text-base font-semibold">Nautink</span>
         <span aria-hidden="true" className="text-faint max-md:hidden">
           /
         </span>
-        <span className="truncate font-medium max-md:hidden">{title}</span>
-        <span className="text-xs text-muted-foreground max-md:hidden">{saveState}</span>
+        <DiagramTitle />
+        <SaveStatus className="shrink-0 text-xs text-muted-foreground max-md:hidden" />
       </div>
       <div className="flex items-center gap-2">
         <CanvasModeToggle />
