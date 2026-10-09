@@ -78,4 +78,3 @@ undo/redo stack (`edit-history.ts`, 200 steps, session only) and queues the save
 | `two-tab-notice.ts` | `BroadcastChannel('nautink')`: both tabs warn that their edits overwrite each other (PRD §11) |
 | `panel/` | The diagrams panel: search, type chips, the keyboard listbox, row menu, inline rename |
 | `workspace-deps.ts`, `default-workspace-deps.ts` | Database, notices, downloads, clock: swapped in tests |
-| `active-code-stand-in.tsx` | **Temporary**: the code as plain text until the preview lands |

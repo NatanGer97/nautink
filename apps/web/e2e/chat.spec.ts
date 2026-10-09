@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { skipFirstRun } from './helpers.ts';
+import { skipFirstRun, readCode } from './helpers.ts';
 
 import type { Page, Route } from '@playwright/test';
 
@@ -62,7 +62,7 @@ test.beforeEach(async ({ context }) => {
 test.describe('chat', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByLabel('Diagram code')).toHaveText('flowchart TD');
+    await expect.poll(async () => readCode(page)).toBe('flowchart TD');
     // Playwright reuses whatever dev server holds E2E_PORT. Fail clearly when it serves a build
     // without the chat (another checkout's server), instead of timing out on an unsent message.
     await expect(
@@ -79,13 +79,13 @@ test.describe('chat', () => {
     const chat = page.getByRole('complementary', { name: 'Chat' });
     await expect(chat.getByText('Diagram updated')).toBeVisible();
     await expect(chat.getByText('Read the current diagram')).toBeVisible();
-    await expect(page.getByLabel('Diagram code')).toHaveText(VALID);
+    await expect.poll(async () => readCode(page)).toBe(VALID);
     expect(messages).toEqual(['Draw a checkout']);
     await page.getByLabel('Message Claude').blur();
     await page.keyboard.press('ControlOrMeta+z');
-    await expect(page.getByLabel('Diagram code')).toHaveText('flowchart TD');
+    await expect.poll(async () => readCode(page)).toBe('flowchart TD');
     await page.keyboard.press('ControlOrMeta+Shift+z');
-    await expect(page.getByLabel('Diagram code')).toHaveText(VALID);
+    await expect.poll(async () => readCode(page)).toBe(VALID);
   });
 
   test('retries on its own when the reply does not parse', async ({ page }) => {
@@ -94,11 +94,11 @@ test.describe('chat', () => {
       replyBody(fenced(VALID)),
     ]);
     await send(page, 'Draw a checkout');
-    await expect(page.getByLabel('Diagram code')).toHaveText(VALID);
+    await expect.poll(async () => readCode(page)).toBe(VALID);
     expect(messages).toHaveLength(2);
     expect(messages[1]).toMatch(/^The diagram fails to parse:\n[\s\S]+\nFix it\.$/);
     await page.getByLabel('Message Claude').blur();
     await page.keyboard.press('ControlOrMeta+z');
-    await expect(page.getByLabel('Diagram code')).toHaveText('flowchart TD');
+    await expect.poll(async () => readCode(page)).toBe('flowchart TD');
   });
 });

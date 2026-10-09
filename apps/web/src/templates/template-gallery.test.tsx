@@ -32,7 +32,7 @@ async function openGallery(): Promise<{
 }> {
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByLabelText('Diagram code');
+  await screen.findByRole('group', { name: 'Diagram preview' });
   await user.click(screen.getByRole('button', { name: 'Templates' }));
   return { user, gallery: await screen.findByRole('dialog', { name: 'New diagram' }) };
 }
@@ -84,7 +84,7 @@ describe('new diagram gallery', () => {
     useUiStore.setState({ activePanel: 'diagrams' });
     const user = userEvent.setup();
     render(<App />);
-    await screen.findByLabelText('Diagram code');
+    await screen.findByRole('group', { name: 'Diagram preview' });
     await user.click(screen.getByRole('button', { name: 'New from a template' }));
     expect(useUiStore.getState().isTemplatesOpen).toBe(true);
     await user.keyboard('{Escape}');

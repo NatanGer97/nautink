@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { skipFirstRun } from './helpers.ts';
+import { skipFirstRun, readCode } from './helpers.ts';
 
 test.beforeEach(async ({ context }) => {
   await skipFirstRun(context);
@@ -8,7 +8,7 @@ test.beforeEach(async ({ context }) => {
 
 test('creates a diagram from a template in the gallery', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByLabel('Diagram code')).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   await page.getByRole('button', { name: 'Templates' }).click();
   const gallery = page.getByRole('dialog', { name: 'New diagram' });
   await gallery.getByRole('button', { name: /^Charts/ }).click();
@@ -16,7 +16,7 @@ test('creates a diagram from a template in the gallery', async ({ page }) => {
   await expect(gallery.locator('[data-state="image"]').first()).toBeVisible();
   await gallery.getByRole('button', { name: 'Use the pie chart example' }).click();
   await expect(gallery).toHaveCount(0);
-  await expect(page.getByLabel('Diagram code')).toHaveText(/^pie title Traffic sources/);
+  await expect.poll(async () => readCode(page)).toMatch(/^pie title Traffic sources/);
   await expect(
     page.getByRole('banner').getByRole('button', { name: 'Traffic sources' }),
   ).toBeVisible();

@@ -12,8 +12,9 @@ import { CodeDrawer } from './code-drawer.tsx';
 import { focusOverlayContainer } from './focus-overlay.ts';
 import { PANEL_WIDTHS, SidePanel } from './side-panel.tsx';
 import { PANEL_LABELS } from '../commands/shell-commands.ts';
+import { useIsFocusMode } from '../preview/focus-mode.ts';
+import { PreviewCanvas } from '../preview/preview-canvas.tsx';
 import { useUiStore } from '../state/ui-store.ts';
-import { ActiveCodeStandIn } from '../workspace/active-code-stand-in.tsx';
 
 import type { PanelId } from '../state/ui-prefs.ts';
 import type { ReactElement } from 'react';
@@ -30,8 +31,11 @@ const SHEET_MOTION: string =
 
 /** Wide windows: side panel, canvas and code drawer side by side, with draggable dividers. */
 export function WideWorkspace(): ReactElement {
-  const activePanel: PanelId | null = useUiStore((state) => state.activePanel);
-  const isCodeDrawerOpen: boolean = useUiStore((state) => state.isCodeDrawerOpen);
+  const isFocusMode: boolean = useIsFocusMode();
+  const openPanel: PanelId | null = useUiStore((state) => state.activePanel);
+  const isDrawerOpen: boolean = useUiStore((state) => state.isCodeDrawerOpen);
+  const activePanel: PanelId | null = isFocusMode ? null : openPanel;
+  const isCodeDrawerOpen: boolean = isDrawerOpen && !isFocusMode;
   return (
     <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
       {activePanel === null ? null : (
@@ -50,7 +54,7 @@ export function WideWorkspace(): ReactElement {
       )}
       <ResizablePanel id="canvas" minSize={320}>
         <CanvasArea>
-          <ActiveCodeStandIn />
+          <PreviewCanvas />
         </CanvasArea>
       </ResizablePanel>
       {isCodeDrawerOpen ? (
@@ -85,7 +89,7 @@ export function NarrowWorkspace(): ReactElement {
   return (
     <div className="flex min-w-0 flex-1">
       <CanvasArea>
-        <ActiveCodeStandIn />
+        <PreviewCanvas />
       </CanvasArea>
       <Sheet
         open={activePanel !== null}

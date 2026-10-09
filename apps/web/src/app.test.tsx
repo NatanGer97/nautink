@@ -32,7 +32,7 @@ describe('App shell', () => {
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeTruthy();
     expect(screen.getByRole('complementary', { name: 'Chat' })).toBeTruthy();
     expect(screen.getByRole('main', { name: 'Canvas' })).toBeTruthy();
-    expect(screen.getByRole('contentinfo').textContent).toContain('Valid');
+    expect(screen.getByRole('contentinfo').textContent).toContain('Empty');
   });
 
   it('switches rail panels, one at a time, and collapses them', async () => {

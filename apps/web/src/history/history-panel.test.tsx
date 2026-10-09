@@ -39,7 +39,7 @@ async function renderHistory(): Promise<ReturnType<typeof userEvent.setup>> {
   useUiStore.setState({ activePanel: 'history' });
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByLabelText('Diagram code');
+  await screen.findByRole('group', { name: 'Diagram preview' });
   await screen.findByText('No versions yet');
   return user;
 }

@@ -36,7 +36,7 @@ async function runCommand(user: User, text: string): Promise<void> {
 async function renderApp(): Promise<User> {
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByLabelText('Diagram code');
+  await screen.findByRole('group', { name: 'Diagram preview' });
   return user;
 }
 

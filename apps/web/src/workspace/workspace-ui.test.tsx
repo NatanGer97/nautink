@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useWorkspaceStore } from './use-workspace.ts';
+import { selectActiveDiagram, useWorkspaceStore } from './use-workspace.ts';
 import { App } from '../app.tsx';
 
 beforeEach(() => {
@@ -19,14 +19,14 @@ afterEach(() => {
 async function renderLoadedApp(): Promise<ReturnType<typeof userEvent.setup>> {
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByLabelText('Diagram code');
+  await screen.findByRole('group', { name: 'Diagram preview' });
   return user;
 }
 
 describe('workspace in the shell', () => {
   it('shows the open diagram in the canvas, top bar and status bar', async () => {
     await renderLoadedApp();
-    expect(screen.getByLabelText('Diagram code').textContent).toBe('flowchart TD\n');
+    expect(selectActiveDiagram(useWorkspaceStore.getState())?.code).toBe('flowchart TD\n');
     const banner = screen.getByRole('banner');
     expect(within(banner).getByRole('button', { name: /^Flowchart · / })).toBeTruthy();
     expect(within(banner).getByText('Saved')).toBeTruthy();

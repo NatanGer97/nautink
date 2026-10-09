@@ -118,7 +118,7 @@ describe('first run', () => {
     await createDiagram(db, { code: 'pie title Mine\n  "a" : 1\n' });
     db.close();
     render(<App />);
-    expect(await screen.findByLabelText('Diagram code')).toBeTruthy();
+    expect(await screen.findByRole('group', { name: 'Diagram preview' })).toBeTruthy();
     expect(screen.queryByRole('main', { name: 'Get started' })).toBeNull();
   });
 

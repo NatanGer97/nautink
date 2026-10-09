@@ -2,31 +2,28 @@ import { MODEL_LABELS } from '@nautink/contracts/models';
 import { typeName } from '@nautink/storage/diagram-type';
 import { cn } from '@nautink/ui/lib/utils';
 
+import { usePreviewStatus } from '../preview/preview-status.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { SaveStatus } from '../workspace/diagram-title.tsx';
 import { lineCount } from '../workspace/text.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
+import type { PreviewStatus, PreviewValidity } from '../preview/preview-status.ts';
 import type { ModelId } from '@nautink/contracts/models';
 import type { Diagram } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
-/** What the preview reports about the open diagram. A seam for the preview wave. */
-export interface PreviewStatus {
-  isValid: boolean;
-  /** `null` until the first render. */
-  renderMs: number | null;
-}
-
-/** Shown until the renderer reports real values. */
-export const PLACEHOLDER_PREVIEW_STATUS: PreviewStatus = {
-  isValid: true,
-  renderMs: null,
+const VALIDITY_LABELS: Readonly<Record<PreviewValidity, string>> = {
+  valid: 'Valid',
+  invalid: 'Invalid',
+  empty: 'Empty',
 };
 
-export interface StatusBarProps {
-  preview?: PreviewStatus;
-}
+const VALIDITY_DOT_CLASS: Readonly<Record<PreviewValidity, string>> = {
+  valid: 'bg-success',
+  invalid: 'bg-destructive',
+  empty: 'bg-faint',
+};
 
 function lineLabel(count: number): string {
   return count === 1 ? '1 line' : `${String(count)} lines`;
@@ -37,7 +34,8 @@ function renderLabel(renderMs: number | null): string {
 }
 
 /** The 28 px footer: type, validity, save state, line count, render time, model (M1). */
-export function StatusBar({ preview = PLACEHOLDER_PREVIEW_STATUS }: StatusBarProps): ReactElement {
+export function StatusBar(): ReactElement {
+  const preview: PreviewStatus = usePreviewStatus();
   const model: ModelId | null = useUiStore((state) => state.defaultModel);
   const diagram: Diagram | undefined = useActiveDiagram();
   const code: string = diagram?.code ?? '';
@@ -47,9 +45,9 @@ export function StatusBar({ preview = PLACEHOLDER_PREVIEW_STATUS }: StatusBarPro
       <span className="inline-flex items-center gap-1.5">
         <span
           aria-hidden="true"
-          className={cn('size-1.5 rounded-full', preview.isValid ? 'bg-success' : 'bg-destructive')}
+          className={cn('size-1.5 rounded-full', VALIDITY_DOT_CLASS[preview.validity])}
         />
-        {preview.isValid ? 'Valid' : 'Invalid'}
+        {VALIDITY_LABELS[preview.validity]}
       </span>
       <SaveStatus className="max-sm:hidden" />
       <span className="flex-1" />

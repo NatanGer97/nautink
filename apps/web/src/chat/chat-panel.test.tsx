@@ -60,7 +60,7 @@ function chatRequests(): ChatRequest[] {
 async function renderApp(): Promise<ReturnType<typeof userEvent.setup>> {
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByLabelText('Diagram code');
+  await screen.findByRole('group', { name: 'Diagram preview' });
   return user;
 }
 

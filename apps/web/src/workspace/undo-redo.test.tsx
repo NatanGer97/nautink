@@ -25,7 +25,7 @@ const code = (): string | undefined => selectActiveDiagram(useWorkspaceStore.get
 async function renderWithSteps(): Promise<ReturnType<typeof userEvent.setup>> {
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByLabelText('Diagram code');
+  await screen.findByRole('group', { name: 'Diagram preview' });
   const { applyEdit } = useWorkspaceStore.getState();
   applyEdit('flowchart TD\n  a', { label: 'Pasted code', source: 'code' });
   applyEdit('flowchart TD\n  a --> b', { label: 'Claude: Link a to b', source: 'claude' });

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { editCode, skipFirstRun } from './helpers.ts';
+import { editCode, skipFirstRun, readCode } from './helpers.ts';
 
 test.beforeEach(async ({ context }) => {
   await skipFirstRun(context);
@@ -23,7 +23,7 @@ const TWO_BLOCKS = [
 
 test('imports a Markdown file with two mermaid blocks as two diagrams', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByLabel('Diagram code')).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   await page.getByRole('button', { name: 'Diagrams', exact: true }).click();
   const panel = page.getByRole('complementary', { name: 'Diagrams' });
   const chooser = page.waitForEvent('filechooser');
@@ -43,7 +43,7 @@ test('imports a Markdown file with two mermaid blocks as two diagrams', async ({
   await expect(page.getByText('Imported 2 diagrams')).toBeVisible();
   await expect(panel.getByRole('option')).toHaveCount(3);
   await expect(panel.getByRole('option', { name: /^notes 1, Pie/ })).toBeVisible();
-  await expect(page.getByLabel('Diagram code')).toHaveText(/flowchart LR/);
+  await expect.poll(async () => readCode(page)).toMatch(/flowchart LR/);
 });
 
 test('backs up every diagram and restores it from the first-run hint of a fresh profile', async ({
@@ -51,7 +51,7 @@ test('backs up every diagram and restores it from the first-run hint of a fresh 
   browser,
 }) => {
   await page.goto('/');
-  await expect(page.getByLabel('Diagram code')).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   await editCode(page, 'pie title Kept\n  "a" : 1\n');
   await page.getByRole('button', { name: 'Settings' }).click();
   const downloading = page.waitForEvent('download');
@@ -68,6 +68,6 @@ test('backs up every diagram and restores it from the first-run hint of a fresh 
   await other.getByRole('button', { name: 'Restore its backup.' }).click();
   await (await chooser).setFiles(backupPath);
   await expect(other.getByText('Restored 1 diagram and 0 versions')).toBeVisible();
-  await expect(other.getByLabel('Diagram code')).toHaveText(/pie title Kept/);
+  await expect.poll(async () => readCode(other)).toMatch(/pie title Kept/);
   await fresh.close();
 });

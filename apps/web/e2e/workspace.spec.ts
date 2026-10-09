@@ -9,12 +9,12 @@ test.beforeEach(async ({ context }) => {
 test.describe('workspace', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByLabel('Diagram code')).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   });
 
   test('starts with a blank flowchart and keeps a rename after a reload', async ({ page }) => {
     const banner = page.getByRole('banner');
-    await expect(page.getByLabel('Diagram code')).toHaveText('flowchart TD');
+    await expect(page.getByRole('contentinfo')).toContainText('1 line');
     await banner.getByRole('button', { name: /^Flowchart · / }).click();
     await page.keyboard.type('Checkout flow');
     await page.keyboard.press('Enter');
@@ -28,7 +28,7 @@ test.describe('workspace', () => {
 
 test('renames the diagram in place from the command palette', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByLabel('Diagram code')).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   await page.keyboard.press('ControlOrMeta+k');
   await page.getByRole('dialog', { name: 'Command palette' }).getByRole('combobox').fill('rename');
   await page.keyboard.press('Enter');
@@ -103,7 +103,7 @@ test.describe('diagrams panel', () => {
 test('warns in both tabs when the app is open twice', async ({ context }) => {
   const first = await context.newPage();
   await first.goto('/');
-  await expect(first.getByLabel('Diagram code')).toBeVisible();
+  await expect(first.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
   const second = await context.newPage();
   await second.goto('/');
   const warning = /open in another tab\. Edits made in both tabs overwrite each other/;

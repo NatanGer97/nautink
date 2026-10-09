@@ -3,10 +3,27 @@ import type { BrowserContext, Page } from '@playwright/test';
 /** The `localStorage` flag that says the first-run screen was left (`first-run-store.ts`). */
 const FIRST_RUN_DONE_KEY: string = 'nautink.firstRunDone';
 
+interface StoreState {
+  applyEdit: (code: string, meta: { label: string; source: string }) => void;
+  activeId: string | null;
+  diagrams: readonly { id: string; code: string }[];
+}
+
 interface StoreModule {
-  useWorkspaceStore: {
-    getState: () => { applyEdit: (code: string, meta: { label: string; source: string }) => void };
-  };
+  useWorkspaceStore: { getState: () => StoreState };
+}
+
+/**
+ * The open diagram's code, trimmed, read from the workspace store. Use it with `expect.poll`:
+ * the canvas shows the rendered diagram, not the code text.
+ */
+export async function readCode(page: Page): Promise<string> {
+  return page.evaluate(async () => {
+    const modulePath: string = '/src/workspace/use-workspace.ts';
+    const workspace: StoreModule = (await import(modulePath)) as StoreModule;
+    const state: StoreState = workspace.useWorkspaceStore.getState();
+    return (state.diagrams.find((diagram) => diagram.id === state.activeId)?.code ?? '').trim();
+  });
 }
 
 /**

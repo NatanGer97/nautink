@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { cleanup } from '@testing-library/react';
 import { IDBFactory } from 'fake-indexeddb';
-import { afterEach, beforeEach } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 import { installLocalBroadcastChannel } from './broadcast.ts';
 import { resetHistoryState, skipFirstRun } from './history-fixtures.ts';
@@ -45,6 +45,13 @@ Element.prototype.releasePointerCapture = (): undefined => undefined;
 Element.prototype.setPointerCapture = (): undefined => undefined;
 installMatchMedia();
 installLocalBroadcastChannel();
+
+// Mermaid cannot lay out diagrams in jsdom (no SVG geometry) and is slow to import, so every test
+// that mounts the app gets a renderer that answers at once. `render-diagram.test.ts` unmocks it.
+vi.mock('../src/preview/render-diagram.ts', () => ({
+  renderDiagram: async (): Promise<unknown> =>
+    Promise.resolve({ kind: 'rendered', svg: '<svg viewBox="0 0 10 10"></svg>', renderMs: 1 }),
+}));
 
 beforeEach(() => {
   // A fresh, empty IndexedDB per test, so the app's `nautink` database never leaks between tests.
