@@ -75,5 +75,5 @@ To recreate it, write a Vitest test file (plain `.mjs`) outside the repo that:
    `{ editor, source: { repo, commit }, mappings, roundTrip, ops, layouts }`.
 4. Formats the output with the repo's Prettier (`prettier --write packages/editors/tests/golden/*.json`).
 
-A copy of the last generator lived at `/private/tmp/claude-501/nautink-golden/` on the machine that
-made these files (`generate.test.mjs`, `harness.mjs`, `engine.mjs`, one `<editor>.mjs` per editor).
+A copy of the last generator is kept outside the repo at `~/dev/projects/nautink-tools/golden-generator/`
+on the machine that made these files (`generate.test.mjs`, `harness.mjs`, `engine.mjs`, one `<editor>.mjs` per editor).
