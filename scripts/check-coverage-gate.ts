@@ -21,7 +21,12 @@ interface GatedPackage {
   root: string;
 }
 
-const GATED: GatedPackage[] = [];
+const GATED: GatedPackage[] = [
+  {
+    name: 'packages/contracts',
+    root: path.join(import.meta.dirname, '..', 'packages', 'contracts'),
+  },
+];
 
 // A noisy suite overruns `spawnSync`'s 1 MB default and would truncate away the very line this
 // script looks for.

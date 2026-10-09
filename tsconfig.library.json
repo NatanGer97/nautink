@@ -1,0 +1,15 @@
+{
+  // Shared compiler options for every workspace package. Packages ship TypeScript source with no
+  // build step (ADR-001): Vite and Node read `src/*.ts` directly, so relative imports keep their
+  // `.ts` extension and only erasable syntax is allowed.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "types": []
+  }
+}

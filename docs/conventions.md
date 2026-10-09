@@ -88,3 +88,29 @@ Warnings (`no-magic-numbers`, `no-inline-comments`, `no-warning-comments`) block
 gates and not the last two: an agent or a commit has to deal with them there and then, while a
 push and CI let them through. That is deliberate — a warning is a prompt to think, not a reason
 to block the branch.
+
+## Workspace packages
+
+- **Name and place.** Apps live in `apps/<name>` as `@nautink/<name>`; libraries in `packages/<name>` as
+  `@nautink/<name>`. `packages/contracts` is the reference layout to copy.
+- **No build step for libraries.** A package ships its TypeScript source: `"exports": { "./*": "./src/*.ts" }`,
+  so imports name the file that owns the symbol (`@nautink/contracts/chat`). There is no `index.ts`
+  (barrel files are banned). Only `apps/web` and `apps/server` build.
+- **Relative imports keep their `.ts` extension** (`./chat.ts`), so Node can run the source directly.
+  Only erasable TypeScript: no `enum`, no `namespace`, no constructor parameter properties.
+- **tsconfig.** `{ "extends": "../../tsconfig.library.json", "include": ["src", "vitest.config.ts"] }`, plus
+  `lib`/`types` for browser or Node packages.
+- **Tests.** `vitest.config.ts` merges `vitest.shared.config.ts` and sets the package's coverage
+  thresholds. A package with a threshold is listed in `GATED` in `scripts/check-coverage-gate.ts`.
+- **Scripts.** `typecheck` (`tsc -p tsconfig.json`) and `test` (`vitest run`); turbo runs them for
+  every package.
+
+## App defaults
+
+| What | Value |
+|---|---|
+| Web dev server | `http://localhost:5190` |
+| API server | `http://127.0.0.1:8791` (localhost only) |
+| IndexedDB name | `nautink` |
+| Styling | Tailwind classes that use the `docs/PRD.md` §6 token variables. No hex colors in components; inline `style` only for computed canvas positions |
+

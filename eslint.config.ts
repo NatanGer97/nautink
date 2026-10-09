@@ -328,6 +328,9 @@ export default tseslint.config(
       '@typescript-eslint/naming-convention': 'off',
       '@typescript-eslint/no-magic-numbers': 'off',
       'no-inline-comments': 'off',
+      // Package configs import the shared root config by relative path; this rule's autofix would
+      // turn that into an unresolvable package import.
+      'import-x/no-relative-packages': 'off',
     },
   },
 

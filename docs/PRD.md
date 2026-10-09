@@ -101,7 +101,7 @@ The five editors and their contract port as-is (logic in TypeScript, new UI chro
 
 | v1 feature | v1 reference | v2 location | Change |
 |---|---|---|---|
-| Many diagrams in IndexedDB, one record each | `src/storage.js` (`newDiagram`, stores `diagrams`, `versions`) | Same schema (§7.3) | Typed; DB name `mermaid-chat-v2` |
+| Many diagrams in IndexedDB, one record each | `src/storage.js` (`newDiagram`, stores `diagrams`, `versions`) | Same schema (§7.3) | Typed; DB name `nautink` |
 | Diagram list: search title + content, pin, rename, duplicate, download, delete with undo | `src/Sidebar.jsx`, `src/workspace.js` | Diagrams panel from the rail (M3) | Adds type filter chips |
 | Auto titles | `src/workspace.js` `autoTitle` | Same | Also read titles from `pie title`, `gantt title` (v1 gap) |
 | Per-diagram code, chat, session, mode, positions | `src/App.jsx`, `src/storage.js` | Same | Chat draft kept per diagram (v1 gap) |
