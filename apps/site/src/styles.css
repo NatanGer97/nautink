@@ -89,6 +89,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Reset here, not on .window, so a frame's own margin (.hero-shot) is not overridden. */
+figure {
+  margin: 0;
+}
+
 img,
 svg {
   display: block;
@@ -335,7 +340,6 @@ h1 {
 
 /* ------------------------------------------------------------ window frame */
 .window {
-  margin: 0;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
