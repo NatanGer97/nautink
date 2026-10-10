@@ -12,7 +12,14 @@ export interface ChatMessageMeta {
   costUsd?: number | null | undefined;
 }
 
-/** One chat bubble, stored exactly as v1 stores it. */
+/** What the user did with a reply's proposed change (new in v2, PRD §4.2). */
+export interface ChatMessageReview {
+  outcome: 'accepted' | 'rejected';
+  /** How many changes the proposal had. */
+  changes: number;
+}
+
+/** One chat bubble, stored exactly as v1 stores it, plus v2's optional `review`. */
 export interface ChatMessage {
   role: 'user' | 'assistant';
   text: string;
@@ -22,6 +29,8 @@ export interface ChatMessage {
   streaming?: boolean | undefined;
   error?: string | undefined;
   meta?: ChatMessageMeta | undefined;
+  /** Set once the user accepted or rejected the change this reply proposed. */
+  review?: ChatMessageReview | undefined;
 }
 
 /** One diagram of the workspace. */
@@ -76,6 +85,11 @@ const chatMessageMetaSchema: z.ZodType<ChatMessageMeta> = z.looseObject({
   costUsd: z.number().nullish(),
 });
 
+const chatMessageReviewSchema: z.ZodType<ChatMessageReview> = z.object({
+  outcome: z.enum(['accepted', 'rejected']),
+  changes: z.number().int().nonnegative(),
+});
+
 export const chatMessageSchema: z.ZodType<ChatMessage> = z.object({
   role: z.enum(['user', 'assistant']),
   text: z.string(),
@@ -84,6 +98,7 @@ export const chatMessageSchema: z.ZodType<ChatMessage> = z.object({
   streaming: z.boolean().optional(),
   error: z.string().optional(),
   meta: chatMessageMetaSchema.optional(),
+  review: chatMessageReviewSchema.optional(),
 });
 
 export const diagramSchema: z.ZodType<Diagram> = z.object({

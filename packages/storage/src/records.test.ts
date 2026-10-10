@@ -21,6 +21,7 @@ const diagram = {
       tools: ['Read'],
       streaming: false,
       meta: { durationMs: 1200, costUsd: null },
+      review: { outcome: 'rejected', changes: 3 },
     },
   ],
   sessionId: null,
@@ -38,6 +39,8 @@ describe('record schemas', () => {
   it('rejects an unknown view and an unknown chat role', () => {
     expect(() => diagramSchema.parse({ ...diagram, view: 'code' })).toThrow();
     expect(() => chatMessageSchema.parse({ role: 'system', text: '' })).toThrow();
+    const review = { outcome: 'ignored', changes: 1 };
+    expect(() => chatMessageSchema.parse({ role: 'assistant', text: '', review })).toThrow();
   });
 
   it('accepts a version and rejects an unknown kind', () => {
