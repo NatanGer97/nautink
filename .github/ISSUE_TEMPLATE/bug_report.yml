@@ -1,0 +1,71 @@
+name: Bug report
+description: Something in Nautink does not work as expected.
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For a security problem, do not file an issue: see SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a new flowchart
+        2. Switch to Edit
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: diagram
+    attributes:
+      label: Mermaid code
+      description: The smallest diagram that shows the problem, if it depends on one.
+      render: text
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Chat with Claude
+        - Review of Claude's change
+        - Visual editor (Edit or Split)
+        - Preview canvas
+        - Code drawer
+        - Diagrams, history or undo
+        - Import, export or backup
+        - Settings or theme
+        - Local server
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 140 on macOS 15
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Nautink commit or version
+      description: Output of `git rev-parse --short HEAD`, or the release.
+  - type: input
+    id: claude
+    attributes:
+      label: Claude Code version
+      description: Output of `claude --version`, if the bug involves the chat.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console or server output
+      description: Errors from the browser console or the terminal running `pnpm dev`.
+      render: text

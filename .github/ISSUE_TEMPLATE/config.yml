@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/NatanGer97/nautink/security/advisories/new
+    about: Please report security problems privately, not as an issue.
+  - name: Contributing guide
+    url: https://github.com/NatanGer97/nautink/blob/main/CONTRIBUTING.md
+    about: Setup, the gates, and how changes are made.
