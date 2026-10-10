@@ -1,11 +1,16 @@
-import { changeCount, useReviewStore } from './review-store.ts';
+import { changeCount, nextProposalId, useReviewStore } from './review-store.ts';
+import { turnLabel } from '../chat/auto-fix.ts';
+import { defaultChatDeps } from '../chat/chat-deps.ts';
 import { useChatStore } from '../chat/chat-store.ts';
+import { extractMermaid } from '../chat/extract-mermaid.ts';
 import { findTurnDiagram } from '../chat/turn-edit.ts';
+import { revealCodeReview } from '../chat/turn-proposal.ts';
 import { saveTurnVersions } from '../chat/turn-versions.ts';
 
-import type { Proposal } from './review-store.ts';
+import type { Proposal, ProposalReview } from './review-store.ts';
+import type { ChatDeps } from '../chat/chat-deps.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
-import type { ChatMessage, ChatMessageReview } from '@nautink/storage/records';
+import type { ChatMessage, ChatMessageReview, Diagram } from '@nautink/storage/records';
 
 /** Shown on "Show again" when the diagram changed after the reply. */
 export const DIAGRAM_CHANGED: string =
@@ -17,12 +22,18 @@ export const PROPOSAL_GONE: string = 'This proposal is no longer available. Ask 
 /** Shown on "Show again" while another proposal or a reply is on this diagram. */
 export const REVIEW_BUSY: string = 'Finish the current review or reply first.';
 
+/** Shown on "Review again" when the reply's diagram is already the diagram's code. */
+export const ALREADY_APPLIED: string = 'The diagram already matches this reply.';
+
+/** The outcome written while a proposal waits, so a reload can tell it was never reviewed. */
+const PENDING: ChatMessageReview = { outcome: 'pending', changes: 0 };
+
 function changesOf(proposal: Proposal): number {
   return proposal.review === null ? 0 : changeCount(proposal.review);
 }
 
-/** Writes the outcome (or clears it, for "Show again") on the turn's replies. */
-function markReplies(proposal: Proposal, review: ChatMessageReview | undefined): void {
+/** Writes the outcome (`pending` while the proposal waits) on the turn's replies. */
+function markReplies(proposal: Proposal, review: ChatMessageReview): void {
   const state: WorkspaceState = proposal.deps.workspace();
   if (findTurnDiagram(state, proposal.diagramId) === undefined) {
     return;
@@ -121,6 +132,83 @@ export function showProposalAgain(diagramId: string, messageIndex: number): void
     return;
   }
   review.openProposal(proposal);
-  markReplies(proposal, undefined);
+  markReplies(proposal, PENDING);
   useChatStore.getState().announce(`Claude proposes ${String(changesOf(proposal))} changes.`);
+}
+
+/** Marks the turn's replies as waiting for review, until Accept or Reject replaces it. */
+export function markProposalPending(proposal: Proposal): void {
+  markReplies(proposal, PENDING);
+}
+
+/** What decides whether a reply whose review a reload cut off can be reviewed again. */
+export interface ReviewAgainState {
+  /** Claude's diagram in the reply, `null` when it has none. */
+  replyCode: string | null;
+  /** The diagram's code now, `undefined` once it is gone. */
+  code: string | undefined;
+  isBusy: boolean;
+}
+
+/** Why the reply cannot be reviewed again now, or `null` when it can. */
+export function reviewAgainBlocker({ replyCode, code, isBusy }: ReviewAgainState): string | null {
+  if (replyCode === null || code === undefined) {
+    return PROPOSAL_GONE;
+  }
+  if (isBusy) {
+    return REVIEW_BUSY;
+  }
+  return replyCode === code ? ALREADY_APPLIED : null;
+}
+
+/** The user message that asked for the reply at `messageIndex`, for the undo step's label. */
+function askedFor(diagram: Diagram, messageIndex: number): string {
+  const asked: ChatMessage | undefined = diagram.messages
+    .slice(0, messageIndex)
+    .filter((message: ChatMessage) => message.role === 'user')
+    .at(-1);
+  return asked?.text ?? 'Change';
+}
+
+function lostProposal(diagram: Diagram, messageIndex: number, deps: ChatDeps): Proposal | null {
+  const after: string | null = extractMermaid(diagram.messages[messageIndex]?.text ?? '');
+  if (after === null) {
+    return null;
+  }
+  const prompt: string = askedFor(diagram, messageIndex);
+  return {
+    id: nextProposalId(),
+    diagramId: diagram.id,
+    before: diagram.code,
+    after,
+    prompt,
+    label: turnLabel('user', prompt),
+    isValid: true,
+    replyIndexes: [messageIndex],
+    review: null,
+    deps,
+  };
+}
+
+/**
+ * Rebuilds the proposal of a reply whose review a reload cut off: the reply's diagram against the
+ * diagram's code now, opened for Accept or Reject as if Claude had just replied.
+ */
+export async function reviewReplyAgain(
+  diagramId: string,
+  messageIndex: number,
+  deps: ChatDeps = defaultChatDeps(),
+): Promise<void> {
+  const diagram: Diagram | undefined = findTurnDiagram(deps.workspace(), diagramId);
+  const proposal: Proposal | null =
+    diagram === undefined ? null : lostProposal(diagram, messageIndex, deps);
+  if (proposal === null || proposal.after === proposal.before) {
+    return;
+  }
+  proposal.isValid = (await deps.validate(proposal.after)) === null;
+  useReviewStore.getState().openProposal(proposal);
+  markReplies(proposal, PENDING);
+  const review: ProposalReview = await deps.review(proposal.before, proposal.after);
+  useReviewStore.getState().setReview(diagramId, { proposalId: proposal.id, review });
+  revealCodeReview(proposal, review);
 }

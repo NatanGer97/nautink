@@ -136,6 +136,30 @@ test.beforeEach(async ({ context, page }) => {
 });
 
 test.describe('review Claude’s change', () => {
+  test('a reload during review applies nothing, and Review again brings the proposal back', async ({
+    page,
+  }) => {
+    const before = 'flowchart TD\n  A[Start] --> B\n  B --> C';
+    const after = 'flowchart TD\n  A[Begin] --> B\n  B --> D';
+    await editCode(page, before);
+    await cannedChat(page, [replyBody(fenced(after))]);
+    await send(page, 'Rename the start');
+    await expect(proposalBar(page)).toBeVisible(SLOW);
+    await expect(chatPanel(page).getByText('Waiting for your review')).toBeVisible();
+    // Autosave writes ~400 ms after the last change; reload once the chat is on disk.
+    await expect(page.getByRole('contentinfo')).toContainText('Saved');
+    await page.waitForTimeout(600);
+    await page.reload();
+    await expect.poll(async () => readCode(page), SLOW).toBe(before);
+    await expect(proposalBar(page)).toBeHidden();
+    await expect(chatPanel(page).getByText('Not applied')).toBeVisible();
+    await expect(chatPanel(page).getByText('Diagram updated')).toHaveCount(0);
+    await chatPanel(page).getByRole('button', { name: 'Review again' }).click();
+    await expect(proposalBar(page)).toContainText('Claude proposes', SLOW);
+    await proposalBar(page).getByRole('button', { name: 'Accept' }).click();
+    await expect.poll(async () => readCode(page)).toBe(after);
+  });
+
   for (const item of CASES) {
     test(`${item.name}: reject, show again, accept, then undo`, async ({ page }) => {
       await editCode(page, item.before);

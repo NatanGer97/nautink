@@ -3,14 +3,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   acceptProposal,
+  ALREADY_APPLIED,
   DIAGRAM_CHANGED,
   PROPOSAL_GONE,
   rejectProposal,
   REVIEW_BUSY,
+  reviewAgainBlocker,
+  reviewReplyAgain,
   showAgainBlocker,
   showProposalAgain,
 } from './review-actions.ts';
-import { useReviewStore } from './review-store.ts';
+import { resetReviewState, useReviewStore } from './review-store.ts';
 import { controlledStream, eventsResponse, replyEvents } from '../../tests/chat-stream.ts';
 import { loadedWorkspace } from '../../tests/workspace-fixtures.ts';
 import { resetChatState, useChatStore } from '../chat/chat-store.ts';
@@ -196,7 +199,7 @@ describe('accept, reject and show again', () => {
     expect(useChatStore.getState().announcement).toBe('Change rejected. The diagram is unchanged.');
     showProposalAgain(id, 1);
     expect(useReviewStore.getState().open[id]?.after).toBe(VALID);
-    expect(h.active().messages[1]?.review).toBeUndefined();
+    expect(h.active().messages[1]?.review).toEqual({ outcome: 'pending', changes: 0 });
     await acceptProposal(id);
     expect(h.active().code).toBe(VALID);
   });
@@ -278,5 +281,47 @@ describe('accept, reject and show again', () => {
     startNewChat(id, h.deps);
     expect(useReviewStore.getState().open).toEqual({});
     expect(useReviewStore.getState().closed).toEqual({});
+  });
+});
+
+describe('a review a reload cut off', () => {
+  it('marks the reply pending while its proposal waits', async () => {
+    const h = await harness([reply(fenced(VALID))]);
+    await sendChat('Draw A to B', {}, h.deps);
+    expect(h.active().messages[1]?.review).toEqual({ outcome: 'pending', changes: 0 });
+  });
+
+  it('rebuilds the proposal from the reply after a reload, and accept applies it', async () => {
+    const h = await harness([reply(fenced(VALID))]);
+    const before = h.active().code;
+    await sendChat('Draw A to B', {}, h.deps);
+    const id = h.active().id;
+    resetReviewState();
+    expect(h.active().code).toBe(before);
+    await reviewReplyAgain(id, 1, h.deps);
+    const proposal = useReviewStore.getState().open[id];
+    expect(proposal).toMatchObject({ before, after: VALID, label: 'Claude: Draw A to B' });
+    expect(proposal?.review).toEqual(STRUCTURAL);
+    await acceptProposal(id);
+    expect(h.active().code).toBe(VALID);
+    expect(h.active().messages[1]?.review).toEqual({ outcome: 'accepted', changes: 2 });
+  });
+
+  it('does nothing for a reply with no diagram or one already applied', async () => {
+    const h = await harness([reply('No diagram here.')]);
+    await sendChat('Explain', {}, h.deps);
+    const id = h.active().id;
+    await reviewReplyAgain(id, 1, h.deps);
+    await reviewReplyAgain('missing', 1, h.deps);
+    expect(useReviewStore.getState().open).toEqual({});
+  });
+
+  it('says why a reply cannot be reviewed again', () => {
+    const base = { replyCode: VALID, code: 'flowchart TD', isBusy: false };
+    expect(reviewAgainBlocker(base)).toBeNull();
+    expect(reviewAgainBlocker({ ...base, replyCode: null })).toBe(PROPOSAL_GONE);
+    expect(reviewAgainBlocker({ ...base, code: undefined })).toBe(PROPOSAL_GONE);
+    expect(reviewAgainBlocker({ ...base, isBusy: true })).toBe(REVIEW_BUSY);
+    expect(reviewAgainBlocker({ ...base, code: VALID })).toBe(ALREADY_APPLIED);
   });
 });

@@ -43,6 +43,11 @@ describe('record schemas', () => {
     expect(() => chatMessageSchema.parse({ role: 'assistant', text: '', review })).toThrow();
   });
 
+  it('keeps a review that is still pending', () => {
+    const message = { role: 'assistant', text: 'x', review: { outcome: 'pending', changes: 0 } };
+    expect(chatMessageSchema.parse(message)).toEqual(message);
+  });
+
   it('accepts a version and rejects an unknown kind', () => {
     const version = {
       id: 'v1',
