@@ -189,6 +189,23 @@ export function BackupField(): ReactElement {
   );
 }
 
+/** Where the web build writes every bundled package's license text (`apps/web` build script). */
+const LICENSES_URL: string = '/third-party-licenses.txt';
+
+/** Nautink's license and the license texts of the packages it ships with, as MIT and BSD ask. */
+export function LicensesField(): ReactElement {
+  return (
+    <a
+      href={LICENSES_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="self-start text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+    >
+      Open-source licenses
+    </a>
+  );
+}
+
 /**
  * Every row of the settings popover, in order. Loaded the first time Settings opens, so the Select
  * and Switch it needs stay out of the main bundle (PRD §9).
@@ -208,6 +225,7 @@ export function SettingsFields({ connection }: { connection: ConnectionCheck }):
       />
       <CodebaseField />
       <BackupField />
+      <LicensesField />
     </>
   );
 }

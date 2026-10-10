@@ -57,9 +57,10 @@ These ship inside the built web app and carry their own terms:
 ## Licenses to review
 
 Packages whose license is not on the permissive list in
-`scripts/generate-third-party-notices.ts`, or could not be read:
+`scripts/generate-third-party-notices.ts`, or could not be read. `--check` fails until each one
+is reviewed:
 
-- `elkjs` 0.9.3: EPL-2.0 (https://github.com/kieler/elkjs)
+- `elkjs` 0.9.3: EPL-2.0 (https://github.com/kieler/elkjs). Reviewed: weak copyleft at the file level; Nautink uses it unchanged, as a separate module, so only its own files stay under EPL-2.0.
 
 ## Production dependencies
 

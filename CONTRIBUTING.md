@@ -154,12 +154,19 @@ adding, removing or upgrading a dependency, regenerate it and commit the result:
 
 ```bash
 node scripts/generate-third-party-notices.ts           # rewrite the file
-node scripts/generate-third-party-notices.ts --check   # exit 1 when it is out of date
+pnpm check:licenses                                    # exit 1 when it is out of date or a license fails
 ```
 
-The script does not fail on a license it does not like: read the file's "Licenses to review" section.
-A new dependency under a copyleft (GPL, AGPL, LGPL) or unknown license needs a discussion in the pull
-request first. Also see PRD §6.8: effect libraries with non-permissive terms are not used in the app.
+`pnpm check:licenses` is part of `pnpm check`, so CI runs it too. It fails on any license that is not
+on the script's permissive list, or that it cannot read. A new dependency under a copyleft (GPL, AGPL,
+LGPL) or unknown license needs a discussion in the pull request first. If it is accepted, add it to
+`REVIEWED` in the script with the license and the reason; the file's "Licenses to review" section
+shows that reason. Also see PRD §6.8: effect libraries with non-permissive terms are not used in the
+app.
+
+The web build also writes `dist/third-party-licenses.txt`: Nautink's license, the attribution above,
+and the full license text of every package the web app ships with. Settings links to it as
+"Open-source licenses", so anyone running a build gets the notices the licenses ask for.
 
 ## Working with coding agents
 
