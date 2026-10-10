@@ -7,9 +7,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from './app.ts';
 import { createProcessLogger } from './logger.ts';
 import { HOST, REPO_ROOT, listen, startServer } from './server.ts';
-import { FAKE_CLAUDE, FAKE_CODEX, makeTempDir } from '../tests/test-server.ts';
+import { FAKE_CLAUDE, FAKE_CODEX, createMemoryLogger, makeTempDir } from '../tests/test-server.ts';
 
-import type { Logger } from './logger.ts';
 import type { ChildProcess } from 'node:child_process';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -22,15 +21,6 @@ afterEach(() => {
   }
   vi.restoreAllMocks();
 });
-
-function createMemoryLogger(): Logger & { lines: string[] } {
-  const lines: string[] = [];
-  return {
-    lines,
-    info: (message) => lines.push(`info: ${message}`),
-    error: (message) => lines.push(`error: ${message}`),
-  };
-}
 
 async function occupyPort(): Promise<number> {
   const blocker = createServer();
@@ -79,6 +69,7 @@ describe('listen', () => {
     const app = createApp({
       claudeBin: FAKE_CLAUDE,
       codexBin: FAKE_CODEX,
+      logger: createMemoryLogger(),
       repoDir: null,
       homeDir: '/',
       workDir: REPO_ROOT,

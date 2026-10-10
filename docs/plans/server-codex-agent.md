@@ -76,7 +76,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: `curl /api/health` shows `claude` and `codex`
 
-- [ ] **T7 — `GET /api/models` lists the installed Codex models**
+- [x] **T7 — `GET /api/models` lists the installed Codex models**
   - context - user wants the picker to show the models the local Codex supports
   - Files: `apps/server/src/models.ts` (new), `apps/server/src/models.test.ts`, `apps/server/src/info-routes.ts`, `info-routes.test.ts`, `apps/server/tests/fake-codex.ts`
   - Red: `parseCodexModels(json)` keeps only `visibility: "list"` entries as `{id: slug, label: display_name}` in catalog order; bad JSON or unknown shape throws with a clear message; route returns `{ claude: CLAUDE_MODEL_OPTIONS, codex: [...] }`; when `codex debug models` fails or does not parse, `codex: []` and the reason is logged

@@ -59,12 +59,13 @@ export interface StartOptions {
   logger: Logger;
 }
 
-function createAppFromConfig(config: ServerConfig, homeDir: string): Express {
+function createAppFromConfig(config: ServerConfig, options: StartOptions): Express {
   return createApp({
     claudeBin: config.claudeBin,
     codexBin: config.codexBin,
+    logger: options.logger,
     repoDir: config.repoDir,
-    homeDir,
+    homeDir: options.homeDir,
     workDir: prepareNeutralWorkDir(),
     webDistDir: findWebDist(REPO_ROOT, config.isProduction),
     healthTimeoutMs: HEALTH_TIMEOUT_MS,
@@ -74,7 +75,7 @@ function createAppFromConfig(config: ServerConfig, homeDir: string): Express {
 /** Reads the config from the environment and starts the server. Throws on invalid config or a taken port. */
 export async function startServer(options: StartOptions): Promise<Server> {
   const config: ServerConfig = loadConfig(options.env, options.homeDir);
-  const server: Server = await listen(createAppFromConfig(config, options.homeDir), config.port);
+  const server: Server = await listen(createAppFromConfig(config, options), config.port);
   const { port } = server.address() as AddressInfo;
   options.logger.info(`Nautink server on http://${HOST}:${String(port)}`);
   if (config.repoDir !== null) {
