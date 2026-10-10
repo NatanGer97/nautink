@@ -9,6 +9,7 @@ import { useEditorReadOnly } from './use-editor-read-only.ts';
 import { useErrorMarkers } from './use-error-markers.ts';
 import { useDiagramModel, useDisposeDeletedModels } from './use-model-sync.ts';
 import { useEditorTheme, useMonacoEditor } from './use-monaco-editor.ts';
+import { useAgentName } from '../chat/agent-name.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
 import { parseErrorTitle } from '../preview/parse-error-notice.tsx';
 import { usePreviewStatus } from '../preview/preview-status.ts';
@@ -38,6 +39,7 @@ interface FooterProps {
 
 /** Under the editor: the parse error with "Ask Claude to fix", or a hint; and the cursor (M3). */
 function CodeFooter({ diagramId, cursor, isViewingVersion }: FooterProps): ReactElement {
+  const name: string = useAgentName();
   const status: PreviewStatus = usePreviewStatus();
   const error: PreviewStatus['error'] = status.diagramId === diagramId ? status.error : null;
   const hint: string = isViewingVersion ? '' : 'Click a shape on the canvas to find its line';
@@ -57,7 +59,7 @@ function CodeFooter({ diagramId, cursor, isViewingVersion }: FooterProps): React
               askClaudeToFix(error);
             }}
           >
-            Ask Claude to fix
+            Ask {name} to fix
           </Button>
         </span>
       )}

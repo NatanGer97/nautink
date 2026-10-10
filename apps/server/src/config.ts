@@ -8,6 +8,7 @@ import { expandHome, isStrictlyInside } from './repo-dir.ts';
 export interface ServerConfig {
   port: number;
   claudeBin: string;
+  codexBin: string;
   /** The codebase Claude may read at startup (`REPO_DIR`); `null` means repo-aware mode is off. */
   repoDir: string | null;
   isProduction: boolean;
@@ -15,6 +16,7 @@ export interface ServerConfig {
 
 export const DEFAULT_PORT: number = 8791;
 export const DEFAULT_CLAUDE_BIN: string = 'claude';
+export const DEFAULT_CODEX_BIN: string = 'codex';
 const MAX_PORT: number = 65_535;
 
 function toExistingDirectory(input: string, context: z.RefinementCtx<string>): string {
@@ -74,12 +76,14 @@ function createEnvSchema(homeDir: string): z.ZodType<ServerConfig, Record<string
     .object({
       API_PORT: portSchema,
       CLAUDE_BIN: z.string().min(1, 'CLAUDE_BIN must not be empty').default(DEFAULT_CLAUDE_BIN),
+      CODEX_BIN: z.string().min(1, 'CODEX_BIN must not be empty').default(DEFAULT_CODEX_BIN),
       REPO_DIR: createRepoDirSchema(homeDir),
       NODE_ENV: z.string().optional(),
     })
     .transform((env) => ({
       port: env.API_PORT,
       claudeBin: env.CLAUDE_BIN,
+      codexBin: env.CODEX_BIN,
       repoDir: env.REPO_DIR ?? null,
       isProduction: env.NODE_ENV === 'production',
     }));

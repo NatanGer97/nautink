@@ -1,3 +1,4 @@
+import type { AgentId } from '@nautink/contracts/agents';
 import type { ChatEvent } from '@nautink/contracts/chat';
 import type { ChatMessage, ChatMessageMeta } from '@nautink/storage/records';
 
@@ -18,7 +19,9 @@ export interface ChatReply {
 export const STOPPED_MESSAGE: string = 'Stopped.';
 
 /** Shown when the stream ends without a `done` or `error` event. */
-export const CUT_OFF_MESSAGE: string = 'The reply ended before Claude finished. Try again.';
+export function cutOffMessage(name: string): string {
+  return `The reply ended before ${name} finished. Try again.`;
+}
 
 /** An empty reply that resumes `sessionId`. */
 export function startReply(sessionId: string | null): ChatReply {
@@ -60,10 +63,10 @@ export function applyChatEvent(reply: ChatReply, event: ChatEvent): ChatReply {
   }
 }
 
-/** The reply once the stream is over: still streaming means it was cut off. */
-export function settleReply(reply: ChatReply): ChatReply {
+/** The reply once the stream is over: still streaming means `name`'s reply was cut off. */
+export function settleReply(reply: ChatReply, name: string): ChatReply {
   return reply.status === 'streaming'
-    ? { ...reply, status: 'error', error: CUT_OFF_MESSAGE }
+    ? { ...reply, status: 'error', error: cutOffMessage(name) }
     : reply;
 }
 
@@ -77,12 +80,13 @@ export function failReply(reply: ChatReply, err: unknown, isStopped: boolean): C
 }
 
 /** The stored chat bubble for a reply, in v1's shape. */
-export function toAssistantMessage(reply: ChatReply): ChatMessage {
+export function toAssistantMessage(reply: ChatReply, agent: AgentId): ChatMessage {
   const message: ChatMessage = {
     role: 'assistant',
     text: reply.text,
     tools: [...reply.tools],
     streaming: reply.status === 'streaming',
+    agent,
   };
   if (reply.error !== null) {
     message.error = reply.error;

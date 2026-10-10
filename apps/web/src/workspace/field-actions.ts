@@ -1,6 +1,7 @@
 import { applyPatch, findDiagram } from './workspace-context.ts';
 
 import type { FieldActions, RequestActions, StoreContext } from './workspace-state.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 import type { NautinkDb } from '@nautink/storage/db';
 import type { ChatMessage, DiagramView } from '@nautink/storage/records';
 
@@ -11,8 +12,9 @@ export function fieldActions(ctx: StoreContext): FieldActions {
       const messages: ChatMessage[] = update(findDiagram(ctx.get(), id).messages);
       applyPatch(ctx, id, { messages });
     },
-    setSessionId: (id: string, sessionId: string | null): void => {
-      applyPatch(ctx, id, { sessionId });
+    setSessionId: (id: string, sessionId: string | null, agent?: AgentId): void => {
+      // No session means no owner either.
+      applyPatch(ctx, id, { sessionId, sessionAgent: sessionId === null ? undefined : agent });
     },
     setDraft: (id: string, draft: string): void => {
       applyPatch(ctx, id, { draft });

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ErEditor } from './er-editor.tsx';
-import { CLAUDE_EDITING } from '../read-only-reason.ts';
+import { agentEditingText } from '../read-only-reason.ts';
 import { requestSelection, useCanvasSelectionStore } from '../selection/canvas-selection.ts';
 import { SYNTAX_ERROR_REASON } from '../use-editor-core.ts';
 
@@ -184,7 +184,7 @@ describe('ErEditor', () => {
   });
 
   it('is read-only while Claude edits, and keeps the last canvas on a syntax error', async () => {
-    const { rerender } = renderEditor({ readOnlyReason: CLAUDE_EDITING });
+    const { rerender } = renderEditor({ readOnlyReason: agentEditingText('Claude') });
     await screen.findByTestId('er-node-CUSTOMER');
     // Claude's working pill on the canvas says so; the editor shows no note of its own.
     expect(screen.queryByRole('status')).toBeNull();

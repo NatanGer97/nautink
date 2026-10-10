@@ -72,8 +72,9 @@ afterEach(() => {
 
 describe('promptPlaceholder', () => {
   it('counts many items and names one', () => {
-    expect(promptPlaceholder(ITEMS)).toBe('Ask Claude about these 2…');
-    expect(promptPlaceholder(ITEMS.slice(0, 1))).toBe('Ask Claude about this node…');
+    expect(promptPlaceholder(ITEMS, 'Claude')).toBe('Ask Claude about these 2…');
+    expect(promptPlaceholder(ITEMS.slice(0, 1), 'Claude')).toBe('Ask Claude about this node…');
+    expect(promptPlaceholder(ITEMS, 'Codex')).toBe('Ask Codex about these 2…');
   });
 });
 

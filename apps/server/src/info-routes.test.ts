@@ -1,8 +1,11 @@
+import { modelsResponseSchema } from '@nautink/contracts/models';
+import { healthResponseSchema } from '@nautink/contracts/server-info';
 import { mkdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
+  createMemoryLogger,
   fetchHealth,
   makeTempDir,
   postJson,
@@ -49,6 +52,20 @@ describe('GET /api/health', () => {
     const response = await fetch(`${url}/api/health`);
     expect(await response.json()).toEqual({
       claude: { isFound: true, version: '2.1.0', error: null },
+      codex: { isFound: true, version: '0.154.0', error: null },
+    });
+  });
+
+  it('reports a missing Codex CLI and how to fix it', async () => {
+    const codexBin: string = path.join(home, 'no-such-codex');
+    const url = await start({ codexBin });
+    const response = await fetch(`${url}/api/health`);
+    const health = healthResponseSchema.parse(await response.json());
+    expect(health.claude.isFound).toBe(true);
+    expect(health.codex).toEqual({
+      isFound: false,
+      version: null,
+      error: `"${codexBin}" was not found. Install Codex CLI or set CODEX_BIN.`,
     });
   });
 
@@ -78,6 +95,39 @@ describe('GET /api/health', () => {
       error: expect.stringContaining('did not answer in time') as unknown,
     });
   });
+});
+
+describe('GET /api/models', () => {
+  it('lists the fixed Claude models and the installed Codex models', async () => {
+    const url = await start();
+    const response = await fetch(`${url}/api/models`);
+    expect(await response.json()).toEqual({
+      claude: [
+        { id: 'opus', label: 'Opus' },
+        { id: 'sonnet', label: 'Sonnet' },
+        { id: 'haiku', label: 'Haiku' },
+      ],
+      codex: [
+        { id: 'gpt-6-astra', label: 'GPT-6-Astra' },
+        { id: 'gpt-5.6-luna', label: 'GPT-5.6-Luna' },
+      ],
+    });
+  });
+
+  it.each(['models-fail', 'models-bad'])(
+    'offers no Codex models and logs why when the catalog is unusable (%s)',
+    async (scenario: string) => {
+      const logger = createMemoryLogger();
+      const url = await start({ logger });
+      vi.stubEnv('FAKE_CODEX_SCENARIO', scenario);
+      const models = modelsResponseSchema.parse(await (await fetch(`${url}/api/models`)).json());
+      expect(models.codex).toEqual([]);
+      expect(models.claude).toHaveLength(3);
+      expect(logger.lines).toEqual([
+        expect.stringMatching(/^error: Cannot list the Codex models: /) as unknown,
+      ]);
+    },
+  );
 });
 
 describe('POST /api/repo', () => {

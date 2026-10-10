@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BASE_SYSTEM_PROMPT,
+  CODEX_NO_SHELL_RULE,
+  CODEX_REPO_AWARE_RULE,
   REPO_AWARE_RULE,
   SELECTION_RULES,
   SYSTEM_PROMPT_VERSION,
@@ -12,7 +14,7 @@ import {
 
 describe('buildSystemPrompt', () => {
   it('is versioned and carries v1 rules', () => {
-    expect(SYSTEM_PROMPT_VERSION).toBe(3);
+    expect(SYSTEM_PROMPT_VERSION).toBe(4);
     expect(BASE_SYSTEM_PROMPT).toContain('exactly ONE fenced ```mermaid block');
     expect(BASE_SYSTEM_PROMPT).toContain('logos:aws-lambda');
   });
@@ -25,9 +27,22 @@ describe('buildSystemPrompt', () => {
   });
 
   it('adds the repo-aware rule only in repo-aware mode', () => {
-    expect(buildSystemPrompt(false)).toBe(BASE_SYSTEM_PROMPT);
-    expect(buildSystemPrompt(false)).not.toContain('Read, Grep and Glob');
-    expect(buildSystemPrompt(true)).toBe(`${BASE_SYSTEM_PROMPT}\n${REPO_AWARE_RULE}`);
+    expect(buildSystemPrompt(false, 'claude')).toBe(BASE_SYSTEM_PROMPT);
+    expect(buildSystemPrompt(false, 'claude')).not.toContain('Read, Grep and Glob');
+    expect(buildSystemPrompt(true, 'claude')).toBe(`${BASE_SYSTEM_PROMPT}\n${REPO_AWARE_RULE}`);
+  });
+
+  it('tells Codex to read the codebase with read-only shell commands', () => {
+    expect(buildSystemPrompt(true, 'codex')).toBe(
+      `${BASE_SYSTEM_PROMPT}\n${CODEX_REPO_AWARE_RULE}`,
+    );
+    expect(CODEX_REPO_AWARE_RULE).toContain('rg, cat and ls');
+    expect(CODEX_REPO_AWARE_RULE).not.toContain('Read, Grep and Glob');
+  });
+
+  it('tells Codex not to run commands without a codebase', () => {
+    expect(buildSystemPrompt(false, 'codex')).toBe(`${BASE_SYSTEM_PROMPT}\n${CODEX_NO_SHELL_RULE}`);
+    expect(CODEX_NO_SHELL_RULE).toContain('Do not run shell commands');
   });
 });
 

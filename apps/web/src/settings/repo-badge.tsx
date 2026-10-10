@@ -4,12 +4,14 @@ import { useEffect } from 'react';
 
 import { useRepoStore } from './repo-store.ts';
 import { folderName } from './repo.ts';
+import { useAgentName } from '../chat/agent-name.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
 import type { ReactElement } from 'react';
 
 /** The top bar's badge while Claude can read a codebase (PRD §3.1). Opens settings to change it. */
 export function RepoBadge(): ReactElement | null {
+  const name: string = useAgentName();
   const repoDir: string | null = useRepoStore((state) => state.repoDir);
   useEffect(() => {
     if (useRepoStore.getState().status === 'idle') {
@@ -34,7 +36,9 @@ export function RepoBadge(): ReactElement | null {
           <span className="truncate">{folderName(repoDir)}</span>
         </button>
       </TooltipTrigger>
-      <TooltipContent>Claude can read {repoDir}</TooltipContent>
+      <TooltipContent>
+        {name} can read {repoDir}
+      </TooltipContent>
     </Tooltip>
   );
 }

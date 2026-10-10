@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { EmptyState } from './empty-state.tsx';
 import { PanelHeader } from './panel-header.tsx';
+import { useAgentName } from '../../chat/agent-name.ts';
 import { openSaveVersionDialog } from '../../history/save-version-dialog-store.ts';
 import { VersionDetail } from '../../history/version-detail.tsx';
 import { VersionList } from '../../history/version-list.tsx';
@@ -47,6 +48,7 @@ function HistoryBody({
   versions: readonly Version[] | null;
   code: string;
 }): ReactElement {
+  const name: string = useAgentName();
   const viewed: Version | null = useViewedVersion();
   const shown: Version | undefined = versions?.find((version) => version.id === viewed?.id);
   if (versions === null) {
@@ -55,7 +57,7 @@ function HistoryBody({
   if (versions.length === 0) {
     return (
       <EmptyState title="No versions yet">
-        Every change Claude makes is saved here, so you can compare and restore it. Press{' '}
+        Every change {name} makes is saved here, so you can compare and restore it. Press{' '}
         {shortcutLabel(SHORTCUTS.saveVersion)} to save one yourself.
       </EmptyState>
     );

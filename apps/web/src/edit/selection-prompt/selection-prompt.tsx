@@ -5,6 +5,7 @@ import { useId, useRef, useState } from 'react';
 
 import { usePromptPlacement } from './use-prompt-placement.ts';
 import { useSelectionPromptStore } from './use-selection-prompt.ts';
+import { useAgentName } from '../../chat/agent-name.ts';
 import { toChatSelection } from '../../chat/chat-selection.ts';
 import { useChatStore } from '../../chat/chat-store.ts';
 import { SendButton } from '../../chat/send-button.tsx';
@@ -16,13 +17,13 @@ import type { SelectionPromptHandle } from './use-selection-prompt.ts';
 import type { SelectedItem } from '../selection/canvas-selection.ts';
 import type { KeyboardEvent, ReactElement, RefObject } from 'react';
 
-/** "Ask Claude about these 2…", or "Ask Claude about this node…" for one item. */
-export function promptPlaceholder(items: readonly SelectedItem[]): string {
+/** "Ask Codex about these 2…", or "Ask Codex about this node…" for one item. */
+export function promptPlaceholder(items: readonly SelectedItem[], name: string): string {
   const [only] = items;
   if (items.length === 1 && only !== undefined) {
-    return `Ask Claude about this ${only.kind}…`;
+    return `Ask ${name} about this ${only.kind}…`;
   }
-  return `Ask Claude about these ${String(items.length)}…`;
+  return `Ask ${name} about these ${String(items.length)}…`;
 }
 
 interface FloatingPromptProps {
@@ -50,6 +51,7 @@ function FloatingPrompt({ handle, items, canGroup, onDismiss }: FloatingPromptPr
   const promptRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const placement: Placement | null = usePromptPlacement({ overlayRef, promptRef }, handle);
   const [text, setText, send] = useAsk(items);
+  const name: string = useAgentName();
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
     if (event.nativeEvent.isComposing) {
       return;
@@ -67,7 +69,7 @@ function FloatingPrompt({ handle, items, canGroup, onDismiss }: FloatingPromptPr
       <div
         ref={promptRef}
         role="group"
-        aria-label="Ask Claude about the selection"
+        aria-label={`Ask ${name} about the selection`}
         data-testid="selection-prompt"
         className={cn(
           'pointer-events-auto absolute z-20 flex w-[300px] max-w-[calc(100%-16px)] items-center gap-1.5 rounded-card border border-input bg-panel py-1.5 pr-1.5 pl-2.5 shadow-menu focus-within:border-ring',
@@ -76,12 +78,12 @@ function FloatingPrompt({ handle, items, canGroup, onDismiss }: FloatingPromptPr
         style={{ left: placement?.left ?? 0, top: placement?.top ?? 0 }}
       >
         <label htmlFor={inputId} className="sr-only">
-          Ask Claude about the selection
+          Ask {name} about the selection
         </label>
         <input
           id={inputId}
           value={text}
-          placeholder={promptPlaceholder(items)}
+          placeholder={promptPlaceholder(items, name)}
           className="min-w-0 flex-1 border-0 bg-transparent outline-none placeholder:text-faint"
           onChange={(event) => {
             setText(event.target.value);

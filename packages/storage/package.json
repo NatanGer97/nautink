@@ -13,6 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@nautink/contracts": "workspace:^",
     "idb": "^8.0.4",
     "zod": "^4.6.5"
   },

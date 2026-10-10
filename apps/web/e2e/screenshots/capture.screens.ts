@@ -56,7 +56,10 @@ function replyBody(intro: string, code: string): string {
 
 /** Answers `/api/health`, `/api/info` and each `/api/chat` with the next canned body. */
 async function mockApi(page: Page, replies: string[]): Promise<void> {
-  const health: object = { claude: { isFound: true, version: '2.1.0', error: null } };
+  const health: object = {
+    claude: { isFound: true, version: '2.1.0', error: null },
+    codex: { isFound: true, version: '0.154.0', error: null },
+  };
   await page.route('**/api/health', async (route: Route) => route.fulfill({ json: health }));
   await page.route('**/api/info', async (route: Route) =>
     route.fulfill({ json: { repoDir: null } }),

@@ -1,14 +1,19 @@
-import { CLAUDE_PROPOSING, REVIEWING } from '../../review/use-review.ts';
-import { CLAUDE_EDITING, VIEWING_VERSION } from '../read-only-reason.ts';
+import { AGENT_IDS } from '@nautink/contracts/agents';
+
+import { agentName } from '../../chat/agent-name.ts';
+import { proposingText, reviewingText } from '../../review/use-review.ts';
+import { agentEditingText, VIEWING_VERSION } from '../read-only-reason.ts';
 
 import type { ReactElement } from 'react';
 
 /** Reasons another bar already explains: the version bar, Claude's working pill, the proposal bar. */
 const EXPLAINED_ELSEWHERE: ReadonlySet<string> = new Set<string>([
   VIEWING_VERSION,
-  CLAUDE_EDITING,
-  CLAUDE_PROPOSING,
-  REVIEWING,
+  ...AGENT_IDS.map(agentName).flatMap((name: string) => [
+    agentEditingText(name),
+    proposingText(name),
+    reviewingText(name),
+  ]),
 ]);
 
 /** Says why the canvas is read-only (a syntax error), unless another bar already says so. */

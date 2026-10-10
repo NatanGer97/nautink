@@ -2,6 +2,7 @@ import type { SaveState } from './autosave.ts';
 import type { EditEntry, EditMeta, EditStack } from './edit-history.ts';
 import type { WorkspaceDeps } from './workspace-deps.ts';
 import type { WorkspaceRuntime } from './workspace-runtime.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 import type { ImportResult } from '@nautink/storage/backup';
 import type { Backup } from '@nautink/storage/backup-format';
 import type { NautinkDb } from '@nautink/storage/db';
@@ -95,7 +96,8 @@ export interface EditActions {
 /** The other saved fields of a diagram. */
 export interface FieldActions {
   updateMessages: (id: string, update: (messages: readonly ChatMessage[]) => ChatMessage[]) => void;
-  setSessionId: (id: string, sessionId: string | null) => void;
+  /** `agent` owns the session (ADR-002); left out, the session counts as Claude's. */
+  setSessionId: (id: string, sessionId: string | null, agent?: AgentId) => void;
   setDraft: (id: string, draft: string) => void;
   setView: (id: string, view: DiagramView) => void;
   /** Writes every queued change now. */

@@ -8,9 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from './app.ts';
 import { createProcessLogger } from './logger.ts';
 import { HOST, REPO_ROOT, listen, startServer } from './server.ts';
-import { FAKE_CLAUDE, makeTempDir } from '../tests/test-server.ts';
+import { FAKE_CLAUDE, FAKE_CODEX, createMemoryLogger, makeTempDir } from '../tests/test-server.ts';
 
-import type { Logger } from './logger.ts';
 import type { ChildProcess } from 'node:child_process';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -23,15 +22,6 @@ afterEach(() => {
   }
   vi.restoreAllMocks();
 });
-
-function createMemoryLogger(): Logger & { lines: string[] } {
-  const lines: string[] = [];
-  return {
-    lines,
-    info: (message) => lines.push(`info: ${message}`),
-    error: (message) => lines.push(`error: ${message}`),
-  };
-}
 
 async function occupyPort(): Promise<number> {
   const blocker = createServer();
@@ -81,6 +71,8 @@ describe('listen', () => {
   it('reports other listen errors', async () => {
     const app = createApp({
       claudeBin: FAKE_CLAUDE,
+      codexBin: FAKE_CODEX,
+      logger: createMemoryLogger(),
       repoDir: null,
       homeDir: '/',
       workDir: REPO_ROOT,
@@ -130,11 +122,14 @@ describe('main.ts under plain Node (type stripping)', () => {
   }
 
   it('starts, answers the API with the contracts package, and runs the fake CLI', async () => {
-    const child = runMain({ API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE });
+    const child = runMain({ API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE, CODEX_BIN: FAKE_CODEX });
     servers.push({ close: () => child.kill() });
     const [, url] = await collect(child, /Nautink server on (http:\S+)/);
     const health = await (await fetch(`${url!}/api/health`)).json();
-    expect(health).toEqual({ claude: { isFound: true, version: '2.1.0', error: null } });
+    expect(health).toEqual({
+      claude: { isFound: true, version: '2.1.0', error: null },
+      codex: { isFound: true, version: '0.154.0', error: null },
+    });
   });
 
   it('exits with code 1 and a message on invalid config', async () => {

@@ -1,3 +1,4 @@
+import { isModelOfAgent } from '@nautink/contracts/chat';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -5,7 +6,7 @@ import { DEFAULT_UI_PREFS, parseSavedUiPrefs, pickUiPrefs } from './ui-prefs.ts'
 import { safeLocalStorage } from '../lib/safe-storage.ts';
 
 import type { PanelId, UiPrefs } from './ui-prefs.ts';
-import type { ModelId } from '@nautink/contracts/models';
+import type { AgentId } from '@nautink/contracts/agents';
 import type { ThemePreference } from '@nautink/ui/theme';
 import type { Mutate, StoreApi, UseBoundStore } from 'zustand';
 
@@ -28,7 +29,10 @@ export interface UiActions {
   setCodeDrawerOpen: (isOpen: boolean) => void;
   setLibraryOpen: (isOpen: boolean) => void;
   setThemePreference: (preference: ThemePreference) => void;
-  setDefaultModel: (model: ModelId | null) => void;
+  /** Picks the agent; a different agent starts on its own default model. */
+  setAgent: (agent: AgentId) => void;
+  /** Throws when `model` is not one of the current agent's. */
+  setDefaultModel: (model: string | null) => void;
   setReviewChanges: (isOn: boolean) => void;
   setPaletteOpen: (isOpen: boolean) => void;
   setSettingsOpen: (isOpen: boolean) => void;
@@ -79,8 +83,13 @@ function preferenceActions(
     setThemePreference: (preference: ThemePreference): void => {
       set({ themePreference: preference });
     },
-    setDefaultModel: (model: ModelId | null): void => {
-      set({ defaultModel: model });
+    setDefaultModel: (model: string | null): void => {
+      set((state) => {
+        if (!isModelOfAgent(model, state.agent)) {
+          throw new Error(`Model "${String(model)}" is not a ${state.agent} model.`);
+        }
+        return { defaultModel: model };
+      });
     },
     setReviewChanges: (isOn: boolean): void => {
       set({ shouldReviewChanges: isOn });
@@ -115,6 +124,12 @@ function focusComposerAction(set: SetUiState): UiActions['focusComposer'] {
   };
 }
 
+function setAgentAction(set: SetUiState): UiActions['setAgent'] {
+  return (agent: AgentId): void => {
+    set((state) => (state.agent === agent ? {} : { agent, defaultModel: null }));
+  };
+}
+
 /** The shell's UI state: which panel is open, overlays, and the remembered preferences. */
 export const useUiStore: UseBoundStore<Mutate<StoreApi<UiState>, [['zustand/persist', UiPrefs]]>> =
   create<UiState>()(
@@ -126,6 +141,7 @@ export const useUiStore: UseBoundStore<Mutate<StoreApi<UiState>, [['zustand/pers
         ...preferenceActions(set),
         ...overlayActions(set),
         focusComposer: focusComposerAction(set),
+        setAgent: setAgentAction(set),
       }),
       {
         name: UI_STORAGE_KEY,

@@ -245,6 +245,79 @@ describe('quick actions', () => {
   });
 });
 
+describe('a Codex chat', () => {
+  it('names Codex in the composer, the statuses, the reply and the undo step', async () => {
+    useUiStore.getState().setAgent('codex');
+    const stream = controlledStream();
+    replies.push(stream.response);
+    const user = await renderApp();
+    act(() => {
+      screen.getByLabelText('Message Codex').focus();
+    });
+    await user.keyboard('Draw a start{Meta>}{Enter}{/Meta}');
+    expect(screen.getByText('Codex is replying.')).toBeTruthy();
+    expect(screen.getByLabelText('Message Codex').getAttribute('placeholder')).toBe(
+      'Codex is replying…',
+    );
+    act(() => {
+      stream.send({ type: 'session', sessionId: 't1', model: 'default' });
+      stream.send({ type: 'delta', text: fenced(VALID) });
+      stream.send({
+        type: 'done',
+        sessionId: 't1',
+        text: '',
+        isError: false,
+        durationMs: 900,
+        costUsd: null,
+      });
+      stream.end();
+    });
+    const panel = chatPanel();
+    expect(await within(panel).findByText('Codex · 0.9s')).toBeTruthy();
+    expect(await screen.findByText('Codex updated the diagram.', {}, TURN_END)).toBeTruthy();
+    const steps =
+      useWorkspaceStore.getState().histories[useWorkspaceStore.getState().activeId ?? ''];
+    expect(steps?.entries.at(-1)?.label).toBe('Codex: Draw a start');
+    expect(chatRequests()[0]?.agent).toBe('codex');
+  });
+
+  it('keeps naming the running reply after the agent it started with', async () => {
+    useUiStore.getState().setAgent('codex');
+    const stream = controlledStream();
+    replies.push(stream.response);
+    const user = await renderApp();
+    act(() => {
+      screen.getByLabelText('Message Codex').focus();
+    });
+    await user.keyboard('Draw a start{Meta>}{Enter}{/Meta}');
+    act(() => {
+      useUiStore.getState().setAgent('claude');
+    });
+    expect(screen.getByText('Codex is replying.')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Codex is working' })).toBeTruthy();
+    expect(screen.getByText('Codex is editing')).toBeTruthy();
+    act(() => {
+      stream.end();
+    });
+  });
+
+  it('keeps naming an older reply by the agent that wrote it', async () => {
+    const user = await renderApp();
+    const id: string = useWorkspaceStore.getState().activeId ?? '';
+    act(() => {
+      useWorkspaceStore.getState().updateMessages(id, () => [
+        { role: 'user', text: 'Hi' },
+        { role: 'assistant', text: 'Hello.', meta: { durationMs: 1000 } },
+      ]);
+      useUiStore.getState().setAgent('codex');
+    });
+    expect(within(chatPanel()).getByText('Claude · 1.0s')).toBeTruthy();
+    await user.keyboard('{Control>}k{/Control}');
+    const palette = await screen.findByRole('dialog', { name: 'Command palette' });
+    expect(within(palette).getByRole('option', { name: 'Stop Codex' })).toBeTruthy();
+  });
+});
+
 describe('sending from elsewhere', () => {
   it('sends from the floating prompt bar while the chat is closed', async () => {
     useUiStore.getState().setActivePanel(null);

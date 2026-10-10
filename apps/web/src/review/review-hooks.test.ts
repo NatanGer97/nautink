@@ -27,6 +27,7 @@ function proposal(fields: Partial<Proposal> = {}): Proposal {
     before: 'flowchart TD',
     after: 'flowchart TD\n  A',
     prompt: 'Add A',
+    agent: 'claude',
     label: 'Claude: Add A',
     isValid: true,
     replyIndexes: [1],

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dayLabel, groupByDay, versionText } from './version-text.ts';
+import { dayLabel, groupByDay, kindLabel, versionText } from './version-text.ts';
 import { changedDiagramId, versionCountLabel } from './versions-store.ts';
 
 import type { Version } from '@nautink/storage/records';
@@ -20,6 +20,14 @@ function version(fields: Partial<Version>): Version {
     ...fields,
   };
 }
+
+describe('kindLabel', () => {
+  it('names an agent version by the agent that wrote it', () => {
+    expect(kindLabel(version({ kind: 'claude', agent: 'codex' }))).toBe('Codex');
+    expect(kindLabel(version({ kind: 'claude' }))).toBe('Claude');
+    expect(kindLabel(version({ kind: 'manual' }))).toBe('Saved');
+  });
+});
 
 describe('versionText', () => {
   it('prefers the name, then the prompt, then the kind', () => {

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { VersionRow, versionRowId } from './version-row.tsx';
-import { groupByDay, versionText } from './version-text.ts';
+import { groupByDay, KIND_LABELS, kindLabel, versionText } from './version-text.ts';
 import { viewVersion } from './viewed-version.ts';
 import { nextCursor } from '../workspace/panel/diagram-list-model.ts';
 import { useNow } from '../workspace/use-now.ts';
@@ -56,6 +56,7 @@ export function VersionList(props: VersionListProps): ReactElement {
       <VersionRow
         id={CURRENT_ROW}
         kind="current"
+        badge={KIND_LABELS.current}
         code={currentCode}
         createdAt={null}
         text="Current version"
@@ -79,6 +80,7 @@ export function VersionList(props: VersionListProps): ReactElement {
               key={version.id}
               id={version.id}
               kind={version.kind}
+              badge={kindLabel(version)}
               code={version.code}
               createdAt={version.createdAt}
               text={versionText(version)}

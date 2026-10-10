@@ -1,4 +1,3 @@
-import { MODEL_LABELS } from '@nautink/contracts/models';
 import { Button } from '@nautink/ui/components/button';
 import { ToggleGroup, ToggleGroupItem } from '@nautink/ui/components/toggle-group';
 import { useState } from 'react';
@@ -9,9 +8,8 @@ import {
   firstRunType,
   startFromPrompt,
 } from './first-run-prompt.ts';
-import { useUiStore } from '../state/ui-store.ts';
+import { useChosenModelLabel } from '../settings/models.ts';
 
-import type { ModelId } from '@nautink/contracts/models';
 import type { KeyboardEvent, ReactElement } from 'react';
 
 function TypePicker({
@@ -51,7 +49,7 @@ function TypePicker({
 export function FirstRunPromptBox(): ReactElement {
   const [text, setText] = useState<string>('');
   const [typeId, setTypeId] = useState<string>('auto');
-  const model: ModelId | null = useUiStore((state) => state.defaultModel);
+  const modelName: string = useChosenModelLabel();
   const submit = (): void => {
     startFromPrompt(text, firstRunType(typeId));
   };
@@ -81,9 +79,7 @@ export function FirstRunPromptBox(): ReactElement {
         <div className="flex items-center justify-between gap-2.5">
           <TypePicker value={typeId} onChange={setTypeId} />
           <div className="flex shrink-0 items-center gap-2">
-            <span className="text-xs text-faint">
-              {model === null ? 'Default model' : MODEL_LABELS[model]}
-            </span>
+            <span className="text-xs text-faint">{modelName}</span>
             <Button size="sm" disabled={text.trim() === ''} onClick={submit}>
               Create
             </Button>

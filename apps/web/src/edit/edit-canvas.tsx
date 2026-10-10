@@ -6,6 +6,7 @@ import { VISUAL_EDITORS, editorIdFor } from './editor-registry.ts';
 import { readOnlyReason } from './read-only-reason.ts';
 import { ReviewMarksContext, reviewMarksOf } from './review/review-marks.ts';
 import { SelectionPrompt } from './selection-prompt/selection-prompt.tsx';
+import { useAgentName } from '../chat/agent-name.ts';
 import { useChatStore } from '../chat/chat-store.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
@@ -41,8 +42,9 @@ function useEditorReviewMarks(diagramId: string): ReviewMarks {
 /** Why the canvas is read-only: a viewed version, Claude's review, Claude streaming; or null. */
 function useHostReadOnlyReason(diagramId: string, isViewingVersion: boolean): string | null {
   const isClaudeEditing: boolean = useChatStore((state) => state.busyDiagramId === diagramId);
+  const agentName: string = useAgentName();
   const reviewReason: string | null = useReviewReadOnlyReason(diagramId);
-  const reason: string | null = readOnlyReason({ isClaudeEditing, isViewingVersion });
+  const reason: string | null = readOnlyReason({ isClaudeEditing, agentName, isViewingVersion });
   return isViewingVersion ? reason : (reviewReason ?? reason);
 }
 

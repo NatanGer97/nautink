@@ -5,6 +5,8 @@ import type { ConnectionStatus } from './health.ts';
 import type { ReactElement } from 'react';
 
 export interface ConnectionRowProps {
+  /** The CLI's name, such as `Claude Code` or `Codex CLI`. */
+  title: string;
   status: ConnectionStatus;
   onRecheck: () => void;
 }
@@ -21,11 +23,11 @@ const DOT_CLASS: Readonly<Record<ConnectionStatus['kind'], string>> = {
   disconnected: 'bg-destructive',
 };
 
-/** The Claude Code row in Settings: a status dot, the CLI version, and why it is not connected. */
-export function ConnectionRow({ status, onRecheck }: ConnectionRowProps): ReactElement {
+/** The agent CLI row in Settings: a status dot, the CLI version, and why it is not connected. */
+export function ConnectionRow({ title, status, onRecheck }: ConnectionRowProps): ReactElement {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-xs text-muted-foreground">Claude Code</span>
+      <span className="text-xs text-muted-foreground">{title}</span>
       <div
         role="status"
         className="flex items-center justify-between rounded-track border px-2.5 py-2"
@@ -39,7 +41,7 @@ export function ConnectionRow({ status, onRecheck }: ConnectionRowProps): ReactE
         </span>
         {status.kind === 'connected' ? (
           <span className="font-mono text-xs text-muted-foreground">
-            {status.version ?? 'claude'}
+            {status.version ?? 'unknown version'}
           </span>
         ) : null}
         {status.kind === 'disconnected' ? (

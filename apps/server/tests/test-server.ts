@@ -9,12 +9,26 @@ import { createApp } from '../src/app.ts';
 import { listen } from '../src/server.ts';
 
 import type { AppOptions } from '../src/app.ts';
+import type { Logger } from '../src/logger.ts';
 import type { ChatEvent } from '@nautink/contracts/chat';
 import type { HealthResponse } from '@nautink/contracts/server-info';
 import type { AddressInfo } from 'node:net';
 
 /** The fake Claude Code CLI (see `fake-claude.ts`). */
 export const FAKE_CLAUDE: string = path.join(import.meta.dirname, 'fake-claude.ts');
+
+/** The fake Codex CLI (see `fake-codex.ts`). */
+export const FAKE_CODEX: string = path.join(import.meta.dirname, 'fake-codex.ts');
+
+/** A logger that keeps its lines, for tests that check what the server logged. */
+export function createMemoryLogger(): Logger & { lines: string[] } {
+  const lines: string[] = [];
+  return {
+    lines,
+    info: (message: string) => lines.push(`info: ${message}`),
+    error: (message: string) => lines.push(`error: ${message}`),
+  };
+}
 
 export interface TestServer {
   url: string;
@@ -25,6 +39,8 @@ export interface TestServer {
 export async function startTestServer(overrides: Partial<AppOptions> = {}): Promise<TestServer> {
   const app = createApp({
     claudeBin: FAKE_CLAUDE,
+    codexBin: FAKE_CODEX,
+    logger: createMemoryLogger(),
     repoDir: null,
     homeDir: os.tmpdir(),
     workDir: process.cwd(),
