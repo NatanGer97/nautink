@@ -13,7 +13,12 @@ export interface InspectorCardProps {
   children: ReactNode;
 }
 
-/** The floating inspector in the canvas's top-right corner (M1): 248 px, tokens only. */
+/**
+ * The floating inspector in the canvas's top-right corner (M1): 248 px, tokens only. It stops above
+ * the zoom bar under it (`preview/zoom-controls.tsx`: 16 px from the bottom, 72 px under 52rem,
+ * about 38 px tall) and scrolls, so it never covers the zoom bar, however narrow the canvas is
+ * (Split). Under 40rem it starts below the wrapped toolbar.
+ */
 export function InspectorCard({
   title,
   subtitle,
@@ -24,7 +29,7 @@ export function InspectorCard({
     <section
       aria-label="Inspector"
       data-canvas-chrome=""
-      className="absolute top-4 right-4 z-10 flex max-h-[calc(100%-32px)] w-[248px] @max-[40rem]:top-[68px] @max-[40rem]:max-h-[calc(100%-84px)] flex-col gap-3.5 overflow-y-auto rounded-float border bg-panel p-3.5 shadow-float"
+      className="absolute top-4 right-4 z-10 flex max-h-[calc(100%-82px)] w-[248px] flex-col gap-3.5 overflow-y-auto rounded-float border bg-panel p-3.5 shadow-float @max-[52rem]:max-h-[calc(100%-138px)] @max-[40rem]:top-[68px] @max-[40rem]:max-h-[calc(100%-190px)]"
     >
       <header className="flex min-w-0 items-baseline justify-between gap-2">
         <h2 className="shrink-0 font-semibold">{title}</h2>
