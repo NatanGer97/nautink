@@ -50,7 +50,10 @@ test.describe('app shell smoke', () => {
     // Answered here, so the result does not depend on whether the API server is running.
     await page.route('**/api/health', async (route) => {
       await route.fulfill({
-        json: { claude: { isFound: false, version: null, error: 'claude: command not found' } },
+        json: {
+          claude: { isFound: false, version: null, error: 'claude: command not found' },
+          codex: { isFound: true, version: '0.154.0', error: null },
+        },
       });
     });
     await page.getByRole('button', { name: 'Settings' }).click();

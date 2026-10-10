@@ -1,3 +1,4 @@
+import { healthResponseSchema } from '@nautink/contracts/server-info';
 import { mkdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -49,6 +50,20 @@ describe('GET /api/health', () => {
     const response = await fetch(`${url}/api/health`);
     expect(await response.json()).toEqual({
       claude: { isFound: true, version: '2.1.0', error: null },
+      codex: { isFound: true, version: '0.154.0', error: null },
+    });
+  });
+
+  it('reports a missing Codex CLI and how to fix it', async () => {
+    const codexBin: string = path.join(home, 'no-such-codex');
+    const url = await start({ codexBin });
+    const response = await fetch(`${url}/api/health`);
+    const health = healthResponseSchema.parse(await response.json());
+    expect(health.claude.isFound).toBe(true);
+    expect(health.codex).toEqual({
+      isFound: false,
+      version: null,
+      error: `"${codexBin}" was not found. Install Codex CLI or set CODEX_BIN.`,
     });
   });
 

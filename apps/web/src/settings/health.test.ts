@@ -5,7 +5,8 @@ import { checkConnection, fetchHealth, toConnectionStatus } from './health.ts';
 const json = (body: unknown, status = 200): Response =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
-const found = { claude: { isFound: true, version: '2.1.0', error: null } };
+const codex = { isFound: true, version: '0.154.0', error: null };
+const found = { claude: { isFound: true, version: '2.1.0', error: null }, codex };
 
 describe('fetchHealth', () => {
   it('returns the validated health answer', async () => {
@@ -31,9 +32,11 @@ describe('toConnectionStatus', () => {
   it('maps found and missing CLIs', () => {
     expect(toConnectionStatus(found)).toEqual({ kind: 'connected', version: '2.1.0' });
     expect(
-      toConnectionStatus({ claude: { isFound: false, version: null, error: 'ENOENT' } }),
+      toConnectionStatus({ claude: { isFound: false, version: null, error: 'ENOENT' }, codex }),
     ).toEqual({ kind: 'disconnected', error: 'ENOENT' });
-    expect(toConnectionStatus({ claude: { isFound: false, version: null, error: null } })).toEqual({
+    expect(
+      toConnectionStatus({ claude: { isFound: false, version: null, error: null }, codex }),
+    ).toEqual({
       kind: 'disconnected',
       error: 'Claude Code was not found.',
     });

@@ -62,6 +62,7 @@ export interface StartOptions {
 function createAppFromConfig(config: ServerConfig, homeDir: string): Express {
   return createApp({
     claudeBin: config.claudeBin,
+    codexBin: config.codexBin,
     repoDir: config.repoDir,
     homeDir,
     workDir: prepareNeutralWorkDir(),

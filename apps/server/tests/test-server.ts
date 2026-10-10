@@ -16,6 +16,9 @@ import type { AddressInfo } from 'node:net';
 /** The fake Claude Code CLI (see `fake-claude.ts`). */
 export const FAKE_CLAUDE: string = path.join(import.meta.dirname, 'fake-claude.ts');
 
+/** The fake Codex CLI (see `fake-codex.ts`). */
+export const FAKE_CODEX: string = path.join(import.meta.dirname, 'fake-codex.ts');
+
 export interface TestServer {
   url: string;
   close: () => Promise<void>;
@@ -25,6 +28,7 @@ export interface TestServer {
 export async function startTestServer(overrides: Partial<AppOptions> = {}): Promise<TestServer> {
   const app = createApp({
     claudeBin: FAKE_CLAUDE,
+    codexBin: FAKE_CODEX,
     repoDir: null,
     homeDir: os.tmpdir(),
     workDir: process.cwd(),

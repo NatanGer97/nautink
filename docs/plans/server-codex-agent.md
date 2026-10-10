@@ -68,7 +68,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: args match a manual run that works (`codex exec … -`), checked once by hand and noted in the PR
 
-- [ ] **T6 — `CODEX_BIN` config and Codex in health**
+- [x] **T6 — `CODEX_BIN` config and Codex in health**
   - context - same pattern as `CLAUDE_BIN`; health contract gains `codex` here so the tree stays green (moved from T2)
   - Files: `packages/contracts/src/server-info.ts`, `apps/web/src/settings/health.ts` (type only), `apps/server/src/config.ts`, `config.test.ts`, `apps/server/src/health.ts`, `health.test.ts`, `apps/server/src/info-routes.ts`, `info-routes.test.ts`, `apps/server/src/app.ts`, `apps/server/src/server.ts`
   - Red: `CODEX_BIN` defaults to `codex`, empty string is an error; `parseVersion('codex-cli 0.154.0') === '0.154.0'`; ENOENT says `"codex" was not found. Install Codex CLI or set CODEX_BIN.`; `GET /api/health` returns both entries, checked in parallel

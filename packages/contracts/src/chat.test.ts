@@ -106,8 +106,12 @@ describe('chatEventSchema', () => {
 describe('server info schemas', () => {
   it('parse the info, health, repo and error bodies', () => {
     expect(infoResponseSchema.parse({ repoDir: null })).toEqual({ repoDir: null });
-    const health = { claude: { isFound: true, version: '2.1.0', error: null } };
+    const health = {
+      claude: { isFound: true, version: '2.1.0', error: null },
+      codex: { isFound: false, version: null, error: '"codex" was not found.' },
+    };
     expect(healthResponseSchema.parse(health)).toEqual(health);
+    expect(healthResponseSchema.safeParse({ claude: health.claude }).success).toBe(false);
     expect(repoRequestSchema.parse({ path: ' ~/dev/app ' })).toEqual({ path: '~/dev/app' });
     expect(() => repoRequestSchema.parse({ path: '' })).toThrow();
     expect(errorResponseSchema.parse({ error: 'bad' })).toEqual({ error: 'bad' });

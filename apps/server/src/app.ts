@@ -13,6 +13,7 @@ import type { Express, Request, Response } from 'express';
 
 export interface AppOptions {
   claudeBin: string;
+  codexBin: string;
   /** The codebase Claude may read until `POST /api/repo` changes it; `null` turns repo-aware mode off. */
   repoDir: string | null;
   homeDir: string;

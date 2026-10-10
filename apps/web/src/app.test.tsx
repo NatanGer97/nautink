@@ -107,7 +107,10 @@ describe('App shell', () => {
       vi.fn(async () =>
         Promise.resolve(
           new Response(
-            JSON.stringify({ claude: { isFound: true, version: '2.1.0', error: null } }),
+            JSON.stringify({
+              claude: { isFound: true, version: '2.1.0', error: null },
+              codex: { isFound: true, version: '0.154.0', error: null },
+            }),
           ),
         ),
       ),
