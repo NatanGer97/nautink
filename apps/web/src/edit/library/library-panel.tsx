@@ -33,6 +33,7 @@ export function LibraryPanel({
   return (
     <section
       aria-label="Library"
+      data-canvas-chrome=""
       className="absolute top-[68px] bottom-4 left-4 z-10 flex w-[264px] flex-col overflow-hidden rounded-float border bg-panel shadow-float"
     >
       <div className="flex items-center gap-1 border-b border-border-subtle p-1.5">

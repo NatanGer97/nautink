@@ -23,6 +23,7 @@ export function InspectorCard({
   return (
     <section
       aria-label="Inspector"
+      data-canvas-chrome=""
       className="absolute top-4 right-4 z-10 flex max-h-[calc(100%-32px)] w-[248px] @max-[40rem]:top-[68px] @max-[40rem]:max-h-[calc(100%-84px)] flex-col gap-3.5 overflow-y-auto rounded-float border bg-panel p-3.5 shadow-float"
     >
       <header className="flex min-w-0 items-baseline justify-between gap-2">

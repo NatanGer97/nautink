@@ -4,6 +4,7 @@ import { viewAvailability } from './canvas-views.ts';
 import { CenteredNotice, EmptyDiagramNotice, NoEditorNotice } from './edit-notices.tsx';
 import { VISUAL_EDITORS, editorIdFor } from './editor-registry.ts';
 import { readOnlyReason } from './read-only-reason.ts';
+import { SelectionPrompt } from './selection-prompt/selection-prompt.tsx';
 import { useChatStore } from '../chat/chat-store.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
@@ -91,6 +92,7 @@ export function EditCanvas({ isSplit }: EditCanvasProps): ReactElement {
   return (
     <div className="absolute inset-0">
       <EditBody diagram={diagram} viewed={viewed} />
+      <SelectionPrompt diagramId={diagram.id} />
       {viewed !== null && !isSplit ? (
         <ViewedVersionBar version={viewed} currentCode={diagram.code} />
       ) : null}

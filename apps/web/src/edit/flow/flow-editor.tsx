@@ -1,7 +1,7 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import { useMemo, useRef, useState } from 'react';
 
-import { addShape, renameNode, setDirection } from './flow-actions.ts';
+import { addShape, groupNodes, renameNode, setDirection } from './flow-actions.ts';
 import { FlowEditorContext } from './flow-context.ts';
 import { FlowInspector } from './flow-inspector.tsx';
 import { handleFlowKey } from './flow-keys.ts';
@@ -15,6 +15,7 @@ import { CanvasHint } from '../canvas/canvas-notices.tsx';
 import { EditorCanvas } from '../canvas/editor-canvas.tsx';
 import { useFitNow } from '../canvas/use-canvas-fit.ts';
 import { useWindowKeys } from '../canvas/use-window-keys.ts';
+import { useSelectionPrompt } from '../selection-prompt/use-selection-prompt.ts';
 
 import type { NewShape } from './flow-actions.ts';
 import type { FlowEditorContextValue } from './flow-context.ts';
@@ -72,6 +73,24 @@ function useFlowKeys(root: RefObject<HTMLDivElement | null>, state: FlowEditorSt
   );
 }
 
+/** The floating selection prompt: its Group wraps the selected nodes in a subgraph. */
+function useFlowSelectionPrompt(
+  root: RefObject<HTMLDivElement | null>,
+  state: FlowEditorState,
+): void {
+  const { selection, context, core } = state;
+  useSelectionPrompt({
+    rootRef: root,
+    isReadOnly: core.isReadOnly,
+    group:
+      selection.nodes.length > 0
+        ? (): void => {
+            groupNodes(context, selection.nodes);
+          }
+        : null,
+  });
+}
+
 function useNodeContext(state: FlowEditorState): FlowEditorContextValue {
   const { editingId, setEditingId, context } = state;
   const isReadOnly: boolean = state.core.isReadOnly;
@@ -95,6 +114,7 @@ function FlowCanvas(props: VisualEditorProps): ReactElement {
   const [libraryTab, setLibraryTab] = useLibraryTab();
   const addAtCenter: (spec: NewShape) => void = useAddAtCenter(rootRef, state);
   useFlowKeys(rootRef, state);
+  useFlowSelectionPrompt(rootRef, state);
   const graph: FlowGraph | null = core.model;
   return (
     <FlowEditorContext.Provider value={useNodeContext(state)}>

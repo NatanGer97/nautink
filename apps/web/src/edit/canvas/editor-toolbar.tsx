@@ -19,6 +19,7 @@ export function EditorToolbar({ children }: { children: ReactNode }): ReactEleme
     <div
       role="toolbar"
       aria-label="Editor tools"
+      data-canvas-chrome=""
       className="absolute top-4 left-4 z-10 flex items-center gap-0.5 rounded-card border bg-panel p-1 shadow-float"
     >
       {children}

@@ -8,6 +8,8 @@ import { renameFromCanvas, setDirection } from './class-item-actions.ts';
 import { handleClassKey } from './class-keys.ts';
 import { ClassMarkers } from './class-markers.tsx';
 import { setMemberText } from './class-member-actions.ts';
+import { itemKind } from './class-names.ts';
+import { groupInNamespace } from './class-namespace-actions.ts';
 import { setNoteText } from './class-note-actions.ts';
 import { ClassToolbar } from './class-toolbar.tsx';
 import { useClassEditor } from './use-class-editor.ts';
@@ -16,6 +18,7 @@ import { CanvasHint } from '../canvas/canvas-notices.tsx';
 import { EditorCanvas } from '../canvas/editor-canvas.tsx';
 import { useFitNow } from '../canvas/use-canvas-fit.ts';
 import { useWindowKeys } from '../canvas/use-window-keys.ts';
+import { useSelectionPrompt } from '../selection-prompt/use-selection-prompt.ts';
 
 import type { ClassNodeContextValue } from './class-context.ts';
 import type { PaletteKind } from './class-palette.ts';
@@ -85,6 +88,26 @@ function useNodeContext(state: ClassEditorState): ClassNodeContextValue {
   );
 }
 
+/** The floating selection prompt: its Group puts the selected classes in a new namespace. */
+function useClassSelectionPrompt(
+  root: RefObject<HTMLDivElement | null>,
+  state: ClassEditorState,
+): void {
+  const { selection, context, core } = state;
+  const model: ClassModel | null = core.model;
+  const hasClass: boolean =
+    model !== null && selection.nodes.some((id) => itemKind(model, id) === 'class');
+  useSelectionPrompt({
+    rootRef: root,
+    isReadOnly: core.isReadOnly,
+    group: hasClass
+      ? (): void => {
+          groupInNamespace(context, selection.nodes);
+        }
+      : null,
+  });
+}
+
 function isEmpty(model: ClassModel): boolean {
   return model.classes.length === 0 && model.notes.length === 0;
 }
@@ -95,6 +118,7 @@ function ClassCanvas(props: VisualEditorProps): ReactElement {
   const { core, selection, context } = state;
   const addAtCenter: (kind: PaletteKind) => void = useAddAtCenter(rootRef, state);
   useClassKeys(rootRef, state);
+  useClassSelectionPrompt(rootRef, state);
   const model: ClassModel | null = core.model;
   return (
     <ClassNodeContext.Provider value={useNodeContext(state)}>

@@ -1,7 +1,8 @@
+import { stateById } from '@nautink/editors/state/scopes';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useMemo, useRef } from 'react';
 
-import { renameInline, setDirection } from './state-actions.ts';
+import { renameInline, setDirection, wrap } from './state-actions.ts';
 import { addItem, toolbarSpot } from './state-add.ts';
 import { StateEditorContext } from './state-context.ts';
 import { StateInspector } from './state-inspector.tsx';
@@ -13,6 +14,7 @@ import { CanvasHint } from '../canvas/canvas-notices.tsx';
 import { EditorCanvas } from '../canvas/editor-canvas.tsx';
 import { useFitNow } from '../canvas/use-canvas-fit.ts';
 import { useWindowKeys } from '../canvas/use-window-keys.ts';
+import { useSelectionPrompt } from '../selection-prompt/use-selection-prompt.ts';
 
 import type { Spot } from './state-add.ts';
 import type { StateEditorContextValue } from './state-context.ts';
@@ -82,6 +84,27 @@ function useNodeContext(state: StateEditorState): StateEditorContextValue {
   );
 }
 
+/** The floating selection prompt: its Group wraps the selected states in a composite. */
+function useStateSelectionPrompt(
+  root: RefObject<HTMLDivElement | null>,
+  state: StateEditorState,
+): void {
+  const { selection, context, core } = state;
+  const model: StateModel | null = core.model;
+  const states: string[] =
+    model === null ? [] : selection.nodes.filter((id) => stateById(model, id) !== undefined);
+  useSelectionPrompt({
+    rootRef: root,
+    isReadOnly: core.isReadOnly,
+    group:
+      states.length > 0
+        ? (): void => {
+            wrap(context, states);
+          }
+        : null,
+  });
+}
+
 function isEmptyModel(model: StateModel): boolean {
   return model.states.length === 0 && model.transitions.length === 0 && model.pseudo.length === 0;
 }
@@ -92,6 +115,7 @@ function StateCanvas(props: VisualEditorProps): ReactElement {
   const { core, selection, context } = state;
   const onAdd: (kind: PaletteKind) => void = useAddFromToolbar(rootRef, state);
   useStateKeys(rootRef, state);
+  useStateSelectionPrompt(rootRef, state);
   const model: StateModel | null = core.model;
   return (
     <StateEditorContext.Provider value={useNodeContext(state)}>

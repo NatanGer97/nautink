@@ -18,10 +18,12 @@ import { useSequenceView } from './use-sequence-view.ts';
 import { ZoomControls } from '../../preview/zoom-controls.tsx';
 import { CanvasHint, ReadOnlyBanner } from '../canvas/canvas-notices.tsx';
 import { useWindowKeys } from '../canvas/use-window-keys.ts';
+import { useSelectionPrompt } from '../selection-prompt/use-selection-prompt.ts';
 
 import type { DropOutcome } from './sequence-drop.ts';
 import type { SequenceLibraryTab } from './sequence-library.tsx';
 import type { CanvasHandlers, CanvasScene } from './sequence-scene.ts';
+import type { SelectionKind, SequenceSelection } from './sequence-types.ts';
 import type { SequenceEditorState } from './use-sequence-editor.ts';
 import type { SequencePointer } from './use-sequence-pointer.ts';
 import type { SequenceView } from './use-sequence-view.ts';
@@ -211,6 +213,22 @@ function SequenceHints({ state }: { state: SequenceEditorState }): ReactElement 
   ) : null;
 }
 
+/** The test id each selected thing is drawn with: a participant's header, a box, a row. */
+const SELECTED_TEST_ID: Readonly<Record<SelectionKind, string>> = {
+  participant: 'sequence-participant-',
+  box: 'sequence-box-',
+  items: 'sequence-item-',
+};
+
+/** The drawn elements of the selection, for the floating selection prompt's position. */
+function selectedElements(root: HTMLElement, selection: SequenceSelection): Element[] {
+  const prefix: string | null = selection.kind === null ? null : SELECTED_TEST_ID[selection.kind];
+  const ids: Set<string> = new Set<string>(selection.ids.map((id) => `${prefix ?? ''}${id}`));
+  return [...root.querySelectorAll('[data-testid]')].filter(
+    (element) => prefix !== null && ids.has(element.getAttribute('data-testid') ?? ''),
+  );
+}
+
 function SequenceCanvas(props: VisualEditorProps): ReactElement {
   const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const markerId: string = `sequence${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
@@ -223,6 +241,13 @@ function SequenceCanvas(props: VisualEditorProps): ReactElement {
     view,
     layout: state.layout,
     context: state.context,
+  });
+  // Sequence rows have no group of the M1 kind (blocks are added from the library), so no Group.
+  useSelectionPrompt({
+    rootRef,
+    isReadOnly: state.core.isReadOnly,
+    group: null,
+    selectedElements: (root) => selectedElements(root, state.selection),
   });
   useWindowKeys(rootRef, (event: KeyboardEvent) =>
     handleSequenceKey(event, {

@@ -31,6 +31,7 @@ export function ZoomControls({
     <div
       role="toolbar"
       aria-label="Zoom"
+      data-canvas-chrome=""
       className="absolute right-4 bottom-4 flex items-center gap-0.5 rounded-card border bg-panel p-1 shadow-float @max-[52rem]:bottom-[72px]"
     >
       <IconButton

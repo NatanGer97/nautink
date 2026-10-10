@@ -14,6 +14,7 @@ import { CanvasHint } from '../canvas/canvas-notices.tsx';
 import { EditorCanvas } from '../canvas/editor-canvas.tsx';
 import { useFitNow } from '../canvas/use-canvas-fit.ts';
 import { useWindowKeys } from '../canvas/use-window-keys.ts';
+import { useSelectionPrompt } from '../selection-prompt/use-selection-prompt.ts';
 
 import type { ErEditorContextValue } from './er-context.ts';
 import type { ErEditorState } from './use-er-editor.ts';
@@ -79,6 +80,8 @@ function ErCanvas(props: VisualEditorProps): ReactElement {
   const { core, selection, context } = state;
   const addAtCenter: () => void = useAddAtCenter(rootRef, state);
   useErKeys(rootRef, state);
+  // The ER editor cannot make a new group (as v1), so the floating prompt has no Group.
+  useSelectionPrompt({ rootRef, isReadOnly: core.isReadOnly, group: null });
   const model: ErModel | null = core.model;
   return (
     <ErEditorContext.Provider value={useItemContext(state)}>
