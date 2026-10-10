@@ -5,6 +5,7 @@ import { cn } from '@nautink/ui/lib/utils';
 import { Label } from './sequence-label.tsx';
 import { columnOffset, dragOffset, isSelected } from './sequence-scene.ts';
 import { svg, translate } from './svg-path.ts';
+import { DARK_CODE_SVG_FILL } from '../canvas/code-colors.ts';
 
 import type { CanvasHandlers, CanvasScene } from './sequence-scene.ts';
 import type { Column } from '@nautink/editors/sequence/layout';
@@ -81,7 +82,7 @@ export function BoxFrames({
   );
 }
 
-/** `rect` blocks paint their color behind everything else. */
+/** `rect` blocks paint their color behind everything else (faint in dark mode, `code-colors.ts`). */
 export function RectBackgrounds({ scene }: { scene: CanvasScene }): ReactElement {
   return (
     <g className="pointer-events-none">
@@ -96,6 +97,7 @@ export function RectBackgrounds({ scene }: { scene: CanvasScene }): ReactElement
             height={block.y2 - block.y1}
             rx={RECT_RADIUS}
             fill={block.item.sections[0]?.label ?? 'none'}
+            className={DARK_CODE_SVG_FILL}
           />
         ))}
     </g>

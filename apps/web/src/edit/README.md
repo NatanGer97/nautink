@@ -120,6 +120,7 @@ What it does for you (port of v1's `sync.js` + `positions.js`):
 | `useFitNow()` | Fits now, around the prompt bar (for a ⇧1 shortcut) |
 | `react-flow-theme.css` | React Flow variables mapped to the PRD §6 tokens. Style your nodes with Tailwind token classes only |
 | `canvasTextMeasurer` | The `TextMeasurer` `@nautink/editors` layouts take |
+| `DARK_CODE_SVG_FILL`, `DARK_CODE_NODE_FILL` (`code-colors.ts`) | Put on any shape the code colors (`rect rgb(…)`, class `style`/`classDef`): in dark mode only 12 % of the fill shows over the panel and the app's text color wins, so labels keep 4.5:1. Light mode is unchanged |
 
 Libraries (`library/`): `LibraryPanel` (the floating tabbed panel under the toolbar), `LibraryItem`
 (a tile you click or drag), `LibrarySearch`, and `IconLibrary` (the Icons tab: logos, mdi, Font

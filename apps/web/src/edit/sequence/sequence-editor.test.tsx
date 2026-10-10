@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SequenceEditor } from './sequence-editor.tsx';
+import { DARK_CODE_SVG_FILL } from '../canvas/code-colors.ts';
 import { CLAUDE_EDITING } from '../read-only-reason.ts';
 import { requestSelection, useCanvasSelectionStore } from '../selection/canvas-selection.ts';
 import { SYNTAX_ERROR_REASON } from '../use-editor-core.ts';
@@ -127,6 +128,10 @@ describe('SequenceEditor', () => {
     expect(within(inspector()).getByLabelText('else 1')).toBeTruthy();
     clickRow(rowWith('rect'));
     expect(within(inspector()).getByLabelText('Background')).toBeTruthy();
+    const background = screen
+      .getByTestId('sequence-canvas')
+      .querySelector('rect[fill="rgb(1, 2, 3)"]');
+    expect(background?.getAttribute('class')).toBe(DARK_CODE_SVG_FILL);
     fireEvent.pointerDown(screen.getByTestId('sequence-box-box1'), { button: 0 });
     expect(within(inspector()).getByRole('heading', { name: 'Box' })).toBeTruthy();
     clickRow(rowWith('open'));

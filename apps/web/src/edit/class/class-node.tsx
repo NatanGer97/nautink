@@ -13,9 +13,11 @@ import { memo } from 'react';
 import { useClassNodeContext } from './class-context.ts';
 import { ClassHandles } from './class-handles.tsx';
 import { InlineEditor } from './inline-editor.tsx';
+import { DARK_CODE_NODE_FILL } from '../canvas/code-colors.ts';
 
 import type { ClassFlowNode } from './class-types.ts';
 import type { MemberList } from '@nautink/editors/class/ops';
+import type { ClassStyle } from '@nautink/editors/class/styles';
 import type { ClassItem } from '@nautink/editors/class/types';
 import type { NodeProps } from '@xyflow/react';
 import type { CSSProperties, NamedExoticComponent, ReactElement } from 'react';
@@ -170,6 +172,11 @@ function Compartment({
   );
 }
 
+/** True when the code colors this class (`style`, `classDef`): dark mode then tones it down. */
+function hasCodeColors(style: ClassStyle | undefined): boolean {
+  return style !== undefined && ('--node-fill' in style || 'color' in style);
+}
+
 function ClassNodeView({ id, data, selected: isSelected }: NodeProps<ClassFlowNode>): ReactElement {
   const { item, size, style } = data;
   return (
@@ -178,6 +185,7 @@ function ClassNodeView({ id, data, selected: isSelected }: NodeProps<ClassFlowNo
       aria-label={`Class ${displayName(item)}`}
       className={cn(
         'relative box-border flex flex-col rounded-control border border-node-stroke bg-node-fill text-foreground',
+        hasCodeColors(style) && DARK_CODE_NODE_FILL,
         isSelected && 'border-accent-ink shadow-[0_0_0_3px_var(--selection-ring)]',
       )}
       style={{ width: size.width, height: size.height, ...(style as CSSProperties | undefined) }}

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ClassEditor } from './class-editor.tsx';
+import { DARK_CODE_NODE_FILL } from '../canvas/code-colors.ts';
 import { CLAUDE_EDITING } from '../read-only-reason.ts';
 import { requestSelection, useCanvasSelectionStore } from '../selection/canvas-selection.ts';
 import { SYNTAX_ERROR_REASON } from '../use-editor-core.ts';
@@ -65,6 +66,17 @@ async function inspectorFor(id: string): Promise<HTMLElement> {
 }
 
 describe('ClassEditor', () => {
+  it('tones down classes the code colors in dark mode, and leaves the others alone', async () => {
+    renderEditor({
+      code: `${CODE}    classDef warm fill:#ffe9a8\n    class Dog:::warm\n    style Animal color:#111\n    class Cat\n`,
+    });
+    const dog = await screen.findByTestId('class-node-Dog');
+    expect(dog.className).toContain(DARK_CODE_NODE_FILL);
+    expect(dog.style.getPropertyValue('--node-fill')).toBe('#ffe9a8');
+    expect(screen.getByTestId('class-node-Animal').className).toContain(DARK_CODE_NODE_FILL);
+    expect(screen.getByTestId('class-node-Cat').className).not.toContain(DARK_CODE_NODE_FILL);
+  });
+
   it('draws classes with stereotypes and members, and publishes the selection', async () => {
     renderEditor();
     const animal = await screen.findByTestId('class-node-Animal');
