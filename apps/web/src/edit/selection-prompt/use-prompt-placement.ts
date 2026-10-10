@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { placePrompt, unionBox } from './prompt-placement.ts';
 
-import type { Box, Placement } from './prompt-placement.ts';
+import type { Box, Placement, PlacementInput } from './prompt-placement.ts';
 import type { SelectionPromptHandle } from './use-selection-prompt.ts';
 import type { RefObject } from 'react';
 
@@ -22,11 +22,20 @@ function hasArea(rect: DOMRect): boolean {
   return rect.width > 0 || rect.height > 0;
 }
 
+function boxesOf(rects: readonly DOMRect[], origin: DOMRect): Box[] {
+  return rects.filter(hasArea).map((rect) => toBox(rect, origin));
+}
+
 function chromeBoxes(origin: DOMRect): Box[] {
-  return [...document.querySelectorAll(CANVAS_CHROME_SELECTOR)]
-    .map((element) => element.getBoundingClientRect())
-    .filter(hasArea)
-    .map((rect) => toBox(rect, origin));
+  const chrome: Element[] = [...document.querySelectorAll(CANVAS_CHROME_SELECTOR)];
+  return boxesOf(
+    chrome.map((element) => element.getBoundingClientRect()),
+    origin,
+  );
+}
+
+function round(at: Placement | null): Placement | null {
+  return at === null ? null : { left: Math.round(at.left), top: Math.round(at.top) };
 }
 
 export interface PromptElements {
@@ -35,34 +44,33 @@ export interface PromptElements {
   promptRef: RefObject<HTMLElement | null>;
 }
 
-function selectionBox(handle: SelectionPromptHandle, origin: DOMRect): Box | null {
-  return unionBox(
-    handle
-      .selectedRects()
-      .filter(hasArea)
-      .map((rect) => toBox(rect, origin)),
-  );
-}
-
-/** Where the prompt goes now, from the selection's and the chrome's screen rectangles. */
-export function measurePlacement(
+function placementInput(
   elements: PromptElements,
   handle: SelectionPromptHandle,
-): Placement | null {
-  const overlay: HTMLElement | null = elements.overlayRef.current;
+): PlacementInput | null {
+  const origin: DOMRect | undefined = elements.overlayRef.current?.getBoundingClientRect();
   const prompt: HTMLElement | null = elements.promptRef.current;
-  const origin: DOMRect | undefined = overlay?.getBoundingClientRect();
-  const target: Box | null = origin === undefined ? null : selectionBox(handle, origin);
+  const target: Box | null =
+    origin === undefined ? null : unionBox(boxesOf(handle.selectedRects(), origin));
   if (origin === undefined || prompt === null || target === null) {
     return null;
   }
-  const at: Placement | null = placePrompt({
+  return {
     target,
     container: { width: origin.width, height: origin.height },
     prompt: { width: prompt.offsetWidth, height: prompt.offsetHeight },
     obstacles: chromeBoxes(origin),
-  });
-  return at === null ? null : { left: Math.round(at.left), top: Math.round(at.top) };
+    avoid: boxesOf(handle.otherRects(), origin),
+  };
+}
+
+/** Where the prompt goes now, from the screen rectangles of the selection, the chrome and the shapes. */
+export function measurePlacement(
+  elements: PromptElements,
+  handle: SelectionPromptHandle,
+): Placement | null {
+  const input: PlacementInput | null = placementInput(elements, handle);
+  return input === null ? null : round(placePrompt(input));
 }
 
 function isSame(a: Placement | null, b: Placement | null): boolean {

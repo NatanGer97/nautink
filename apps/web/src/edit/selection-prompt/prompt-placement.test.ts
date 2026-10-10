@@ -55,9 +55,18 @@ describe('placePrompt', () => {
     });
   });
 
-  it('moves beside the inspector instead of covering it', () => {
+  it('moves to the selection’s side instead of covering the inspector', () => {
     const at = placePrompt(input(box([700, 150, 120, 60]), [TOOLBAR, INSPECTOR, ZOOM]));
-    expect(at).toEqual({ left: INSPECTOR.left - PROMPT_GAP_PX - PROMPT.width, top: 222 });
+    expect(at).toEqual({ left: 700 - PROMPT_GAP_PX - PROMPT.width, top: 159 });
+  });
+
+  it('slides along the row under the selection when its sides are taken', () => {
+    const left = box([0, 150, 380, 60]);
+    const right = box([620, 150, 380, 60]);
+    const over = box([380, 80, 240, 60]);
+    const under = box([380, 262, 240, 40]);
+    const at = placePrompt(input(box([400, 150, 200, 60]), [left, right, over, under]));
+    expect(at).toEqual({ left: 380 - PROMPT_GAP_PX - PROMPT.width, top: 222 });
   });
 
   it('never covers the toolbar', () => {
@@ -71,6 +80,34 @@ describe('placePrompt', () => {
     expect(placePrompt(input(box([0, 0, 1000, 700])))).toEqual({
       left: 350,
       top: 700 - PROMPT_MARGIN_PX - PROMPT_GAP_PX - PROMPT.height,
+    });
+  });
+
+  it('keeps off the next shape below, beside the selection instead', () => {
+    const selection = box([400, 200, 200, 40]);
+    const next = box([400, 260, 200, 40]);
+    const previous = box([400, 140, 200, 40]);
+    expect(placePrompt({ ...input(selection), avoid: [next, previous] })).toEqual({
+      left: 600 + PROMPT_GAP_PX,
+      top: 199,
+    });
+  });
+
+  it('ignores a frame around the selection, and covers shapes when nothing else fits', () => {
+    const frame = box([300, 100, 400, 300]);
+    expect(placePrompt({ ...input(box([400, 200, 200, 100])), avoid: [frame] })).toEqual({
+      left: 350,
+      top: 300 + PROMPT_GAP_PX,
+    });
+    const everywhere = [
+      box([0, 0, 390, 700]),
+      box([610, 0, 390, 700]),
+      box([390, 0, 220, 190]),
+      box([390, 310, 220, 390]),
+    ];
+    expect(placePrompt({ ...input(box([400, 200, 200, 100])), avoid: everywhere })).toEqual({
+      left: 350,
+      top: 300 + PROMPT_GAP_PX,
     });
   });
 

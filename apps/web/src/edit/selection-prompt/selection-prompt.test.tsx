@@ -53,7 +53,7 @@ const ITEMS = [
 ];
 
 function fakeHandle(group = vi.fn()): SelectionPromptHandle {
-  return { selectedRects: () => [rect(SELECTED)], group };
+  return { selectedRects: () => [rect(SELECTED)], otherRects: () => [], group };
 }
 
 function renderPrompt(element: ReactElement = <SelectionPrompt diagramId="d1" />): void {

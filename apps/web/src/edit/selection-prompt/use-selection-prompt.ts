@@ -13,6 +13,11 @@ export interface SelectionPromptAdapter {
    * edges are found by class.
    */
   selectedElements?: (root: HTMLElement) => readonly Element[];
+  /**
+   * Every shape of the diagram, selected or not: the prompt keeps off the others when it can.
+   * Leave it out on a React Flow canvas: its nodes are found by class.
+   */
+  shapeElements?: (root: HTMLElement) => readonly Element[];
   /** Groups the selection (subgraph, namespace, composite), or null to hide Group. */
   group: (() => void) | null;
   /** The editor's own read-only state (a syntax error, Claude editing, a viewed version). */
@@ -23,6 +28,8 @@ export interface SelectionPromptAdapter {
 export interface SelectionPromptHandle {
   /** Screen rectangles of the selected items now. */
   selectedRects: () => DOMRect[];
+  /** Screen rectangles of the shapes that are not selected. */
+  otherRects: () => DOMRect[];
   group: () => void;
 }
 
@@ -46,12 +53,22 @@ export function reactFlowSelected(root: HTMLElement): Element[] {
   return [...root.querySelectorAll(REACT_FLOW_SELECTED)];
 }
 
-function rectsOf(adapter: SelectionPromptAdapter): DOMRect[] {
+/** Every node of a React Flow canvas. */
+export function reactFlowShapes(root: HTMLElement): Element[] {
+  return [...root.querySelectorAll('.react-flow__node')];
+}
+
+function elementsOf(adapter: SelectionPromptAdapter): { selected: Element[]; others: Element[] } {
   const root: HTMLElement | null = adapter.rootRef.current;
   if (root === null) {
-    return [];
+    return { selected: [], others: [] };
   }
-  const elements: readonly Element[] = (adapter.selectedElements ?? reactFlowSelected)(root);
+  const selected: Element[] = [...(adapter.selectedElements ?? reactFlowSelected)(root)];
+  const shapes: readonly Element[] = (adapter.shapeElements ?? reactFlowShapes)(root);
+  return { selected, others: shapes.filter((shape) => !selected.includes(shape)) };
+}
+
+function rectsOf(elements: readonly Element[]): DOMRect[] {
   return elements.map((element) => element.getBoundingClientRect());
 }
 
@@ -61,7 +78,8 @@ function useStableHandle(adapter: SelectionPromptAdapter): SelectionPromptHandle
     latest.current = adapter;
   });
   const [handle] = useState<SelectionPromptHandle>(() => ({
-    selectedRects: (): DOMRect[] => rectsOf(latest.current),
+    selectedRects: (): DOMRect[] => rectsOf(elementsOf(latest.current).selected),
+    otherRects: (): DOMRect[] => rectsOf(elementsOf(latest.current).others),
     group: (): void => {
       latest.current.group?.();
     },

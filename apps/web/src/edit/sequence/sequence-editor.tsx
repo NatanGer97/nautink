@@ -229,6 +229,15 @@ function selectedElements(root: HTMLElement, selection: SequenceSelection): Elem
   );
 }
 
+/** Rows and participant headers: the prompt keeps off the ones that are not selected. */
+function shapeElements(root: HTMLElement): Element[] {
+  return [
+    ...root.querySelectorAll(
+      '[data-testid^="sequence-item-"], [data-testid^="sequence-participant-"]',
+    ),
+  ];
+}
+
 function SequenceCanvas(props: VisualEditorProps): ReactElement {
   const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const markerId: string = `sequence${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
@@ -248,6 +257,7 @@ function SequenceCanvas(props: VisualEditorProps): ReactElement {
     isReadOnly: state.core.isReadOnly,
     group: null,
     selectedElements: (root) => selectedElements(root, state.selection),
+    shapeElements,
   });
   useWindowKeys(rootRef, (event: KeyboardEvent) =>
     handleSequenceKey(event, {

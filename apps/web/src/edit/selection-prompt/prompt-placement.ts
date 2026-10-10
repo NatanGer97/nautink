@@ -1,5 +1,6 @@
-// Where the floating selection prompt goes (M1): under the selection, or above it, never over the
-// canvas chrome (toolbar, inspector, library, zoom bar, prompt bar). Pure, in container pixels.
+// Where the floating selection prompt goes (M1): under the selection when there is room, never over
+// the canvas chrome (toolbar, inspector, library, zoom bar, prompt bar), and off the diagram's other
+// shapes when it can be. Pure, in container pixels.
 
 /** A rectangle in the canvas container's pixels. */
 export interface Box {
@@ -27,6 +28,11 @@ export interface PlacementInput {
   prompt: Size;
   /** Chrome the prompt must not cover. */
   obstacles: readonly Box[];
+  /**
+   * The diagram's other shapes: covered only when no spot leaves them free. Shapes that overlap
+   * the selection (a frame around it) are ignored.
+   */
+  avoid?: readonly Box[];
 }
 
 /** Space between the selection (or a piece of chrome) and the prompt. */
@@ -85,29 +91,50 @@ function clampLeft(left: number, input: PlacementInput): number {
   return clamp(left, PROMPT_MARGIN_PX, Math.max(PROMPT_MARGIN_PX, highest));
 }
 
-/** Lefts to try on one row: centred on the selection, then beside each piece of chrome in the way. */
-function leftsFor(top: number, input: PlacementInput): number[] {
+function centredLeft(input: PlacementInput): number {
   const { target, prompt } = input;
-  const centred: number = clampLeft((target.left + target.right - prompt.width) * HALF, input);
-  const row: Box = boxAt({ left: centred, top }, prompt);
-  const beside: number[] = input.obstacles
-    .filter((obstacle) => overlaps(row, obstacle))
-    .flatMap((obstacle) => [
-      obstacle.left - PROMPT_GAP_PX - prompt.width,
-      obstacle.right + PROMPT_GAP_PX,
-    ]);
-  return [centred, ...beside.map((left) => clampLeft(left, input))];
+  return clampLeft((target.left + target.right - prompt.width) * HALF, input);
 }
 
-/** Tops to try: under the selection, above it, then inside the bottom of its visible part. */
-function topsFor(input: PlacementInput): number[] {
+/** Spots on one row beside each obstacle a centred prompt would cover. */
+function besideSpots(top: number, input: PlacementInput): Placement[] {
+  const row: Box = boxAt({ left: centredLeft(input), top }, input.prompt);
+  return input.obstacles
+    .filter((obstacle) => overlaps(row, obstacle))
+    .flatMap((obstacle) => [
+      obstacle.left - PROMPT_GAP_PX - input.prompt.width,
+      obstacle.right + PROMPT_GAP_PX,
+    ])
+    .map((left) => ({ left: clampLeft(left, input), top }));
+}
+
+/**
+ * Spots in order of preference: centred under the selection, centred above it, to its right, to
+ * its left, then along those rows beside whatever is in the way, then inside the bottom of its
+ * visible part.
+ */
+function candidates(input: PlacementInput): Placement[] {
   const { target, prompt, container } = input;
-  const visibleBottom: number = Math.min(target.bottom, container.height - PROMPT_MARGIN_PX);
+  const below: number = target.bottom + PROMPT_GAP_PX;
+  const above: number = target.top - PROMPT_GAP_PX - prompt.height;
+  const middle: number = (target.top + target.bottom - prompt.height) * HALF;
+  const inside: number =
+    Math.min(target.bottom, container.height - PROMPT_MARGIN_PX) - PROMPT_GAP_PX - prompt.height;
+  const centred: number = centredLeft(input);
   return [
-    target.bottom + PROMPT_GAP_PX,
-    target.top - PROMPT_GAP_PX - prompt.height,
-    visibleBottom - PROMPT_GAP_PX - prompt.height,
+    { left: centred, top: below },
+    { left: centred, top: above },
+    { left: target.right + PROMPT_GAP_PX, top: middle },
+    { left: target.left - PROMPT_GAP_PX - prompt.width, top: middle },
+    ...besideSpots(below, input),
+    ...besideSpots(above, input),
+    { left: centred, top: inside },
+    ...besideSpots(inside, input),
   ];
+}
+
+function firstFit(input: PlacementInput): Placement | null {
+  return candidates(input).find((spot) => fits(spot, input)) ?? null;
 }
 
 function isOnScreen(target: Box, container: Size): boolean {
@@ -116,19 +143,12 @@ function isOnScreen(target: Box, container: Size): boolean {
 
 /**
  * The prompt's spot, or null when the selection is off screen or there is no room that leaves the
- * chrome uncovered (the prompt then hides).
+ * chrome uncovered (the prompt then hides). Spots that also leave the other shapes free come first.
  */
 export function placePrompt(input: PlacementInput): Placement | null {
   if (!isOnScreen(input.target, input.container)) {
     return null;
   }
-  for (const top of topsFor(input)) {
-    const left: number | undefined = leftsFor(top, input).find((x) =>
-      fits({ left: x, top }, input),
-    );
-    if (left !== undefined) {
-      return { left, top };
-    }
-  }
-  return null;
+  const shapes: Box[] = (input.avoid ?? []).filter((shape) => !overlaps(shape, input.target));
+  return firstFit({ ...input, obstacles: [...input.obstacles, ...shapes] }) ?? firstFit(input);
 }

@@ -98,19 +98,26 @@ test.describe('selection-aware prompts', () => {
     expect(requests.at(-1)?.selection).toBeNull();
   });
 
-  test('the floating prompt sits under the selection, clear of the chrome', async ({ page }) => {
+  test('the floating prompt sits by the selection, clear of the chrome and shapes', async ({
+    page,
+  }) => {
     const requests = await recordChat(page);
     await openInEdit(page);
     await selectAandB(page);
     const prompt = page.getByTestId('selection-prompt');
     await expect(prompt.getByPlaceholder('Ask Claude about these 2…')).toBeVisible();
     const box = await prompt.boundingBox();
-    const nodeB = await canvasNode(page, 'B').boundingBox();
-    const inspector = await page.getByRole('region', { name: 'Inspector' }).boundingBox();
-    const toolbar = await page.getByRole('toolbar', { name: 'Editor tools' }).boundingBox();
-    expect(box && nodeB && box.y >= nodeB.y + nodeB.height).toBe(true);
-    expect(box && inspector && overlaps(box, inspector)).toBe(false);
-    expect(box && toolbar && overlaps(box, toolbar)).toBe(false);
+    const covered = [
+      canvasNode(page, 'A'),
+      canvasNode(page, 'B'),
+      canvasNode(page, 'C'),
+      page.getByRole('region', { name: 'Inspector' }),
+      page.getByRole('toolbar', { name: 'Editor tools' }),
+    ];
+    for (const element of covered) {
+      const other = await element.boundingBox();
+      expect(box && other && overlaps(box, other)).toBe(false);
+    }
     await prompt.getByRole('textbox').fill('Add a timeout between these');
     await prompt.getByRole('textbox').press('Enter');
     await expect.poll(() => requests.length).toBe(1);
