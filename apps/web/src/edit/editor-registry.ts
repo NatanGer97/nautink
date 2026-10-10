@@ -25,6 +25,7 @@ export const VISUAL_EDITORS: EditorRegistry = {
   er: lazyEditor(async () => (await import('./er/er-editor.tsx')).ErEditor),
   state: lazyEditor(async () => (await import('./state/state-editor.tsx')).StateEditor),
   class: lazyEditor(async () => (await import('./class/class-editor.tsx')).ClassEditor),
+  sequence: lazyEditor(async () => (await import('./sequence/sequence-editor.tsx')).SequenceEditor),
 };
 
 /** The editor id for `code` when the app has that editor, else null. */
