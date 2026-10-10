@@ -1,4 +1,6 @@
+import { useAgentName } from './agent-name.ts';
 import { useChatStore } from './chat-store.ts';
+import { useReplyingAgentName } from './replying-agent.ts';
 import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
 import { submitDraft } from './submit-draft.ts';
@@ -22,6 +24,8 @@ export function PromptBar(): ReactElement {
   const busyId: string | null = useChatStore((state) => state.busyDiagramId);
   const draft: string = diagram?.draft ?? '';
   const isStreaming: boolean = busyId !== null && busyId === diagram?.id;
+  const name: string = useAgentName();
+  const replyingName: string = useReplyingAgentName();
   const send = (): void => {
     if (diagram !== undefined) {
       submitDraft(diagram.id, draft);
@@ -34,12 +38,14 @@ export function PromptBar(): ReactElement {
     >
       <SelectionChip diagramId={diagram?.id} />
       <label htmlFor="canvas-prompt" className="sr-only">
-        Ask Claude to change this diagram
+        Ask {name} to change this diagram
       </label>
       <input
         id="canvas-prompt"
         value={draft}
-        placeholder={isStreaming ? 'Claude is replying…' : 'Ask Claude to change this diagram…'}
+        placeholder={
+          isStreaming ? `${replyingName} is replying…` : `Ask ${name} to change this diagram…`
+        }
         className="min-w-0 flex-1 border-0 bg-transparent outline-none placeholder:text-faint"
         onChange={(event) => {
           if (diagram !== undefined) {

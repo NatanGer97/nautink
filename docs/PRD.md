@@ -21,7 +21,7 @@ All `src/…` and `server/…` paths below are v1 paths in `~/dev/mermaid-chat`.
 4. **Enterprise and open-source ready.** Typed, tested, accessible (WCAG 2.2 AA), documented, with a clean license story (§9, §10).
 
 ### Non-goals (v2.0)
-- Hosting for other users or accounts. v2 stays a local app driving the user's own Claude Code CLI, like v1.
+- Hosting for other users or accounts. v2 stays a local app driving the user's own Claude Code CLI, like v1, or their own Codex CLI (ADR-002).
 - Real-time multi-user collaboration.
 - A marketing site. React Bits and similar effect libraries are for that later site only (§6.8).
 - New diagram types beyond v1's five visual editors.
@@ -48,7 +48,7 @@ Every row must ship in v2.0. "Change" notes where behavior intentionally differs
 | v1 feature | v1 reference | v2 location | Change |
 |---|---|---|---|
 | Chat with streaming replies, stop, new chat | `src/Chat.jsx`, `src/App.jsx` (`send`), `src/api.js` | Chat panel, left of canvas (M1, M2) | Reply text may stream into the canvas as a live build (§4.3) |
-| Claude via local CLI, session resume, lean flags | `server/index.js` (`claudeArgs`, `--resume`, `--setting-sources project`, `--strict-mcp-config`) | Same server bridge, ported to TypeScript (§7.4) | None |
+| Claude via local CLI, session resume, lean flags | `server/index.js` (`claudeArgs`, `--resume`, `--setting-sources project`, `--strict-mcp-config`) | Same server bridge, ported to TypeScript (§7.4); loads no settings (`--setting-sources ""`), so a chosen codebase's hooks and `CLAUDE.md` never apply | Codex CLI as a second agent, picked in Settings (ADR-002) |
 | System prompt (shapes, icon packs, UML guidance) | `server/index.js` `SYSTEM_PROMPT` | Same, versioned in `server/prompt.ts` | Add selection and review context (§4) |
 | Auto-fix retry loop (2 retries on parse error) | `src/App.jsx` (`MAX_AUTO_FIX`, `validate`) | Same | Retries merge into one undo step (as v1) |
 | "Ask Claude to fix" on parse error | `src/App.jsx` pane header button | Status bar error + inline action in code drawer | None |
@@ -147,7 +147,7 @@ The five editors and their contract port as-is (logic in TypeScript, new UI chro
 
 ### 4.5 First run and settings (M8)
 - Empty state: one prompt box with a diagram-type picker, example chips, and "start from" cards (blank, templates, import, from a codebase).
-- Settings: appearance, default model, Claude Code connection status, codebase folder, backup and restore.
+- Settings: appearance, agent (Claude or Codex, ADR-002), default model, the chosen agent CLI's connection status, codebase folder, backup and restore.
 
 ---
 
@@ -311,11 +311,13 @@ Keep v1's endpoints and Server-Sent Events (SSE), typed with Zod.
   - `delta { text }`
   - `turn {}`
   - `tool { label }`
-  - `done { sessionId, text, isError, durationMs, costUsd }`
+  - `done { sessionId, text, isError, durationMs, costUsd }` (`costUsd` is `null` for Codex)
   - `error { message }`
 - **Additions:**
   - `selection` in the chat body (§4.1).
-  - `GET /api/health`, reporting whether the claude CLI is found, for M8.
+  - `agent` (`claude` or `codex`) in the chat body (ADR-002); a missing `agent` means Claude.
+  - `GET /api/health`, reporting whether the claude and codex CLIs are found, for M8.
+  - `GET /api/models`, listing each agent's models (Codex's from the installed CLI).
   - `POST /api/repo` to set the codebase folder; restricted to directories under the user's home, and reported in the UI.
 - **Unchanged:** bind to `127.0.0.1` only; spawn without a shell; kill the child on client disconnect.
 

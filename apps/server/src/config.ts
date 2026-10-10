@@ -2,12 +2,13 @@ import { realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 
-import { expandHome } from './repo-dir.ts';
+import { expandHome, isStrictlyInside } from './repo-dir.ts';
 
 /** The server's settings, read once from the environment at startup. */
 export interface ServerConfig {
   port: number;
   claudeBin: string;
+  codexBin: string;
   /** The codebase Claude may read at startup (`REPO_DIR`); `null` means repo-aware mode is off. */
   repoDir: string | null;
   isProduction: boolean;
@@ -15,6 +16,7 @@ export interface ServerConfig {
 
 export const DEFAULT_PORT: number = 8791;
 export const DEFAULT_CLAUDE_BIN: string = 'claude';
+export const DEFAULT_CODEX_BIN: string = 'codex';
 const MAX_PORT: number = 65_535;
 
 function toExistingDirectory(input: string, context: z.RefinementCtx<string>): string {
@@ -31,6 +33,26 @@ function toExistingDirectory(input: string, context: z.RefinementCtx<string>): s
   return z.NEVER;
 }
 
+/**
+ * The same rule as a folder chosen in the app (`resolveRepoDir`): strictly inside the home folder,
+ * symlinks followed. The home folder itself holds keys and tokens Claude must not read.
+ */
+function toHomeFolder(
+  homeDir: string,
+): (input: string, context: z.RefinementCtx<string>) => string {
+  return (input: string, context: z.RefinementCtx<string>): string => {
+    const realHome: string = realpathSync(homeDir);
+    if (isStrictlyInside(input, realHome)) {
+      return input;
+    }
+    context.addIssue({
+      code: 'custom',
+      message: `REPO_DIR must be inside your home folder (${realHome}): ${input}`,
+    });
+    return z.NEVER;
+  };
+}
+
 const portSchema: z.ZodType<number, string | undefined> = z
   .string()
   .regex(/^\d+$/, 'API_PORT must be a whole number')
@@ -45,6 +67,7 @@ function createRepoDirSchema(homeDir: string): z.ZodType<string | undefined, str
     .transform((input: string, context: z.RefinementCtx<string>) =>
       toExistingDirectory(expandHome(input, homeDir), context),
     )
+    .transform(toHomeFolder(homeDir))
     .optional();
 }
 
@@ -53,12 +76,14 @@ function createEnvSchema(homeDir: string): z.ZodType<ServerConfig, Record<string
     .object({
       API_PORT: portSchema,
       CLAUDE_BIN: z.string().min(1, 'CLAUDE_BIN must not be empty').default(DEFAULT_CLAUDE_BIN),
+      CODEX_BIN: z.string().min(1, 'CODEX_BIN must not be empty').default(DEFAULT_CODEX_BIN),
       REPO_DIR: createRepoDirSchema(homeDir),
       NODE_ENV: z.string().optional(),
     })
     .transform((env) => ({
       port: env.API_PORT,
       claudeBin: env.CLAUDE_BIN,
+      codexBin: env.CODEX_BIN,
       repoDir: env.REPO_DIR ?? null,
       isProduction: env.NODE_ENV === 'production',
     }));

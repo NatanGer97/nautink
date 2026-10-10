@@ -1,3 +1,4 @@
+import { agentName } from './agent-name.ts';
 import { useChatStore } from './chat-store.ts';
 import { ChipButton } from './chip-button.tsx';
 import { extractMermaid } from './extract-mermaid.ts';
@@ -140,9 +141,12 @@ function useReviewAgainBlocker(diagramId: string, messageIndex: number): string 
 /** A proposal still waiting when the page reloaded: nothing was applied; "Review again" rebuilds it. */
 function InterruptedCard({ diagramId, messageIndex }: ChangeCardProps): ReactElement {
   const blocker: string | null = useReviewAgainBlocker(diagramId, messageIndex);
+  const name: string = useWorkspaceStore((state) =>
+    agentName(state.diagrams.find((item) => item.id === diagramId)?.messages[messageIndex]?.agent),
+  );
   const tip: { hint: string } | { disabledReason: string } =
     blocker === null
-      ? { hint: "Show Claude's change on the canvas to accept or reject" }
+      ? { hint: `Show ${name}'s change on the canvas to accept or reject` }
       : { disabledReason: blocker };
   return (
     <div className={CARD_CLASS}>

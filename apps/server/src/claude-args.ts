@@ -1,20 +1,22 @@
 import { buildSystemPrompt } from './prompt.ts';
 
-import type { ModelId } from '@nautink/contracts/models';
-
 export interface ClaudeArgsOptions {
   sessionId: string | null;
-  model: ModelId | null;
+  model: string | null;
   isRepoAware: boolean;
 }
 
 /** The read-only tools Claude gets in repo-aware mode. */
 export const REPO_TOOLS: string = 'Read,Grep,Glob';
 
-/** Keeps the context lean: no user hooks or plugins, no MCP servers, no skills (as v1). */
+/**
+ * Keeps the context lean and the run safe: no settings from any source (so no hooks from the
+ * user or from the chosen codebase's `.claude/settings.json`, which could run any command), no MCP
+ * servers, no skills. v1 loaded the project's settings; Nautink loads none.
+ */
 const LEAN_FLAGS: readonly string[] = [
   '--setting-sources',
-  'project',
+  '',
   '--strict-mcp-config',
   '--mcp-config',
   '{"mcpServers":{}}',
@@ -34,7 +36,7 @@ export function buildClaudeArgs(options: ClaudeArgsOptions): string[] {
     '--verbose',
     '--include-partial-messages',
     '--system-prompt',
-    buildSystemPrompt(options.isRepoAware),
+    buildSystemPrompt(options.isRepoAware, 'claude'),
     ...LEAN_FLAGS,
     ...toolFlags(options.isRepoAware),
     ...(options.model === null ? [] : ['--model', options.model]),

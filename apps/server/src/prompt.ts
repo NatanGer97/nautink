@@ -1,11 +1,12 @@
+import type { AgentId } from '@nautink/contracts/agents';
 import type { ChatRequest, ChatSelection } from '@nautink/contracts/chat';
 
 /** Bump when the system prompt text changes, so a behavior change can be traced to a prompt. */
-export const SYSTEM_PROMPT_VERSION: number = 3;
+export const SYSTEM_PROMPT_VERSION: number = 4;
 
 /**
  * v1's `SYSTEM_PROMPT`. Version 2 targets Mermaid 12 (ADR-001); version 3 adds the selection rule
- * (PRD §4.1).
+ * (PRD §4.1); version 4 adds the Codex rules (ADR-002).
  */
 export const BASE_SYSTEM_PROMPT: string = `You are the assistant inside a Mermaid diagram editor web app.
 The user sees a chat, a code editor with the current Mermaid source, and a live preview.
@@ -25,8 +26,24 @@ Rules:
 export const REPO_AWARE_RULE: string =
   '- You can read the codebase in the working directory with Read, Grep and Glob. Use them when the user asks about the code. Never guess structure you can look up.';
 
-export function buildSystemPrompt(isRepoAware: boolean): string {
-  return isRepoAware ? `${BASE_SYSTEM_PROMPT}\n${REPO_AWARE_RULE}` : BASE_SYSTEM_PROMPT;
+/** Codex reads files only through a shell; its sandbox keeps that shell read-only (ADR-002). */
+export const CODEX_REPO_AWARE_RULE: string =
+  '- You can read the codebase in the working directory with read-only shell commands such as rg, cat and ls. Use them when the user asks about the code. Never guess structure you can look up. Never try to change files.';
+
+/** Codex always has a shell, so without a codebase it is told not to use it. */
+export const CODEX_NO_SHELL_RULE: string =
+  '- Do not run shell commands. Everything you need is in the message.';
+
+const AGENT_RULES: Readonly<Record<AgentId, { repoAware: string | null; noRepo: string | null }>> =
+  {
+    claude: { repoAware: REPO_AWARE_RULE, noRepo: null },
+    codex: { repoAware: CODEX_REPO_AWARE_RULE, noRepo: CODEX_NO_SHELL_RULE },
+  };
+
+export function buildSystemPrompt(isRepoAware: boolean, agent: AgentId): string {
+  const rules: { repoAware: string | null; noRepo: string | null } = AGENT_RULES[agent];
+  const rule: string | null = isRepoAware ? rules.repoAware : rules.noRepo;
+  return rule === null ? BASE_SYSTEM_PROMPT : `${BASE_SYSTEM_PROMPT}\n${rule}`;
 }
 
 function describeCurrentDiagram(code: string): string {

@@ -1,6 +1,7 @@
 import { cn } from '@nautink/ui/lib/utils';
 import { Check } from 'lucide-react';
 
+import { agentName } from './agent-name.ts';
 import { ChangeCard } from './change-card.tsx';
 import { ChatMarkdown } from './chat-markdown-view.tsx';
 import { STOPPED_MESSAGE } from './chat-reply.ts';
@@ -13,13 +14,14 @@ import type { ReactElement, ReactNode } from 'react';
 
 const MS_PER_SECOND: number = 1000;
 
-/** "Claude · 6.2s" once the reply reports its time (M1). */
+/** "Codex · 6.2s" once the reply reports its time (M1): named by the agent that wrote it. */
 function replyHeading(message: ChatMessage): string {
+  const name: string = agentName(message.agent);
   const durationMs: number | null | undefined = message.meta?.durationMs;
   if (durationMs === null || durationMs === undefined) {
-    return 'Claude';
+    return name;
   }
-  return `Claude · ${(durationMs / MS_PER_SECOND).toFixed(1)}s`;
+  return `${name} · ${(durationMs / MS_PER_SECOND).toFixed(1)}s`;
 }
 
 /** A user's message: a bubble on the muted fill. An automatic retry shows its parse error. */

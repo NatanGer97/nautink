@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { DEFAULT_CLAUDE_BIN, DEFAULT_PORT, loadConfig } from './config.ts';
+import { DEFAULT_CLAUDE_BIN, DEFAULT_CODEX_BIN, DEFAULT_PORT, loadConfig } from './config.ts';
 import { makeTempDir } from '../tests/test-server.ts';
 
 let home: string;
@@ -18,31 +18,52 @@ describe('loadConfig', () => {
     expect(loadConfig({}, home)).toEqual({
       port: DEFAULT_PORT,
       claudeBin: DEFAULT_CLAUDE_BIN,
+      codexBin: DEFAULT_CODEX_BIN,
       repoDir: null,
       isProduction: false,
     });
     expect(DEFAULT_PORT).toBe(8791);
+    expect(DEFAULT_CODEX_BIN).toBe('codex');
   });
 
   it('reads every variable', () => {
     const env = {
       API_PORT: '9000',
       CLAUDE_BIN: '/opt/claude',
+      CODEX_BIN: '/opt/codex',
       REPO_DIR: '~/app',
       NODE_ENV: 'production',
     };
     expect(loadConfig(env, home)).toEqual({
       port: 9000,
       claudeBin: '/opt/claude',
+      codexBin: '/opt/codex',
       repoDir: path.join(home, 'app'),
       isProduction: true,
     });
   });
 
   it('lists every invalid variable in one error', () => {
-    const env = { API_PORT: '80a', CLAUDE_BIN: '', REPO_DIR: path.join(home, 'missing') };
+    const env = {
+      API_PORT: '80a',
+      CLAUDE_BIN: '',
+      CODEX_BIN: '',
+      REPO_DIR: path.join(home, 'missing'),
+    };
     expect(() => loadConfig(env, home)).toThrow(
-      `Invalid server configuration:\n  - API_PORT must be a whole number\n  - CLAUDE_BIN must not be empty\n  - REPO_DIR does not exist: ${path.join(home, 'missing')}`,
+      `Invalid server configuration:\n  - API_PORT must be a whole number\n  - CLAUDE_BIN must not be empty\n  - CODEX_BIN must not be empty\n  - REPO_DIR does not exist: ${path.join(home, 'missing')}`,
+    );
+  });
+
+  it('accepts a REPO_DIR inside the home folder only, like a folder chosen in the app', () => {
+    expect(() => loadConfig({ REPO_DIR: home }, home)).toThrow(
+      `REPO_DIR must be inside your home folder (${home}): ${home}`,
+    );
+    expect(() => loadConfig({ REPO_DIR: path.dirname(home) }, home)).toThrow(
+      'REPO_DIR must be inside your home folder',
+    );
+    expect(loadConfig({ REPO_DIR: path.join(home, 'app') }, home).repoDir).toBe(
+      path.join(home, 'app'),
     );
   });
 

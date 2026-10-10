@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import type { ChatDeps } from '../chat/chat-deps.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 import type { StructuralReview } from '@nautink/editors/review/review-diagram';
 import type { StoreApi, UseBoundStore } from 'zustand';
 
@@ -26,6 +27,8 @@ export interface Proposal {
   after: string;
   /** What the user asked, saved with the version on Accept. */
   prompt: string;
+  /** The agent that proposed the change, saved with the version on Accept. */
+  agent: AgentId;
   /** Names the undo step on Accept ("Claude: …"). */
   label: string;
   /** False when the proposal still has a syntax error: Accept then saves no version (as v1). */

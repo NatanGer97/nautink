@@ -7,7 +7,7 @@
   "description": "The Nautink web app: the app shell, panels and canvas host.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node ../../scripts/generate-third-party-notices.ts --web-licenses dist/third-party-licenses.txt",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",

@@ -17,6 +17,17 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    // The web build also writes dist/third-party-licenses.txt with a root script, so that script is
+    // an input too.
+    "@nautink/web#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/generate-third-party-notices.ts",
+        "$TURBO_ROOT$/LICENSE"
+      ],
+      "outputs": ["dist/**"]
+    },
     // @nautink/ui's Storybook as a static site: a few seconds, so it runs in `pnpm check`.
     "build-storybook": {
       "dependsOn": ["^build"],
@@ -47,6 +58,15 @@
     "//#check:bundle-budget": {
       "dependsOn": ["@nautink/web#build"],
       "inputs": ["scripts/check-bundle-budget.ts"],
+      "outputs": []
+    },
+    // The license gate and THIRD_PARTY_NOTICES.md freshness (scripts/generate-third-party-notices.ts).
+    "//#check:licenses": {
+      "inputs": [
+        "scripts/generate-third-party-notices.ts",
+        "THIRD_PARTY_NOTICES.md",
+        "pnpm-lock.yaml"
+      ],
       "outputs": []
     },
     "//#lint": {

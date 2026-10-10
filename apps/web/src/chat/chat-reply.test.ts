@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyChatEvent,
-  CUT_OFF_MESSAGE,
   failReply,
   settleReply,
   startReply,
@@ -81,14 +80,14 @@ describe('applyChatEvent', () => {
 
 describe('settling and failing', () => {
   it('marks a reply cut off when the stream ends early, and leaves finished ones alone', () => {
-    expect(settleReply(startReply(null))).toMatchObject({
+    expect(settleReply(startReply(null), 'Codex')).toMatchObject({
       status: 'error',
-      error: CUT_OFF_MESSAGE,
+      error: 'The reply ended before Codex finished. Try again.',
     });
     const done = replay([
       { type: 'done', sessionId: 's', text: 't', isError: false, durationMs: 1, costUsd: 0 },
     ]);
-    expect(settleReply(done)).toBe(done);
+    expect(settleReply(done, 'Claude')).toBe(done);
   });
 
   it('says Stopped. for a stop and the message for any other failure', () => {
@@ -104,18 +103,19 @@ describe('settling and failing', () => {
 });
 
 describe('toAssistantMessage', () => {
-  it('stores the reply in the v1 message shape', () => {
-    expect(toAssistantMessage(startReply(null))).toEqual({
+  it('stores the reply in the v1 message shape, plus the agent that wrote it', () => {
+    expect(toAssistantMessage(startReply(null), 'claude')).toEqual({
       role: 'assistant',
       text: '',
       tools: [],
       streaming: true,
+      agent: 'claude',
     });
     const failed = failReply(startReply(null), new Error('nope'), false);
-    expect(toAssistantMessage(failed)).toMatchObject({ streaming: false, error: 'nope' });
+    expect(toAssistantMessage(failed, 'claude')).toMatchObject({ streaming: false, error: 'nope' });
     const done = replay([
       { type: 'done', sessionId: 's', text: 't', isError: false, durationMs: 5, costUsd: 0 },
     ]);
-    expect(toAssistantMessage(done).meta).toEqual({ durationMs: 5, costUsd: 0 });
+    expect(toAssistantMessage(done, 'codex').meta).toEqual({ durationMs: 5, costUsd: 0 });
   });
 });

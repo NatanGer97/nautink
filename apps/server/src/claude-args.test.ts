@@ -13,12 +13,12 @@ const LEAN_ARGS = [
 ];
 
 describe('buildClaudeArgs', () => {
-  it('runs headless with v1 lean flags and no tools by default', () => {
+  it('runs headless with lean flags, no settings and no tools by default', () => {
     expect(buildClaudeArgs({ sessionId: null, model: null, isRepoAware: false })).toEqual([
       ...LEAN_ARGS,
-      buildSystemPrompt(false),
+      buildSystemPrompt(false, 'claude'),
       '--setting-sources',
-      'project',
+      '',
       '--strict-mcp-config',
       '--mcp-config',
       '{"mcpServers":{}}',
@@ -30,7 +30,7 @@ describe('buildClaudeArgs', () => {
 
   it('allows read-only tools, a model and a resumed session when asked', () => {
     const args = buildClaudeArgs({ sessionId: 's-1', model: 'opus', isRepoAware: true });
-    expect(args).toContain(buildSystemPrompt(true));
+    expect(args).toContain(buildSystemPrompt(true, 'claude'));
     expect(args.slice(-8)).toEqual([
       '--tools',
       REPO_TOOLS,

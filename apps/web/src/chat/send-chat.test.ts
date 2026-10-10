@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { resetChatState, useChatStore } from './chat-store.ts';
 import { askClaudeToFix, canSendChat, sendChat, startNewChat, stopChat } from './send-chat.ts';
-import { VERSIONS_CHANGED_EVENT } from './turn-versions.ts';
+import { VERSIONS_CHANGED_EVENT, beforeAgentLabel } from './turn-versions.ts';
 import { controlledStream, eventsResponse, replyEvents } from '../../tests/chat-stream.ts';
 import { loadedWorkspace } from '../../tests/workspace-fixtures.ts';
 import { selectActiveDiagram, selectActiveStack } from '../workspace/use-workspace.ts';
@@ -11,7 +11,8 @@ import { selectActiveDiagram, selectActiveStack } from '../workspace/use-workspa
 import type { ChatDeps } from './chat-deps.ts';
 import type { TestWorkspace } from '../../tests/workspace-fixtures.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
-import type { ChatRequest } from '@nautink/contracts/chat';
+import type { AgentId } from '@nautink/contracts/agents';
+import type { ChatEvent, ChatRequest } from '@nautink/contracts/chat';
 import type { Diagram } from '@nautink/storage/records';
 import type { Mock } from 'vitest';
 
@@ -32,7 +33,10 @@ interface Harness {
   active: () => Diagram;
 }
 
-async function harness(responses: ((init?: RequestInit) => Response)[]): Promise<Harness> {
+async function harness(
+  responses: ((init?: RequestInit) => Response)[],
+  agent: AgentId = 'claude',
+): Promise<Harness> {
   const workspace = await loadedWorkspace();
   const queue = [...responses];
   const fetchImpl = vi.fn<ChatDeps['fetchImpl']>(async (...[, init]) => {
@@ -48,7 +52,8 @@ async function harness(responses: ((init?: RequestInit) => Response)[]): Promise
     validate: async (code: string): Promise<MermaidError | null> =>
       Promise.resolve(code === INVALID ? { message: 'Parse error on line 2', line: 2 } : null),
     workspace: workspace.store.getState,
-    model: () => 'sonnet',
+    agent: () => agent,
+    model: () => (agent === 'claude' ? 'sonnet' : null),
     isChatOpen: () => false,
     notifyError,
     // These tests cover the turn as it applies straight away; `review/` covers review on.
@@ -74,6 +79,60 @@ afterEach(() => {
   resetChatState();
 });
 
+/** A Codex reply: whole text, no cost. */
+function codexReply(text: string, sessionId = 'thread-1'): (init?: RequestInit) => Response {
+  const events: ChatEvent[] = [
+    { type: 'session', sessionId, model: 'default' },
+    { type: 'delta', text },
+    { type: 'done', sessionId, text, isError: false, durationMs: 900, costUsd: null },
+  ];
+  return () => eventsResponse(events);
+}
+
+describe('sendChat with an agent', () => {
+  it('asks the chosen agent and records it on the reply, the session and the version', async () => {
+    const h = await harness([codexReply(fenced(VALID))], 'codex');
+    await sendChat('Draw A to B', {}, h.deps);
+    expect(h.requests()[0]).toMatchObject({ agent: 'codex', model: null, sessionId: null });
+    expect(h.active()).toMatchObject({ sessionId: 'thread-1', sessionAgent: 'codex' });
+    expect(h.active().messages[1]).toMatchObject({
+      role: 'assistant',
+      agent: 'codex',
+      meta: { durationMs: 900, costUsd: null },
+    });
+    const versions = await listVersions(h.workspace.store.getState().requireDb(), h.active().id);
+    expect(versions.find((version) => version.kind === 'claude')?.agent).toBe('codex');
+  });
+
+  it('names the snapshot before the first change after the agent', () => {
+    expect(beforeAgentLabel('codex')).toBe('Before Codex');
+    expect(beforeAgentLabel('claude')).toBe('Before Claude');
+  });
+
+  it("starts a new session instead of sending another agent's session id", async () => {
+    const h = await harness([codexReply(fenced(VALID), 'thread-2')], 'codex');
+    h.workspace.store.getState().setSessionId(h.active().id, 'claude-session', 'claude');
+    await sendChat('Draw A to B', {}, h.deps);
+    expect(h.requests()[0]?.sessionId).toBeNull();
+    expect(h.active()).toMatchObject({ sessionId: 'thread-2', sessionAgent: 'codex' });
+  });
+
+  it('resumes a session the same agent owns', async () => {
+    const h = await harness([codexReply(fenced(VALID))], 'codex');
+    h.workspace.store.getState().setSessionId(h.active().id, 'thread-1', 'codex');
+    await sendChat('Draw A to B', {}, h.deps);
+    expect(h.requests()[0]?.sessionId).toBe('thread-1');
+  });
+
+  it('treats a session saved before agents existed as Claude', async () => {
+    const h = await harness([reply(fenced(VALID))]);
+    // Saved before ADR-002: no `sessionAgent`.
+    h.workspace.store.getState().setSessionId(h.active().id, 'old-session');
+    await sendChat('Draw A to B', {}, h.deps);
+    expect(h.requests()[0]).toMatchObject({ agent: 'claude', sessionId: 'old-session' });
+  });
+});
+
 describe('sendChat', () => {
   it('streams the diagram in as one undo step, saves versions and keeps the session', async () => {
     const h = await harness([reply(fenced(VALID, 'I drew it.'))]);
@@ -92,6 +151,7 @@ describe('sendChat', () => {
       message: 'Draw A to B',
       code: before,
       sessionId: null,
+      agent: 'claude',
       model: 'sonnet',
       selection: null,
     });

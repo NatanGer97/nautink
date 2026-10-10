@@ -95,6 +95,37 @@ describe('export → import round trip', () => {
     expect(withoutTimestamp(await exportAll(target))).toEqual(withoutTimestamp(backup));
   });
 
+  it('keeps which agent wrote each reply and version, and owns the session', async () => {
+    const diagram = await createDiagram(db, {
+      code: 'flowchart TD\n  A --> B',
+      messages: [
+        { role: 'user', text: 'draw it' },
+        { role: 'assistant', text: 'Done.', agent: 'codex' },
+      ],
+      sessionId: 't-1',
+      sessionAgent: 'codex',
+    });
+    await addVersion(db, {
+      diagramId: diagram.id,
+      code: diagram.code,
+      kind: 'claude',
+      agent: 'codex',
+    });
+    const target = await openFreshDb();
+    await importAll(target, JSON.parse(JSON.stringify(await exportAll(db))));
+    const restored = await getDiagram(target, diagram.id);
+    expect(restored.sessionAgent).toBe('codex');
+    expect(restored.messages[1]?.agent).toBe('codex');
+    expect((await listVersions(target, diagram.id))[0]?.agent).toBe('codex');
+  });
+
+  it('rejects an unknown agent and names the field', async () => {
+    const v2 = await exportAll(db);
+    const message = { role: 'assistant', text: 'Hi', agent: 'gpt' };
+    const diagram = { ...v1Fixture.diagrams[0], draft: '', view: 'edit', messages: [message] };
+    expect(() => validateBackup({ ...v2, diagrams: [diagram] })).toThrow(/agent/);
+  });
+
   it('gives clashing ids new ids and keeps the existing records', async () => {
     await seed(db);
     const before = await exportAll(db);

@@ -75,11 +75,16 @@ async function readEvents(response: Response): Promise<ChatEvent[]> {
   return decoder.push(`${body}\n\n`);
 }
 
-async function ask(options: CheckOptions, request: ChatRequest): Promise<string> {
+/** One fresh Claude turn: the check never resumes a session. */
+async function ask(
+  options: CheckOptions,
+  request: Pick<ChatRequest, 'message' | 'code' | 'model' | 'selection'>,
+): Promise<string> {
+  const body: ChatRequest = { ...request, sessionId: null, agent: 'claude' };
   const response: Response = await fetch(`${options.url}${API_ROUTES.chat}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(request),
+    body: JSON.stringify(body),
   });
   return replyText(await readEvents(response));
 }
@@ -89,7 +94,6 @@ async function judge(options: CheckOptions, scripted: SelectionCase): Promise<Ca
   const reply: string = await ask(options, {
     message: scripted.message,
     code: scripted.code,
-    sessionId: null,
     model: options.model,
     selection: selectionOf(before, scripted.selected),
   });

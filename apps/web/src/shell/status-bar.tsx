@@ -1,17 +1,15 @@
-import { MODEL_LABELS } from '@nautink/contracts/models';
 import { typeName } from '@nautink/storage/diagram-type';
 import { cn } from '@nautink/ui/lib/utils';
 
 import { useVersionCount, versionCountLabel } from '../history/versions-store.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { usePreviewStatus } from '../preview/preview-status.ts';
-import { useUiStore } from '../state/ui-store.ts';
+import { useChosenModelLabel } from '../settings/models.ts';
 import { SaveStatus } from '../workspace/diagram-title.tsx';
 import { lineCount } from '../workspace/text.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
 import type { PreviewStatus, PreviewValidity } from '../preview/preview-status.ts';
-import type { ModelId } from '@nautink/contracts/models';
 import type { Diagram, Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
@@ -38,7 +36,7 @@ function renderLabel(renderMs: number | null): string {
 /** The 28 px footer: type, validity, save state, lines, versions, render time, model (M1, M5). */
 export function StatusBar(): ReactElement {
   const preview: PreviewStatus = usePreviewStatus();
-  const model: ModelId | null = useUiStore((state) => state.defaultModel);
+  const modelName: string = useChosenModelLabel();
   const diagram: Diagram | undefined = useActiveDiagram();
   const viewed: Version | null = useViewedVersion();
   const versionCount: number | null = useVersionCount();
@@ -64,9 +62,7 @@ export function StatusBar(): ReactElement {
         <span className="max-sm:hidden">{versionCountLabel(versionCount)}</span>
       )}
       <span className="max-sm:hidden">{renderLabel(preview.renderMs)}</span>
-      <span className="max-md:hidden">
-        {model === null ? 'Default model' : MODEL_LABELS[model]}
-      </span>
+      <span className="max-md:hidden">{modelName}</span>
     </footer>
   );
 }

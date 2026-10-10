@@ -39,7 +39,12 @@ async function cannedChat(page: Page, text: string): Promise<void> {
 /** The API server is not running in the suite: answer what the shell asks for on load. */
 async function cannedApi(page: Page): Promise<void> {
   await page.route('**/api/health', async (route: Route) => {
-    await route.fulfill({ json: { claude: { isFound: true, version: '2.0.0', error: null } } });
+    await route.fulfill({
+      json: {
+        claude: { isFound: true, version: '2.0.0', error: null },
+        codex: { isFound: true, version: '0.154.0', error: null },
+      },
+    });
   });
 }
 

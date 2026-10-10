@@ -4,6 +4,7 @@ import { sortVersions } from './version-order.ts';
 
 import type { NautinkDb, NautinkTx } from './db.ts';
 import type { Version, VersionKind } from './records.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 
 /** Versions kept per diagram; adding one more prunes the oldest unnamed version first. */
 export const MAX_VERSIONS: number = 50;
@@ -15,6 +16,8 @@ export interface NewVersion {
   kind: VersionKind;
   label?: string;
   prompt?: string;
+  /** Which agent wrote a `claude` version (ADR-002). */
+  agent?: AgentId | undefined;
 }
 
 /** `added` with the new version and what was pruned, or `unchanged` when the code equals the latest. */
@@ -45,6 +48,7 @@ function buildVersion(input: NewVersion, latest: Version | undefined): Version {
     kind: input.kind,
     label: input.label ?? '',
     prompt: input.prompt ?? '',
+    ...(input.agent === undefined ? {} : { agent: input.agent }),
     // Strictly after the latest, so "newest first" holds even within one millisecond.
     createdAt: Math.max(Date.now(), (latest?.createdAt ?? 0) + 1),
   };

@@ -13,6 +13,7 @@ import {
   GALLERY_FILTERS,
   templateDraft,
 } from './template-gallery.ts';
+import { useAgentName } from '../chat/agent-name.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
@@ -28,6 +29,7 @@ interface FilterListProps {
 
 /** The categories with their counts, and the nudge to describe the diagram instead. */
 function FilterList({ value, onChange, onDescribe }: FilterListProps): ReactElement {
+  const name: string = useAgentName();
   return (
     <nav
       aria-label="Categories"
@@ -53,7 +55,7 @@ function FilterList({ value, onChange, onDescribe }: FilterListProps): ReactElem
         className="rounded-track border border-dashed border-border-strong p-3 text-left text-xs leading-normal text-muted-foreground hover:text-foreground"
         onClick={onDescribe}
       >
-        Or describe it, and Claude drafts the first version.
+        Or describe it, and {name} drafts the first version.
       </button>
     </nav>
   );

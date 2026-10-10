@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 
+import { useAgentName } from './agent-name.ts';
 import { buildChatCommands } from './chat-commands.ts';
 import { useChatStore } from './chat-store.ts';
 import { askClaudeToFix } from './send-chat.ts';
 import { useRegisterCommands } from '../commands/use-commands.ts';
 import { validateMermaid } from '../mermaid/validate.ts';
+import { useModelOptions } from '../settings/models.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { selectActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { AppCommand } from '../commands/command-registry.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
-import type { ModelId } from '@nautink/contracts/models';
+import type { ModelOption } from '@nautink/contracts/models';
 
 /** Fired on `window` by the code drawer's "Ask Claude to fix" (`detail: { message, line }`). */
 export const ASK_CLAUDE_TO_FIX_EVENT: string = 'nautink:ask-claude-to-fix';
@@ -73,7 +75,9 @@ function usePaletteParseError(): MermaidError | null {
 
 function useChatCommands(): void {
   const isBusy: boolean = useChatStore((state) => state.busyDiagramId !== null);
-  const model: ModelId | null = useUiStore((state) => state.defaultModel);
+  const model: string | null = useUiStore((state) => state.defaultModel);
+  const models: readonly ModelOption[] = useModelOptions(useUiStore((state) => state.agent));
+  const name: string = useAgentName();
   const fixError: MermaidError | null = usePaletteParseError();
   const commands: AppCommand[] = useMemo(
     () =>
@@ -81,9 +85,11 @@ function useChatCommands(): void {
         isBusy,
         fixError,
         model,
+        models,
+        agentName: name,
         setModel: useUiStore.getState().setDefaultModel,
       }),
-    [isBusy, fixError, model],
+    [isBusy, fixError, model, models, name],
   );
   useRegisterCommands(commands);
 }

@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
@@ -7,9 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from './app.ts';
 import { createProcessLogger } from './logger.ts';
 import { HOST, REPO_ROOT, listen, startServer } from './server.ts';
-import { FAKE_CLAUDE, makeTempDir } from '../tests/test-server.ts';
+import { FAKE_CLAUDE, FAKE_CODEX, createMemoryLogger, makeTempDir } from '../tests/test-server.ts';
 
-import type { Logger } from './logger.ts';
 import type { ChildProcess } from 'node:child_process';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -23,15 +23,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function createMemoryLogger(): Logger & { lines: string[] } {
-  const lines: string[] = [];
-  return {
-    lines,
-    info: (message) => lines.push(`info: ${message}`),
-    error: (message) => lines.push(`error: ${message}`),
-  };
-}
-
 async function occupyPort(): Promise<number> {
   const blocker = createServer();
   servers.push(blocker);
@@ -44,18 +35,20 @@ async function occupyPort(): Promise<number> {
 describe('startServer', () => {
   it('listens on 127.0.0.1 and logs the URL and repo dir', async () => {
     const home = await makeTempDir('start-home');
+    const repo = path.join(home, 'app');
+    await mkdir(repo);
     const logger = createMemoryLogger();
-    const env = { API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE, REPO_DIR: home };
+    const env = { API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE, REPO_DIR: repo };
     const server: Server = await startServer({ env, homeDir: home, logger });
     servers.push(server);
     const { address, port } = server.address() as AddressInfo;
     expect(address).toBe('127.0.0.1');
     expect(logger.lines).toEqual([
       `info: Nautink server on http://127.0.0.1:${String(port)}`,
-      `info: Repo-aware mode: ${home}`,
+      `info: Repo-aware mode: ${repo}`,
     ]);
     const info = await (await fetch(`http://127.0.0.1:${String(port)}/api/info`)).json();
-    expect(info).toEqual({ repoDir: home });
+    expect(info).toEqual({ repoDir: repo });
   });
 
   it('throws on invalid config', async () => {
@@ -78,6 +71,8 @@ describe('listen', () => {
   it('reports other listen errors', async () => {
     const app = createApp({
       claudeBin: FAKE_CLAUDE,
+      codexBin: FAKE_CODEX,
+      logger: createMemoryLogger(),
       repoDir: null,
       homeDir: '/',
       workDir: REPO_ROOT,
@@ -127,11 +122,14 @@ describe('main.ts under plain Node (type stripping)', () => {
   }
 
   it('starts, answers the API with the contracts package, and runs the fake CLI', async () => {
-    const child = runMain({ API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE });
+    const child = runMain({ API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE, CODEX_BIN: FAKE_CODEX });
     servers.push({ close: () => child.kill() });
     const [, url] = await collect(child, /Nautink server on (http:\S+)/);
     const health = await (await fetch(`${url!}/api/health`)).json();
-    expect(health).toEqual({ claude: { isFound: true, version: '2.1.0', error: null } });
+    expect(health).toEqual({
+      claude: { isFound: true, version: '2.1.0', error: null },
+      codex: { isFound: true, version: '0.154.0', error: null },
+    });
   });
 
   it('exits with code 1 and a message on invalid config', async () => {

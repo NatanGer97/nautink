@@ -4,6 +4,7 @@ import { IconButton } from '@nautink/ui/icon-button';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useAgentName } from '../chat/agent-name.ts';
 import { useChatStore } from '../chat/chat-store.ts';
 import { CodeEditor } from '../code/code-editor.tsx';
 import { useViewedVersion } from '../history/viewed-version.ts';
@@ -19,8 +20,10 @@ import type { Proposal } from '../review/review-store.ts';
 import type { Diagram, Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
-/** Shown over the code while Claude's reply streams into it (PRD §4.3). */
-const CLAUDE_EDITING: string = 'Claude is editing… The code is read-only until the reply ends.';
+/** Shown over the code while the agent's reply streams into it (PRD §4.3). */
+function agentEditingCode(name: string): string {
+  return `${name} is editing… The code is read-only until the reply ends.`;
+}
 
 async function copyCode(code: string): Promise<void> {
   try {
@@ -35,11 +38,11 @@ async function copyCode(code: string): Promise<void> {
 const VIEWING_VERSION: string = 'Viewing an older version · read-only';
 
 /** Why the code cannot be edited now: Claude is replying, or an older version is on view. */
-function readOnlyReason(isClaudeEditing: boolean, viewed: Version | null): string | null {
+function readOnlyReason(editingAgent: string | null, viewed: Version | null): string | null {
   if (viewed !== null) {
     return VIEWING_VERSION;
   }
-  return isClaudeEditing ? CLAUDE_EDITING : null;
+  return editingAgent === null ? null : agentEditingCode(editingAgent);
 }
 
 /** What replaces the code while no version is on view: Claude's open proposal, or a reply's diff. */
@@ -60,13 +63,14 @@ function DrawerBody({ diagram }: { diagram: Diagram | undefined }): ReactElement
   const viewed: Version | null = useViewedVersion();
   const reviewReason: string | null = useReviewReadOnlyReason(diagram?.id);
   const diff: ReactElement | null = useDrawerDiff(diagram?.id, viewed);
+  const name: string = useAgentName();
   if (diagram === undefined) {
     return <p className="px-3.5 py-2.5 text-muted-foreground">Opening your diagrams…</p>;
   }
   if (diff !== null) {
     return diff;
   }
-  const reason: string | null = readOnlyReason(busyDiagramId === diagram.id, viewed);
+  const reason: string | null = readOnlyReason(busyDiagramId === diagram.id ? name : null, viewed);
   return (
     <CodeEditor
       diagramId={diagram.id}

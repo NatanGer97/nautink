@@ -5,7 +5,7 @@ import {
   acceptProposal,
   ALREADY_APPLIED,
   DIAGRAM_CHANGED,
-  PROPOSAL_GONE,
+  proposalGone,
   rejectProposal,
   REVIEW_BUSY,
   reviewAgainBlocker,
@@ -59,6 +59,7 @@ async function harness(responses: ((init?: RequestInit) => Response)[]): Promise
   const review = vi.fn<ChatDeps['review']>(async () => Promise.resolve(STRUCTURAL));
   const notifyError = vi.fn<ChatDeps['notifyError']>();
   const deps: ChatDeps = {
+    agent: () => 'claude',
     fetchImpl: async (...[, init]) => {
       const next = queue.shift();
       if (next === undefined) {
@@ -186,6 +187,14 @@ describe('accept, reject and show again', () => {
     expect(useReviewStore.getState().open).toEqual({});
   });
 
+  it('accept saves the version with the agent that proposed it', async () => {
+    const h = await harness([reply(fenced(VALID))]);
+    await sendChat('Draw A to B', {}, { ...h.deps, agent: () => 'codex', model: () => null });
+    await acceptProposal(h.active().id);
+    const versions = await listVersions(h.workspace.db(), h.active().id);
+    expect(versions.find((version) => version.kind === 'claude')?.agent).toBe('codex');
+  });
+
   it('reject records nothing, and show again opens the same proposal', async () => {
     const h = await harness([reply(fenced(VALID))]);
     const before = h.active().code;
@@ -216,7 +225,9 @@ describe('accept, reject and show again', () => {
       DIAGRAM_CHANGED,
     );
     expect(showAgainBlocker({ proposal, code, isBusy: true })).toBe(REVIEW_BUSY);
-    expect(showAgainBlocker({ proposal: undefined, code, isBusy: false })).toBe(PROPOSAL_GONE);
+    expect(showAgainBlocker({ proposal: undefined, code, isBusy: false })).toBe(
+      proposalGone('Claude'),
+    );
     h.workspace.store.getState().applyEdit('flowchart LR', { label: 'Typed', source: 'code' });
     showProposalAgain(id, 1);
     expect(useReviewStore.getState().open).toEqual({});
@@ -319,8 +330,8 @@ describe('a review a reload cut off', () => {
   it('says why a reply cannot be reviewed again', () => {
     const base = { replyCode: VALID, code: 'flowchart TD', isBusy: false };
     expect(reviewAgainBlocker(base)).toBeNull();
-    expect(reviewAgainBlocker({ ...base, replyCode: null })).toBe(PROPOSAL_GONE);
-    expect(reviewAgainBlocker({ ...base, code: undefined })).toBe(PROPOSAL_GONE);
+    expect(reviewAgainBlocker({ ...base, replyCode: null })).toBe(proposalGone('Claude'));
+    expect(reviewAgainBlocker({ ...base, code: undefined })).toBe(proposalGone('Claude'));
     expect(reviewAgainBlocker({ ...base, isBusy: true })).toBe(REVIEW_BUSY);
     expect(reviewAgainBlocker({ ...base, code: VALID })).toBe(ALREADY_APPLIED);
   });

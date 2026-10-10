@@ -10,6 +10,7 @@ const REQUEST: ChatRequest = {
   message: 'Draw a flow',
   code: 'flowchart TD',
   sessionId: null,
+  agent: 'claude',
   model: 'opus',
   selection: null,
 };

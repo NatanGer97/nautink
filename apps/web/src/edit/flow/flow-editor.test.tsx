@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { FlowEditor } from './flow-editor.tsx';
 import { useUiStore } from '../../state/ui-store.ts';
-import { CLAUDE_EDITING } from '../read-only-reason.ts';
+import { agentEditingText } from '../read-only-reason.ts';
 import { requestSelection, useCanvasSelectionStore } from '../selection/canvas-selection.ts';
 import { SYNTAX_ERROR_REASON } from '../use-editor-core.ts';
 
@@ -174,7 +174,7 @@ describe('FlowEditor', () => {
   });
 
   it('is read-only while Claude edits, and keeps the last canvas on a syntax error', async () => {
-    const { rerender } = renderEditor({ readOnlyReason: CLAUDE_EDITING });
+    const { rerender } = renderEditor({ readOnlyReason: agentEditingText('Claude') });
     await screen.findByTestId('flow-node-A');
     // Claude's working pill on the canvas says so; the editor shows no note of its own.
     expect(screen.queryByRole('status')).toBeNull();

@@ -3,6 +3,7 @@ import { cn } from '@nautink/ui/lib/utils';
 
 import { acceptProposal, rejectProposal } from './review-actions.ts';
 import { changeCount } from './review-store.ts';
+import { agentName } from '../chat/agent-name.ts';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
@@ -10,13 +11,13 @@ import type { Proposal, ProposalReview } from './review-store.ts';
 import type { ReviewCounts } from '@nautink/editors/review/review-element';
 import type { ReactElement } from 'react';
 
-/** "Claude proposes 5 changes" (M2), or what is happening while the comparison runs. */
-export function proposalTitle(review: ProposalReview | null): string {
+/** "Codex proposes 5 changes" (M2), or what is happening while the comparison runs. */
+export function proposalTitle(review: ProposalReview | null, name: string): string {
   if (review === null) {
-    return "Comparing Claude's change…";
+    return `Comparing ${name}'s change…`;
   }
   const count: number = changeCount(review);
-  return `Claude proposes ${String(count)} ${count === 1 ? 'change' : 'changes'}`;
+  return `${name} proposes ${String(count)} ${count === 1 ? 'change' : 'changes'}`;
 }
 
 const LEGEND: readonly { mark: keyof ReviewCounts; label: string; swatch: string }[] = [
@@ -82,16 +83,17 @@ export const PLACEMENT_CLASSES: Readonly<Record<ReviewBarProps['placement'], str
   drawer: 'shrink-0 border-b border-border-subtle py-1.5 pr-2 pl-3.5',
 };
 
-/** "Claude proposes N changes" with the legend, Reject and Accept ⏎ (PRD §4.2, M2). */
+/** "Codex proposes N changes" with the legend, Reject and Accept ⏎ (PRD §4.2, M2). */
 export function ReviewBar({ proposal, placement }: ReviewBarProps): ReactElement {
   const { review, diagramId } = proposal;
+  const name: string = agentName(proposal.agent);
   const isCodeOnCanvas: boolean = placement !== 'drawer' && review?.kind === 'code';
   return (
     <section
-      aria-label="Claude's proposal"
+      aria-label={`${name}'s proposal`}
       className={cn('flex items-center gap-3.5 whitespace-nowrap', PLACEMENT_CLASSES[placement])}
     >
-      <p className="shrink-0 font-medium">{proposalTitle(review)}</p>
+      <p className="shrink-0 font-medium">{proposalTitle(review, name)}</p>
       {review?.kind === 'structural' ? <Legend counts={review.counts} /> : null}
       <span className="ml-auto flex gap-1.5">
         {isCodeOnCanvas ? <ShowDiffButton /> : null}

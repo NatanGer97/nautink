@@ -1,3 +1,4 @@
+import { agentName } from './agent-name.ts';
 import { findTurnDiagram } from './turn-edit.ts';
 import { markProposalPending } from '../review/review-actions.ts';
 import { nextProposalId, changeCount, useReviewStore } from '../review/review-store.ts';
@@ -8,6 +9,7 @@ import type { ChatDeps } from './chat-deps.ts';
 import type { TurnCodeSink } from './turn-edit.ts';
 import type { Proposal, ProposalReview } from '../review/review-store.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 
 /**
  * A turn with review on (PRD §4.2, §4.3): the streamed code is a live preview on the canvas, never
@@ -51,16 +53,17 @@ export interface ProposalTurn {
   diagramId: string;
   before: string;
   prompt: string;
+  agent: AgentId;
   label: string;
   replyIndexes: readonly number[];
   deps: ChatDeps;
 }
 
 /** The live region's words for an open proposal. */
-export function proposalAnnouncement(review: ProposalReview): string {
+export function proposalAnnouncement(review: ProposalReview, name: string): string {
   const count: number = changeCount(review);
   const where: string = review.kind === 'code' ? 'in the code drawer' : 'on the canvas';
-  return `Claude proposes ${String(count)} ${count === 1 ? 'change' : 'changes'}. Review ${where}.`;
+  return `${name} proposes ${String(count)} ${count === 1 ? 'change' : 'changes'}. Review ${where}.`;
 }
 
 function newProposal(turn: ProposalTurn, result: AttemptResult & { code: string }): Proposal {
@@ -70,6 +73,7 @@ function newProposal(turn: ProposalTurn, result: AttemptResult & { code: string 
     before: turn.before,
     after: result.code,
     prompt: turn.prompt,
+    agent: turn.agent,
     label: turn.label,
     isValid: result.error === null,
     replyIndexes: [...turn.replyIndexes],
@@ -107,7 +111,7 @@ export async function proposeTurn(
   const review: ProposalReview = await turn.deps.review(proposal.before, proposal.after);
   useReviewStore.getState().setReview(turn.diagramId, { proposalId: proposal.id, review });
   revealCodeReview(proposal, review);
-  return proposalAnnouncement(review);
+  return proposalAnnouncement(review, agentName(turn.agent));
 }
 
 /** A code-only review lives in the code drawer, so it opens when the diagram is on view. */

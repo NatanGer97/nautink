@@ -12,7 +12,8 @@ pnpm --filter @nautink/server start
 |---|---|---|
 | `API_PORT` | `8791` | Port on 127.0.0.1 |
 | `CLAUDE_BIN` | `claude` | The Claude Code CLI to run |
-| `REPO_DIR` | none | A codebase Claude may read at startup (repo-aware mode) |
+| `CODEX_BIN` | `codex` | The Codex CLI to run when the user picks Codex (ADR-002) |
+| `REPO_DIR` | none | A codebase the agent may read at startup (repo-aware mode); must be inside your home folder |
 
 The prompt Claude gets is built in `src/prompt.ts` (`SYSTEM_PROMPT_VERSION`, `buildPrompt`). A
 canvas selection adds a block that lists the selected items (kind, id, label) and tells Claude to

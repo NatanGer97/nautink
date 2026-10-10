@@ -26,6 +26,7 @@ const REQUEST: ChatRequest = {
   message: 'Add a retry path',
   code: 'flowchart TD\n  a --> b',
   sessionId: null,
+  agent: 'claude',
   model: null,
   selection: null,
 };
@@ -98,6 +99,17 @@ describe('POST /api/chat', () => {
     expect(recorded.argv[recorded.argv.indexOf('--tools') + 1]).toBe('');
     expect(recorded.stdin).toBe(buildPrompt(REQUEST));
     expect(recorded.cwd).toBe(scratch);
+  });
+
+  it('runs Claude for an older client that sends no agent', async () => {
+    useScenario('reply');
+    const url = await start();
+    const withoutAgent: Record<string, unknown> = { ...REQUEST };
+    delete withoutAgent.agent;
+    await readEvents(await postJson(`${url}/api/chat`, withoutAgent));
+    expect((await readRecord()).argv).toEqual(
+      buildClaudeArgs({ sessionId: null, model: null, isRepoAware: false }),
+    );
   });
 
   it('passes model, session and selection, and runs in the repo dir with read-only tools', async () => {

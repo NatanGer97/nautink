@@ -1,4 +1,5 @@
 import { changeCount, nextProposalId, useReviewStore } from './review-store.ts';
+import { agentName, currentAgentName } from '../chat/agent-name.ts';
 import { turnLabel } from '../chat/auto-fix.ts';
 import { defaultChatDeps } from '../chat/chat-deps.ts';
 import { useChatStore } from '../chat/chat-store.ts';
@@ -10,6 +11,8 @@ import { saveTurnVersions } from '../chat/turn-versions.ts';
 import type { Proposal, ProposalReview } from './review-store.ts';
 import type { ChatDeps } from '../chat/chat-deps.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { AgentId } from '@nautink/contracts/agents';
+import type { NautinkDb } from '@nautink/storage/db';
 import type { ChatMessage, ChatMessageReview, Diagram } from '@nautink/storage/records';
 
 /** Shown on "Show again" when the diagram changed after the reply. */
@@ -17,7 +20,9 @@ export const DIAGRAM_CHANGED: string =
   'The diagram changed after this reply, so its proposal cannot be shown again.';
 
 /** Shown on "Show again" when the proposal is no longer kept (a reload, a new chat). */
-export const PROPOSAL_GONE: string = 'This proposal is no longer available. Ask Claude again.';
+export function proposalGone(name: string): string {
+  return `This proposal is no longer available. Ask ${name} again.`;
+}
 
 /** Shown on "Show again" while another proposal or a reply is on this diagram. */
 export const REVIEW_BUSY: string = 'Finish the current review or reply first.';
@@ -47,9 +52,10 @@ function markReplies(proposal: Proposal, review: ChatMessageReview): void {
 }
 
 async function saveVersions(proposal: Proposal): Promise<void> {
-  const { diagramId, before, after, prompt, deps } = proposal;
+  const { diagramId, before, after, prompt, agent, deps } = proposal;
   try {
-    await saveTurnVersions({ db: deps.workspace().requireDb(), diagramId, before, after, prompt });
+    const db: NautinkDb = deps.workspace().requireDb();
+    await saveTurnVersions({ db, diagramId, before, after, prompt, agent });
   } catch (err) {
     const message: string = err instanceof Error ? err.message : String(err);
     deps.notifyError(`Could not save a version. ${message}`);
@@ -110,7 +116,7 @@ export interface ShowAgainState {
 /** Why the reply's proposal cannot be shown again now, or `null` when it can. */
 export function showAgainBlocker({ proposal, code, isBusy }: ShowAgainState): string | null {
   if (proposal === undefined || code === undefined) {
-    return PROPOSAL_GONE;
+    return proposalGone(currentAgentName());
   }
   if (isBusy) {
     return REVIEW_BUSY;
@@ -133,7 +139,8 @@ export function showProposalAgain(diagramId: string, messageIndex: number): void
   }
   review.openProposal(proposal);
   markReplies(proposal, PENDING);
-  useChatStore.getState().announce(`Claude proposes ${String(changesOf(proposal))} changes.`);
+  const name: string = agentName(proposal.agent);
+  useChatStore.getState().announce(`${name} proposes ${String(changesOf(proposal))} changes.`);
 }
 
 /** Marks the turn's replies as waiting for review, until Accept or Reject replaces it. */
@@ -143,7 +150,7 @@ export function markProposalPending(proposal: Proposal): void {
 
 /** What decides whether a reply whose review a reload cut off can be reviewed again. */
 export interface ReviewAgainState {
-  /** Claude's diagram in the reply, `null` when it has none. */
+  /** The agent's diagram in the reply, `null` when it has none. */
   replyCode: string | null;
   /** The diagram's code now, `undefined` once it is gone. */
   code: string | undefined;
@@ -153,7 +160,7 @@ export interface ReviewAgainState {
 /** Why the reply cannot be reviewed again now, or `null` when it can. */
 export function reviewAgainBlocker({ replyCode, code, isBusy }: ReviewAgainState): string | null {
   if (replyCode === null || code === undefined) {
-    return PROPOSAL_GONE;
+    return proposalGone(currentAgentName());
   }
   if (isBusy) {
     return REVIEW_BUSY;
@@ -170,19 +177,28 @@ function askedFor(diagram: Diagram, messageIndex: number): string {
   return asked?.text ?? 'Change';
 }
 
+/** What was asked, by whom it was answered, and the undo step's name, for the reply at `messageIndex`. */
+function replyTurn(
+  diagram: Diagram,
+  messageIndex: number,
+): Pick<Proposal, 'prompt' | 'agent' | 'label'> {
+  const prompt: string = askedFor(diagram, messageIndex);
+  // A reply saved before ADR-002 has no agent: Claude wrote it.
+  const agent: AgentId = diagram.messages[messageIndex]?.agent ?? 'claude';
+  return { prompt, agent, label: turnLabel('user', prompt, agentName(agent)) };
+}
+
 function lostProposal(diagram: Diagram, messageIndex: number, deps: ChatDeps): Proposal | null {
   const after: string | null = extractMermaid(diagram.messages[messageIndex]?.text ?? '');
   if (after === null) {
     return null;
   }
-  const prompt: string = askedFor(diagram, messageIndex);
   return {
     id: nextProposalId(),
     diagramId: diagram.id,
     before: diagram.code,
     after,
-    prompt,
-    label: turnLabel('user', prompt),
+    ...replyTurn(diagram, messageIndex),
     isValid: true,
     replyIndexes: [messageIndex],
     review: null,

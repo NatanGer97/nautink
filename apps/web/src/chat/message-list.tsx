@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 
+import { useAgentName } from './agent-name.ts';
 import { AssistantMessage, UserMessage } from './chat-message.tsx';
 import { ChipButton } from './chip-button.tsx';
 import { EXAMPLE_PROMPTS, hasDiagramContent } from './quick-actions.ts';
@@ -17,10 +18,11 @@ export interface MessageListProps {
 
 /** v1's welcome: what the chat does, and example prompts to start from. */
 function ChatWelcome({ hasContent }: { hasContent: boolean }): ReactElement {
+  const name: string = useAgentName();
   if (hasContent) {
     return (
       <EmptyState title="Ask about this diagram">
-        Describe a change, or pick a quick action below. Claude edits the code; you can edit it too.
+        Describe a change, or pick a quick action below. {name} edits the code; you can edit it too.
       </EmptyState>
     );
   }
@@ -41,7 +43,7 @@ function ChatWelcome({ hasContent }: { hasContent: boolean }): ReactElement {
         </div>
       }
     >
-      Describe the diagram you want and Claude will draw it on the canvas. You can edit it too.
+      Describe the diagram you want and {name} will draw it on the canvas. You can edit it too.
     </EmptyState>
   );
 }

@@ -1,4 +1,7 @@
+import { agentIdSchema } from '@nautink/contracts/agents';
 import { z } from 'zod';
+
+import type { AgentId } from '@nautink/contracts/agents';
 
 // Record shapes (PRD §7.3) and the Zod schemas that check them in backups. Field names are v1's
 // (`pinned`, `titleAuto`, `auto`, `streaming`) so v1 backups import unchanged (PRD §8).
@@ -32,6 +35,8 @@ export interface ChatMessage {
   meta?: ChatMessageMeta | undefined;
   /** Set once the user accepted or rejected the change this reply proposed. */
   review?: ChatMessageReview | undefined;
+  /** Which agent wrote this reply (ADR-002). Missing means Claude: replies from before Codex. */
+  agent?: AgentId | undefined;
 }
 
 /** One diagram of the workspace. */
@@ -44,6 +49,8 @@ export interface Diagram {
   view: DiagramView;
   messages: ChatMessage[];
   sessionId: string | null;
+  /** The agent that owns `sessionId` (ADR-002). Missing means Claude. */
+  sessionAgent?: AgentId | undefined;
   pinned: boolean;
   /** Unsent chat text, kept per diagram (new in v2). */
   draft: string;
@@ -62,6 +69,8 @@ export interface Version {
   kind: VersionKind;
   label: string;
   prompt: string;
+  /** For a `claude` (agent) version: which agent wrote it (ADR-002). Missing means Claude. */
+  agent?: AgentId | undefined;
 }
 
 /** Where one canvas item sits. Editors may store more than `x` and `y`, so extra keys are kept. */
@@ -100,6 +109,7 @@ export const chatMessageSchema: z.ZodType<ChatMessage> = z.object({
   error: z.string().optional(),
   meta: chatMessageMetaSchema.optional(),
   review: chatMessageReviewSchema.optional(),
+  agent: agentIdSchema.optional(),
 });
 
 export const diagramSchema: z.ZodType<Diagram> = z.object({
@@ -110,6 +120,7 @@ export const diagramSchema: z.ZodType<Diagram> = z.object({
   view: diagramViewSchema,
   messages: z.array(chatMessageSchema),
   sessionId: z.string().nullable(),
+  sessionAgent: agentIdSchema.optional(),
   pinned: z.boolean(),
   draft: z.string(),
   createdAt: z.number(),
@@ -124,6 +135,7 @@ export const versionSchema: z.ZodType<Version> = z.object({
   kind: versionKindSchema,
   label: z.string(),
   prompt: z.string(),
+  agent: agentIdSchema.optional(),
 });
 
 const nodePositionSchema: z.ZodType<NodePosition> = z.looseObject({

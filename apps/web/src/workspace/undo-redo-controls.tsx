@@ -23,7 +23,8 @@ import type { ReactElement } from 'react';
 export const EDIT_SOURCE_LABELS: Readonly<Record<EditSource, string>> = {
   code: 'Code',
   visual: 'Visual',
-  claude: 'Claude',
+  // The step label already names the agent ("Codex: Add a step").
+  claude: 'Agent',
   restore: 'Restore',
   import: 'Import',
   template: 'Template',
