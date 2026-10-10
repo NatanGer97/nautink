@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { useChatStore } from './chat-store.ts';
+import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
 import { submitDraft } from './submit-draft.ts';
 import { matchesShortcut, SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
@@ -55,6 +56,7 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
     <div className="flex shrink-0 flex-col gap-2.5 border-t border-border-subtle p-3">
       {above}
       <div className="flex flex-col gap-2 rounded-card border border-input bg-panel p-2 pl-2.5 focus-within:border-ring">
+        <SelectionChip diagramId={diagram?.id} />
         <label htmlFor="chat-composer" className="sr-only">
           Message Claude
         </label>

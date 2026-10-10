@@ -1,4 +1,5 @@
 import { useChatStore } from './chat-store.ts';
+import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
 import { submitDraft } from './submit-draft.ts';
 import { matchesShortcut, SHORTCUTS } from '../lib/shortcuts.ts';
@@ -28,6 +29,7 @@ export function PromptBar(): ReactElement {
   };
   return (
     <div className="absolute bottom-5 left-1/2 flex w-[min(460px,calc(100%-32px))] -translate-x-1/2 items-center gap-2 rounded-float border border-input bg-panel py-1.5 pr-1.5 pl-3 shadow-float focus-within:border-ring">
+      <SelectionChip diagramId={diagram?.id} />
       <label htmlFor="canvas-prompt" className="sr-only">
         Ask Claude to change this diagram
       </label>
