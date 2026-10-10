@@ -1,13 +1,24 @@
+import markDarkUrl from './assets/nautink-mark-dark.png';
+import markUrl from './assets/nautink-mark.png';
+
 import type { ReactElement } from 'react';
 
-/** The app mark: a diamond outline on an ink tile (M1). */
+const MARK_CLASS: string = 'h-[22px] w-auto shrink-0 select-none';
+
+/**
+ * The Nautink mark (docs/brand/). The navy wave disappears on the dark panel, so dark mode swaps in
+ * the light variant. Decorative: the "Nautink" text beside it names the app.
+ */
 export function LogoMark(): ReactElement {
   return (
-    <span
-      aria-hidden="true"
-      className="grid size-[22px] shrink-0 place-items-center rounded-control bg-primary"
-    >
-      <span className="size-2 rotate-45 border-[1.5px] border-primary-foreground" />
+    <span aria-hidden="true" className="flex shrink-0 items-center">
+      <img src={markUrl} alt="" draggable={false} className={`${MARK_CLASS} dark:hidden`} />
+      <img
+        src={markDarkUrl}
+        alt=""
+        draggable={false}
+        className={`${MARK_CLASS} hidden dark:block`}
+      />
     </span>
   );
 }

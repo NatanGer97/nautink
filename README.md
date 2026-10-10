@@ -1,4 +1,9 @@
-# Nautink
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/nautink-logo-dark.webp" />
+    <img src="docs/brand/nautink-logo.webp" alt="Nautink" width="420" />
+  </picture>
+</h1>
 
 A local-first, open-source app for building [Mermaid](https://mermaid.js.org) diagrams. You shape one
 canvas by hand, in code, or by chatting with Claude, and every change Claude proposes is shown on the
