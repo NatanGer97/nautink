@@ -2,8 +2,10 @@ import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } fr
 
 import { ViewController } from './view-controller.ts';
 import { viewBoxSize } from './view-math.ts';
+import { NO_INSETS } from '../lib/fit-insets.ts';
 
 import type { Point, Size, ViewTransform } from './view-math.ts';
+import type { FitInsets } from '../lib/fit-insets.ts';
 import type { PointerEvent, RefObject } from 'react';
 
 export interface PanZoomOptions {
@@ -13,8 +15,8 @@ export interface PanZoomOptions {
   fitKey: string;
   /** A click (not a drag) on something inside the diagram. */
   onShapeClick?: (target: Element) => void;
-  /** Room a fit keeps free at the bottom, for the floating prompt bar. */
-  bottomInset?: number;
+  /** Room a fit keeps free at the top and bottom, for the floating bars. */
+  insets?: FitInsets;
 }
 
 export interface PointerHandlers {
@@ -148,14 +150,15 @@ function pointerHandlers(
   };
 }
 
-/** A new diagram starts fitted again; the prompt bar's room is kept free when fitting. */
-function useFitInputs(controller: ViewController, fitKey: string, bottomInset: number): void {
+/** A new diagram starts fitted again; the floating bars' room is kept free when fitting. */
+function useFitInputs(controller: ViewController, fitKey: string, insets: FitInsets): void {
+  const { top, bottom } = insets;
   useLayoutEffect(() => {
     controller.follow();
   }, [controller, fitKey]);
   useLayoutEffect(() => {
-    controller.setBottomInset(bottomInset);
-  }, [controller, bottomInset]);
+    controller.setInsets({ top, bottom });
+  }, [controller, top, bottom]);
 }
 
 /** Pan, zoom and fit for the preview canvas. */
@@ -163,13 +166,13 @@ export function usePanZoom({
   svg,
   fitKey,
   onShapeClick,
-  bottomInset = 0,
+  insets = NO_INSETS,
 }: PanZoomOptions): PanZoom {
   const viewportRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const stageRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const [controller] = useState<ViewController>(() => new ViewController());
   const view: ViewTransform = useSyncExternalStore(controller.subscribe, controller.getView);
-  useFitInputs(controller, fitKey, bottomInset);
+  useFitInputs(controller, fitKey, insets);
   useContentSize(stageRef, svg, controller);
   useViewportSize(viewportRef, controller);
   useWheel(viewportRef, controller);

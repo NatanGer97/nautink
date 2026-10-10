@@ -20,6 +20,7 @@ import {
   zoomCentered,
 } from './sequence-view.ts';
 import { sampleModel, testContext } from '../../../tests/sequence-fixtures.ts';
+import { NO_INSETS } from '../../lib/fit-insets.ts';
 
 import type { SequenceModel } from '@nautink/editors/sequence/types';
 
@@ -159,16 +160,23 @@ describe('keys', () => {
 describe('view', () => {
   it('fits the drawing above the prompt bar, no larger than 120 %', () => {
     const bounds = { minX: -20, width: 380, height: 300 };
-    const fitted = fitSequence(bounds, { width: 1000, height: 800 }, 76);
+    const fitted = fitSequence(bounds, { width: 1000, height: 800 }, { top: 0, bottom: 76 });
     expect(fitted.k).toBe(1.2);
     expect(fitted.x).toBeCloseTo((1000 - 400 * 1.2) / 2);
-    expect(fitSequence(bounds, { width: 0, height: 0 }, 0)).toEqual({ x: 0, y: 0, k: 1 });
+    expect(fitSequence(bounds, { width: 0, height: 0 }, NO_INSETS)).toEqual({ x: 0, y: 0, k: 1 });
     const small = fitSequence(
       { minX: 0, width: 4000, height: 100 },
       { width: 448, height: 400 },
-      0,
+      NO_INSETS,
     );
     expect(small.k).toBeCloseTo(0.1);
+  });
+
+  it("fits below Claude's proposal bar while it shows", () => {
+    const tall = { minX: 0, width: 300, height: 1000 };
+    const fitted = fitSequence(tall, { width: 1000, height: 800 }, { top: 158, bottom: 76 });
+    expect(fitted.y).toBeGreaterThanOrEqual(158 + 24);
+    expect(fitted.y + 1000 * fitted.k).toBeLessThanOrEqual(800 - 76 - 24 + 0.001);
   });
 
   it('zooms around a point, maps screen points to the canvas, and clamps', () => {

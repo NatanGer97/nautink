@@ -27,12 +27,27 @@ describe('fitView', () => {
   });
 
   it('keeps the bottom inset free for the prompt bar, so a tall diagram stays above it', () => {
-    const view = fitView({ width: 100, height: 800 }, { width: 848, height: 848 }, 76);
+    const view = fitView(
+      { width: 100, height: 800 },
+      { width: 848, height: 848 },
+      { top: 0, bottom: 76 },
+    );
     expect(view.k).toBeCloseTo((848 - 76 - 48) / 800);
     expect(view.y + 800 * view.k).toBeLessThanOrEqual(848 - 76);
-    expect(fitView({ width: 10, height: 10 }, { width: 100, height: 50 }, 50)).toEqual(
-      IDENTITY_VIEW,
+    expect(
+      fitView({ width: 10, height: 10 }, { width: 100, height: 50 }, { top: 0, bottom: 50 }),
+    ).toEqual(IDENTITY_VIEW);
+  });
+
+  it("keeps the top inset free for Claude's proposal bar, so the top node stays below it", () => {
+    const view = fitView(
+      { width: 100, height: 800 },
+      { width: 848, height: 848 },
+      { top: 70, bottom: 76 },
     );
+    expect(view.k).toBeCloseTo((848 - 70 - 76 - 48) / 800);
+    expect(view.y).toBeGreaterThanOrEqual(70);
+    expect(view.y + 800 * view.k).toBeLessThanOrEqual(848 - 76);
   });
 
   it('returns the identity view when either side has no size', () => {

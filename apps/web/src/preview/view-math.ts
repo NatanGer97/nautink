@@ -1,3 +1,7 @@
+import { NO_INSETS } from '../lib/fit-insets.ts';
+
+import type { FitInsets } from '../lib/fit-insets.ts';
+
 /** Where the diagram sits in the viewport: translate by (x, y), then scale by k. */
 export interface ViewTransform {
   x: number;
@@ -35,28 +39,37 @@ export function clampZoom(k: number): number {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, k));
 }
 
+/** The largest zoom that shows `content` in `room` with padding, at most `MAX_FIT_ZOOM`. */
+function fitScale(content: Size, room: Size): number {
+  return clampZoom(
+    Math.min(
+      (room.width - FIT_PADDING) / content.width,
+      (room.height - FIT_PADDING) / content.height,
+      MAX_FIT_ZOOM,
+    ),
+  );
+}
+
 /**
- * The view that centers `content` in `viewport`, as large as fits, above a `bottomInset` kept free
- * (the floating prompt bar). Identity when either is empty.
+ * The view that centers `content` in `viewport`, as large as fits, between the `insets` kept free
+ * (the proposal bar on top, the floating prompt bar below). Identity when either is empty.
  */
-export function fitView(content: Size, viewport: Size, bottomInset: number = 0): ViewTransform {
-  const height: number = viewport.height - bottomInset;
+export function fitView(
+  content: Size,
+  viewport: Size,
+  insets: FitInsets = NO_INSETS,
+): ViewTransform {
+  const height: number = viewport.height - insets.top - insets.bottom;
   const isMeasurable: boolean =
     content.width > 0 && content.height > 0 && viewport.width > 0 && height > 0;
   if (!isMeasurable) {
     return IDENTITY_VIEW;
   }
-  const k: number = clampZoom(
-    Math.min(
-      (viewport.width - FIT_PADDING) / content.width,
-      (height - FIT_PADDING) / content.height,
-      MAX_FIT_ZOOM,
-    ),
-  );
+  const k: number = fitScale(content, { width: viewport.width, height });
   return {
     k,
     x: (viewport.width - content.width * k) * HALF,
-    y: (height - content.height * k) * HALF,
+    y: insets.top + (height - content.height * k) * HALF,
   };
 }
 

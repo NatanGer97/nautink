@@ -8,9 +8,10 @@ import {
   zoomAround,
   zoomCentered,
 } from './sequence-view.ts';
-import { usePromptBarInset } from '../../shell/prompt-bar-inset.ts';
+import { useFitInsets } from '../../shell/use-fit-insets.ts';
 
 import type { CanvasBounds } from './sequence-view.ts';
+import type { FitInsets } from '../../lib/fit-insets.ts';
 import type { Point, Size, ViewTransform } from '../../preview/view-math.ts';
 import type { Dispatch, SetStateAction } from 'react';
 
@@ -40,18 +41,18 @@ function pointIn(element: HTMLElement | null, client: Point): Point {
 interface ViewInputs {
   viewport: HTMLDivElement | null;
   bounds: CanvasBounds | null;
-  inset: number;
+  insets: FitInsets;
 }
 
 /** The view's commands, reading the viewport only when they run. */
 function viewCommands(
-  { viewport, bounds, inset }: ViewInputs,
+  { viewport, bounds, insets }: ViewInputs,
   view: ViewTransform,
   setView: Dispatch<SetStateAction<ViewTransform>>,
 ): Omit<SequenceView, 'view' | 'setView' | 'attachViewport'> {
   return {
     fit: (): void => {
-      setView(fitSequence(bounds ?? NO_BOUNDS, sizeOf(viewport), inset));
+      setView(fitSequence(bounds ?? NO_BOUNDS, sizeOf(viewport), insets));
     },
     zoomBy: (factor: number): void => {
       const size: Size = sizeOf(viewport);
@@ -106,9 +107,9 @@ function useFitOnRequest(fitRequest: number, fit: () => void): void {
 export function useSequenceView(bounds: CanvasBounds | null, fitRequest: number): SequenceView {
   const [viewport, attachViewport] = useState<HTMLDivElement | null>(null);
   const [view, setView] = useState<ViewTransform>(START_VIEW);
-  const inset: number = usePromptBarInset();
+  const insets: FitInsets = useFitInsets();
   const commands: Omit<SequenceView, 'view' | 'setView' | 'attachViewport'> = viewCommands(
-    { viewport, bounds, inset },
+    { viewport, bounds, insets },
     view,
     setView,
   );

@@ -1,8 +1,9 @@
 import { useReactFlow } from '@xyflow/react';
 import { useEffect, useEffectEvent } from 'react';
 
-import { usePromptBarInset } from '../../shell/prompt-bar-inset.ts';
+import { useFitInsets } from '../../shell/use-fit-insets.ts';
 
+import type { FitInsets } from '../../lib/fit-insets.ts';
 import type { FitViewOptions, ReactFlowInstance } from '@xyflow/react';
 
 const FIT_PADDING_PX: number = 24;
@@ -25,25 +26,27 @@ export function pixels(value: number): Pixels {
   return text;
 }
 
-/** v1's fit, keeping the floating prompt bar's room free at the bottom. */
-export function fitOptions(
-  bottomInset: number,
-  duration: number = FIT_DURATION_MS,
-): FitViewOptions {
+/** v1's fit, keeping the proposal bar's room free at the top and the prompt bar's at the bottom. */
+export function fitOptions(insets: FitInsets, duration: number = FIT_DURATION_MS): FitViewOptions {
   const side: Pixels = pixels(FIT_PADDING_PX);
   return {
-    padding: { top: side, left: side, right: side, bottom: pixels(FIT_PADDING_PX + bottomInset) },
+    padding: {
+      top: pixels(FIT_PADDING_PX + insets.top),
+      left: side,
+      right: side,
+      bottom: pixels(FIT_PADDING_PX + insets.bottom),
+    },
     maxZoom: FIT_MAX_ZOOM,
     duration,
   };
 }
 
-/** Fits the canvas now, around the prompt bar. */
+/** Fits the canvas now, around the floating bars. */
 export function useFitNow(): (duration?: number) => void {
   const flow: ReactFlowInstance = useReactFlow();
-  const inset: number = usePromptBarInset();
+  const insets: FitInsets = useFitInsets();
   return (duration?: number): void => {
-    void flow.fitView(fitOptions(inset, duration));
+    void flow.fitView(fitOptions(insets, duration));
   };
 }
 

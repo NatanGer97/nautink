@@ -45,7 +45,7 @@ layout, so there are **no saved positions**. It still uses `useEditorCore`, with
 gets a positions record. It does not render `EditorCanvas` or a `ReactFlowProvider`; instead
 `use-sequence-view.ts` pans, zooms and fits the stage with a CSS transform, with React Flow's limits
 (10–300 %, wheel zooms around the pointer, drag pans) and the shared fit (24 px padding, at most
-120 %, the prompt bar's room kept free, from `usePromptBarInset`). It reuses the shared toolbar,
+120 %, the proposal bar's and prompt bar's room kept free, from `useFitInsets`). It reuses the shared toolbar,
 inspector, library, `ZoomControls`, `ReadOnlyBanner`, `CanvasHint` and `useWindowKeys`. Participants
 are published with their Mermaid id, so Split marks and selects them; rows and boxes have no
 Mermaid id and are published by item id with a descriptive label. If you need something another editor has, move it to
@@ -111,7 +111,7 @@ What it does for you (port of v1's `sync.js` + `positions.js`):
 
 | Piece | What |
 |---|---|
-| `EditorCanvas` | React Flow as every editor uses it: token colors, Delete/Backspace, Shift/⌘ multi-select, read-only, the zoom bar, fit requests (keeping the prompt bar's room free), the read-only banner. Pass `flow` (nodes, edges, nodeTypes, events), `isDark`, `isReadOnly`, `readOnlyReason`, `fitRequest`, `rootRef`, and the chrome as children |
+| `EditorCanvas` | React Flow as every editor uses it: token colors, Delete/Backspace, Shift/⌘ multi-select, read-only, the zoom bar, fit requests (keeping the floating bars' room free: `useFitInsets` in `shell/use-fit-insets.ts` gives the proposal bar's room at the top while Claude's proposal shows, and the prompt bar's at the bottom), the read-only banner. Pass `flow` (nodes, edges, nodeTypes, events), `isDark`, `isReadOnly`, `readOnlyReason`, `fitRequest`, `rootRef`, and the chrome as children |
 | `EditorToolbar`, `ToolbarIconButton`, `ToolbarTextButton`, `ToolbarSelect`, `ToolbarSeparator`, `ToolbarHelp` | The floating tools card (M1), top-left. Put "Library", "Add …", "Auto layout" and your tips here |
 | `InspectorCard`, `InspectorSection`, `InspectorActions`, `InspectorButton` | The floating inspector (M1), top-right, 248 px. Show it only while something is selected |
 | `CommitField`, `ChoiceField`, `SelectField` | v1's `Field` (commits on blur/Enter, Esc reverts), `Seg` (segmented) and a select with groups |

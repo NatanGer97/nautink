@@ -68,7 +68,7 @@ the session (proposals are not saved) and only while the diagram still has the c
 turn. Sending a new message about a diagram rejects its open proposal first. Review off behaves
 exactly as before. The bar (`review-bar.tsx`) floats over the canvas; a code-only review (types
 without a visual editor, code that does not parse, text-only changes) shows its bar and Monaco's diff
-in the code drawer. Enter accepts and Esc rejects unless the focus is on a field or control.
+in the code drawer. Enter accepts and Esc rejects unless the focus is on a field or control. While the bar floats over the canvas, every fit (Preview and the visual editors) keeps its room free at the top (`review/review-bar-room.ts`, through `useFitInsets`), so it never covers the top node.
 
 **Diff** on a change card (`review/reply-diff.ts`) opens the code drawer on a read-only Monaco diff
 of the code before → after that reply (`showReplyDiff(diagramId, messageIndex)`; "Back to code"

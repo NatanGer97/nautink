@@ -1,6 +1,8 @@
 import { fitView, IDENTITY_VIEW, panBy, wheelZoomFactor, zoomAt } from './view-math.ts';
+import { NO_INSETS } from '../lib/fit-insets.ts';
 
 import type { Point, Size, ViewTransform } from './view-math.ts';
+import type { FitInsets } from '../lib/fit-insets.ts';
 
 /** A press that moves less than this is a click, not a pan. */
 const DRAG_THRESHOLD_PX: number = 4;
@@ -31,7 +33,7 @@ export class ViewController {
   private isFollowing: boolean = true;
   private viewport: Size = { width: 0, height: 0 };
   private content: Size = { width: 0, height: 0 };
-  private bottomInset: number = 0;
+  private insets: FitInsets = NO_INSETS;
   private drag: Drag | null = null;
   private readonly listeners: Set<() => void> = new Set<() => void>();
 
@@ -45,7 +47,7 @@ export class ViewController {
   /** Fits now and follows the diagram from here on. */
   fit = (): void => {
     this.isFollowing = true;
-    this.publish(fitView(this.content, this.viewport, this.bottomInset));
+    this.publish(fitView(this.content, this.viewport, this.insets));
   };
 
   /** A different diagram: fit it once it has a size. */
@@ -58,9 +60,9 @@ export class ViewController {
     this.refit();
   }
 
-  /** Room to keep free at the bottom (the floating prompt bar); refits while following. */
-  setBottomInset(inset: number): void {
-    this.bottomInset = inset;
+  /** Room to keep free at the top and bottom (the floating bars); refits while following. */
+  setInsets(insets: FitInsets): void {
+    this.insets = insets;
     this.refit();
   }
 
@@ -111,7 +113,7 @@ export class ViewController {
 
   private refit(): void {
     if (this.isFollowing) {
-      this.publish(fitView(this.content, this.viewport, this.bottomInset));
+      this.publish(fitView(this.content, this.viewport, this.insets));
     }
   }
 

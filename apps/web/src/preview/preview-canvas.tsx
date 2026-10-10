@@ -18,7 +18,7 @@ import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
 import { useLiveFade } from '../review/live-fade.ts';
 import { REVIEW_STAGE_CLASS, usePreviewReviewMarks } from '../review/preview-marks.ts';
 import { useIsReviewing, useShownCode, useStructuralReview } from '../review/use-review.ts';
-import { usePromptBarInset } from '../shell/prompt-bar-inset.ts';
+import { useFitInsets } from '../shell/use-fit-insets.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
@@ -145,7 +145,7 @@ function PreviewSurface({
   const { viewportRef, stageRef, view, controller, handlers } = usePanZoom({
     svg,
     fitKey: diagramId,
-    bottomInset: usePromptBarInset(),
+    insets: useFitInsets(),
     onShapeClick:
       onShapeClick ??
       ((target: Element): void => {

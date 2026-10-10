@@ -1,5 +1,6 @@
 // Pan, zoom and fit for the sequence canvas, as the other editors do them (React Flow's limits and
 // the shared fit: 24 px padding, at most 120 %, the prompt bar's room kept free at the bottom).
+import type { FitInsets } from '../../lib/fit-insets.ts';
 import type { Point, Size, ViewTransform } from '../../preview/view-math.ts';
 import type { SequenceLayout } from '@nautink/editors/sequence/layout';
 
@@ -22,15 +23,15 @@ export function clampZoom(k: number): number {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, k));
 }
 
-/** The view that shows the whole diagram, centred above the prompt bar's room. */
+/** The view that shows the whole diagram, centred between the floating bars' room. */
 export function fitSequence(
   bounds: CanvasBounds,
   viewport: Size,
-  bottomInset: number,
+  insets: FitInsets,
 ): ViewTransform {
   const width: number = bounds.width - bounds.minX;
   const roomW: number = viewport.width - FIT_PADDINGS_PX;
-  const roomH: number = viewport.height - bottomInset - FIT_PADDINGS_PX;
+  const roomH: number = viewport.height - insets.top - insets.bottom - FIT_PADDINGS_PX;
   if (width <= 0 || bounds.height <= 0 || roomW <= 0 || roomH <= 0) {
     return START_VIEW;
   }
@@ -38,7 +39,7 @@ export function fitSequence(
   return {
     k,
     x: (viewport.width - width * k) * HALF,
-    y: FIT_PADDING_PX + (roomH - bounds.height * k) * HALF,
+    y: FIT_PADDING_PX + insets.top + (roomH - bounds.height * k) * HALF,
   };
 }
 
