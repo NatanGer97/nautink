@@ -56,7 +56,7 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
     <div className="flex shrink-0 flex-col gap-2.5 border-t border-border-subtle p-3">
       {above}
       <div className="flex flex-col gap-2 rounded-card border border-input bg-panel p-2 pl-2.5 focus-within:border-ring">
-        <SelectionChip diagramId={diagram?.id} />
+        <SelectionChip diagramId={diagram?.id} className="self-start" />
         <label htmlFor="chat-composer" className="sr-only">
           Message Claude
         </label>
