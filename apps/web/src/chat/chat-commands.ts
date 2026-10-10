@@ -1,10 +1,9 @@
-import { MODEL_IDS, MODEL_LABELS } from '@nautink/contracts/models';
-
 import { requestNewChat } from './new-chat-button.tsx';
 import { askClaudeToFix, stopChat } from './send-chat.ts';
 
 import type { AppCommand } from '../commands/command-registry.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
+import type { ModelOption } from '@nautink/contracts/models';
 
 /** What the chat commands depend on; they are registered again when it changes. */
 export interface ChatCommandState {
@@ -12,6 +11,8 @@ export interface ChatCommandState {
   /** The open diagram's parse error, checked when the palette opens; `null` when it parses. */
   fixError: MermaidError | null;
   model: string | null;
+  /** The current agent's models, besides its default. */
+  models: readonly ModelOption[];
   setModel: (model: string | null) => void;
 }
 
@@ -48,7 +49,7 @@ function conversationCommands(state: ChatCommandState): AppCommand[] {
 function modelCommands(state: ChatCommandState): AppCommand[] {
   const choices: { model: string | null; name: string }[] = [
     { model: null, name: 'the default model' },
-    ...MODEL_IDS.map((id) => ({ model: id, name: MODEL_LABELS[id] })),
+    ...state.models.map((option) => ({ model: option.id, name: option.label })),
   ];
   return choices.map(({ model, name }) => ({
     id: `model.${model ?? 'default'}`,

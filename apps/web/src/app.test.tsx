@@ -135,6 +135,34 @@ describe('App shell', () => {
     expect(useUiStore.getState().defaultModel).toBeNull();
   });
 
+  it('picks Codex in settings: the connection row and the models follow the agent', async () => {
+    const health = {
+      claude: { isFound: true, version: '2.1.0', error: null },
+      codex: { isFound: false, version: null, error: '"codex" was not found.' },
+    };
+    const models = { claude: [], codex: [{ id: 'gpt-6-astra', label: 'GPT-6-Astra' }] };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) =>
+        Promise.resolve(new Response(JSON.stringify(url === '/api/models' ? models : health))),
+      ),
+    );
+    useUiStore.getState().setSettingsOpen(true);
+    const user = renderApp();
+    const settings = await screen.findByRole('dialog', { name: 'Settings' });
+    expect(await within(settings).findByText('Claude Code')).toBeTruthy();
+    await user.click(within(settings).getByRole('radio', { name: 'Codex' }));
+    expect(useUiStore.getState().agent).toBe('codex');
+    expect(await within(settings).findByText('Codex CLI')).toBeTruthy();
+    expect(await within(settings).findByText('"codex" was not found.')).toBeTruthy();
+    await user.click(within(settings).getByRole('combobox', { name: 'Default model' }));
+    await user.click(await screen.findByRole('option', { name: 'GPT-6-Astra' }));
+    expect(useUiStore.getState().defaultModel).toBe('gpt-6-astra');
+    expect(screen.getByRole('contentinfo').textContent).toContain('GPT-6-Astra');
+    await user.click(within(settings).getByRole('radio', { name: 'Claude' }));
+    expect(useUiStore.getState()).toMatchObject({ agent: 'claude', defaultModel: null });
+  });
+
   it('turns change review off and on in settings, on by default', async () => {
     useUiStore.getState().setSettingsOpen(true);
     const user = renderApp();

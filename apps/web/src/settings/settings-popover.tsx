@@ -8,6 +8,7 @@ import { focusOverlayContainer } from '../shell/focus-overlay.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
 import type { ConnectionCheck } from './use-connection-status.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 import type { ComponentType, ReactElement, ReactNode } from 'react';
 
 const LazySettingsFields: ComponentType<{ connection: ConnectionCheck }> = lazy(async () => ({
@@ -19,11 +20,12 @@ export interface SettingsPopoverProps {
   children: ReactNode;
 }
 
-/** Settings (M8): appearance, default model, change review, Claude Code connection, codebase and backup. */
+/** Settings (M8): appearance, agent, default model, change review, CLI connection, codebase and backup. */
 export function SettingsPopover({ children }: SettingsPopoverProps): ReactElement {
   const isOpen: boolean = useUiStore((state) => state.isSettingsOpen);
   const setOpen: (isOpen: boolean) => void = useUiStore((state) => state.setSettingsOpen);
-  const connection: ConnectionCheck = useConnectionStatus(isOpen);
+  const agent: AgentId = useUiStore((state) => state.agent);
+  const connection: ConnectionCheck = useConnectionStatus(isOpen, agent);
   return (
     <Popover open={isOpen} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>

@@ -49,7 +49,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: switching agent mid-chat starts a fresh session on the next turn
 
-- [ ] **T4 — Settings: agent picker, per-agent connection and model list**
+- [x] **T4 — Settings: agent picker, per-agent connection and model list**
   - context - M8 settings
   - Files: `apps/web/src/settings/settings-fields.tsx`, `apps/web/src/settings/connection-row.tsx`, `apps/web/src/settings/health.ts`, `apps/web/src/settings/use-connection-status.ts`, `apps/web/src/settings/models.ts` (new, fetch `GET /api/models`), `apps/web/src/chat/model-chip.tsx`, `apps/web/src/chat/chat-commands.ts` (⌘K model commands), tests
   - Red: Settings shows an "Agent" control (Claude / Codex); the connection row title is `Claude Code` or `Codex CLI` and its status comes from `health[agent]`; missing Codex shows the server's error; the default model select and the model chip list `Default` plus the selected agent's models from `/api/models`; an empty Codex list shows only `Default`; ⌘K "Switch to …" commands list the agent's models; a remembered Codex model missing from the list resets to `Default`

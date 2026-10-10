@@ -1,4 +1,4 @@
-import { MODEL_IDS, MODEL_LABELS } from '@nautink/contracts/models';
+import { AGENT_CLI_NAMES, AGENT_IDS, AGENT_LABELS } from '@nautink/contracts/agents';
 import { Button } from '@nautink/ui/components/button';
 import {
   Select,
@@ -13,24 +13,24 @@ import { isThemePreference, THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/
 
 import { CodebaseSetting } from './codebase-setting.tsx';
 import { ConnectionRow } from './connection-row.tsx';
+import { DEFAULT_MODEL_VALUE, toModel, useModelOptions } from './models.ts';
 import { backUpAll, pickAndRestoreBackup } from '../import/import-files.ts';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { ConnectionCheck } from './use-connection-status.ts';
+import type { AgentId } from '@nautink/contracts/agents';
+import type { ModelOption } from '@nautink/contracts/models';
 import type { ThemePreference } from '@nautink/ui/theme';
 import type { ReactElement } from 'react';
 
-/** The Select value for "use Claude Code's own default". */
-const DEFAULT_MODEL_VALUE: string = 'default';
+/** One option of a segmented control (Appearance, Agent). */
+const SEGMENT_ITEM_CLASS: string =
+  'h-[26px] flex-1 rounded-control text-muted-foreground hover:bg-transparent hover:text-foreground data-[state=on]:bg-panel data-[state=on]:text-foreground data-[state=on]:shadow-segment';
 
-function toModel(value: string): string | null {
-  const model: string | undefined = MODEL_IDS.find((id) => id === value);
-  if (model === undefined && value !== DEFAULT_MODEL_VALUE) {
-    throw new Error(`Unknown model "${value}".`);
-  }
-  return model ?? null;
+function isAgentId(value: string): value is AgentId {
+  return AGENT_IDS.some((id: AgentId) => id === value);
 }
 
 /** System, Light or Dark as a segmented control (M8). */
@@ -57,11 +57,7 @@ export function AppearanceField(): ReactElement {
         className="w-full rounded-track bg-muted p-0.5"
       >
         {THEME_PREFERENCES.map((option) => (
-          <ToggleGroupItem
-            key={option}
-            value={option}
-            className="h-[26px] flex-1 rounded-control text-muted-foreground hover:bg-transparent hover:text-foreground data-[state=on]:bg-panel data-[state=on]:text-foreground data-[state=on]:shadow-segment"
-          >
+          <ToggleGroupItem key={option} value={option} className={SEGMENT_ITEM_CLASS}>
             {THEME_LABELS[option]}
           </ToggleGroupItem>
         ))}
@@ -70,10 +66,43 @@ export function AppearanceField(): ReactElement {
   );
 }
 
-/** The model new chats start with: Claude Code's default, or one of the named models. */
+/** Claude or Codex: the agent the chat runs (ADR-002). */
+export function AgentField(): ReactElement {
+  const agent: AgentId = useUiStore((state) => state.agent);
+  const setAgent: (agent: AgentId) => void = useUiStore((state) => state.setAgent);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span id="settings-agent" className="text-xs text-muted-foreground">
+        Agent
+      </span>
+      <ToggleGroup
+        type="single"
+        spacing={0.5}
+        value={agent}
+        onValueChange={(value: string) => {
+          if (isAgentId(value)) {
+            setAgent(value);
+          }
+        }}
+        aria-labelledby="settings-agent"
+        className="w-full rounded-track bg-muted p-0.5"
+      >
+        {AGENT_IDS.map((id) => (
+          <ToggleGroupItem key={id} value={id} className={SEGMENT_ITEM_CLASS}>
+            {AGENT_LABELS[id]}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </div>
+  );
+}
+
+/** The model new chats start with: the agent CLI's default, or one of the agent's models. */
 export function DefaultModelField(): ReactElement {
+  const agent: AgentId = useUiStore((state) => state.agent);
   const model: string | null = useUiStore((state) => state.defaultModel);
   const setModel: (value: string | null) => void = useUiStore((state) => state.setDefaultModel);
+  const options: readonly ModelOption[] = useModelOptions(agent);
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor="settings-model" className="text-xs text-muted-foreground">
@@ -82,7 +111,7 @@ export function DefaultModelField(): ReactElement {
       <Select
         value={model ?? DEFAULT_MODEL_VALUE}
         onValueChange={(value: string) => {
-          setModel(toModel(value));
+          setModel(toModel(value, options));
         }}
       >
         <SelectTrigger id="settings-model" size="sm" className={`w-full ${OUTLINE_BUTTON_CLASS}`}>
@@ -90,9 +119,9 @@ export function DefaultModelField(): ReactElement {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={DEFAULT_MODEL_VALUE}>Default</SelectItem>
-          {MODEL_IDS.map((id) => (
-            <SelectItem key={id} value={id}>
-              {MODEL_LABELS[id]}
+          {options.map((option) => (
+            <SelectItem key={option.id} value={option.id}>
+              {option.label}
             </SelectItem>
           ))}
         </SelectContent>
@@ -163,12 +192,18 @@ export function BackupField(): ReactElement {
  * and Switch it needs stay out of the main bundle (PRD §9).
  */
 export function SettingsFields({ connection }: { connection: ConnectionCheck }): ReactElement {
+  const agent: AgentId = useUiStore((state) => state.agent);
   return (
     <>
       <AppearanceField />
+      <AgentField />
       <DefaultModelField />
       <ReviewChangesField />
-      <ConnectionRow status={connection.status} onRecheck={connection.recheck} />
+      <ConnectionRow
+        title={AGENT_CLI_NAMES[agent]}
+        status={connection.status}
+        onRecheck={connection.recheck}
+      />
       <CodebaseField />
       <BackupField />
     </>
