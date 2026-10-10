@@ -167,6 +167,16 @@ describe('POST /api/chat with agent codex', () => {
     );
   });
 
+  it('rejects a session id that Codex would read as a flag, before running anything', async () => {
+    useScenario('reply');
+    const url = await start();
+    const sessionId = '--dangerously-bypass-approvals-and-sandbox';
+    const response = await postJson(`${url}/api/chat`, { ...REQUEST, sessionId });
+    expect(response.status).toBe(400);
+    expect(await readError(response)).toContain('sessionId');
+    await expect(readRecord()).rejects.toThrow();
+  });
+
   it('rejects a Claude model for Codex with a 400', async () => {
     const url = await start();
     const response = await postJson(`${url}/api/chat`, { ...REQUEST, model: 'opus' });

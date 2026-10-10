@@ -69,12 +69,13 @@ function createTurn(
   input: { prompt: string; options: SendOptions; deps: ChatDeps },
 ): Turn {
   const { prompt, options, deps } = input;
+  const identity: Pick<Turn, 'agent' | 'label'> = turnIdentity(prompt, options, deps);
   const controller: AbortController = new AbortController();
-  useChatStore.getState().begin(diagram.id, controller);
+  useChatStore.getState().begin(diagram.id, controller, identity.agent);
   return {
     diagramId: diagram.id,
     workspace: deps.workspace,
-    ...turnIdentity(prompt, options, deps),
+    ...identity,
     before: diagram.code,
     prompt,
     selection: options.selection ?? null,

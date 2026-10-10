@@ -1,5 +1,6 @@
 import { useReviewStore } from './review-store.ts';
-import { agentName, useAgentName } from '../chat/agent-name.ts';
+import { agentName } from '../chat/agent-name.ts';
+import { useReplyingAgentName } from '../chat/replying-agent.ts';
 
 import type { Proposal, ProposalReview, ReviewData } from './review-store.ts';
 import type { StructuralReview } from '@nautink/editors/review/review-diagram';
@@ -40,7 +41,7 @@ export function useOpenProposal(diagramId: string | undefined): Proposal | undef
 
 /** Why the canvas and code cannot be edited because of a review, or `null`. */
 export function useReviewReadOnlyReason(diagramId: string | undefined): string | null {
-  const name: string = useAgentName();
+  const name: string = useReplyingAgentName();
   return useReviewStore((state) => {
     if (diagramId === undefined) {
       return null;

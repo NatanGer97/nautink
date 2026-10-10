@@ -61,6 +61,19 @@ describe('chatRequestSchema', () => {
     expect(chatRequestSchema.parse(request)).toEqual(request);
   });
 
+  it.each(['--dangerously-bypass-approvals-and-sandbox', '-x', 'a b', ''])(
+    'rejects session id %j, which a CLI could read as a flag',
+    (sessionId: string) => {
+      expect(chatRequestSchema.safeParse({ ...VALID_REQUEST, sessionId }).success).toBe(false);
+    },
+  );
+
+  it('accepts real session ids', () => {
+    for (const sessionId of ['01a126cb-6739-7191-bec0-684001ef066f', 'fake-session-1', 's1']) {
+      expect(chatRequestSchema.parse({ ...VALID_REQUEST, sessionId }).sessionId).toBe(sessionId);
+    }
+  });
+
   it('rejects an unknown agent', () => {
     expect(chatRequestSchema.safeParse({ ...VALID_REQUEST, agent: 'gpt' }).success).toBe(false);
   });

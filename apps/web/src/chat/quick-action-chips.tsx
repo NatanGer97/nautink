@@ -1,10 +1,10 @@
 import { cn } from '@nautink/ui/lib/utils';
 
-import { useAgentName } from './agent-name.ts';
 import { chatSelectionFor } from './chat-selection.ts';
 import { useChatStore } from './chat-store.ts';
 import { ChipButton } from './chip-button.tsx';
 import { quickActionsFor } from './quick-actions.ts';
+import { useReplyingAgentName } from './replying-agent.ts';
 import { sendChat } from './send-chat.ts';
 
 import type { QuickAction } from './quick-actions.ts';
@@ -28,7 +28,7 @@ export function QuickActionChips({
   className,
 }: QuickActionChipsProps): ReactElement | null {
   const isBusy: boolean = useChatStore((state) => state.busyDiagramId !== null);
-  const name: string = useAgentName();
+  const name: string = useReplyingAgentName();
   const actions: readonly QuickAction[] = quickActionsFor(code);
   if (actions.length === 0) {
     return null;

@@ -69,7 +69,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - context - the rest of the 45 strings
   - Files: `review/review-bar.tsx`, `review-actions.ts`, `review-history-guard.ts`, `use-review.ts`, `edit/read-only-reason.ts`, `edit/canvas-views.ts`, `edit/selection-prompt/selection-prompt.tsx`, `shell/code-drawer.tsx`, `code/ask-claude-to-fix.ts`, `history/version-text.ts`, `workspace/undo-redo-controls.tsx`, `settings/codebase-setting.tsx`, `settings/repo-badge.tsx`, `first-run/first-run-screen.tsx`, tests
   - Red: with agent `codex`: `Codex proposes 3 changes`, `Ask Codex about these 2…`, `Codebase Codex can read`, read-only reason names Codex; a version with `agent:'codex'` shows `Codex` in history
-  - Green: same helper as T5
+  - Green: same helper as T5. The undo menu's source label for agent steps becomes `Agent` (it was `Claude`): an edit entry does not know its agent, and the step label already names it (`Codex: …`)
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: `grep -rn "'[^']*Claude" apps/web/src --include=*.tsx --include=*.ts` finds only tests, comments and the agent label table
 

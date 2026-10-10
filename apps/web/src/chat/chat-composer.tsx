@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import { useAgentName } from './agent-name.ts';
 import { useChatStore } from './chat-store.ts';
+import { useReplyingAgentName } from './replying-agent.ts';
 import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
 import { submitDraft } from './submit-draft.ts';
@@ -41,6 +42,7 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
   const textareaRef: RefObject<HTMLTextAreaElement | null> = useRef<HTMLTextAreaElement>(null);
   const busyId: string | null = useChatStore((state) => state.busyDiagramId);
   const name: string = useAgentName();
+  const replyingName: string = useReplyingAgentName();
   useComposerFocus(textareaRef);
   const draft: string = diagram?.draft ?? '';
   const send = (): void => {
@@ -67,7 +69,7 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
           ref={textareaRef}
           rows={2}
           value={draft}
-          placeholder={placeholder(busyId, diagram?.id, name)}
+          placeholder={placeholder(busyId, diagram?.id, replyingName)}
           className="resize-none border-0 bg-transparent leading-normal outline-none placeholder:text-faint"
           onChange={(event) => {
             if (diagram !== undefined) {

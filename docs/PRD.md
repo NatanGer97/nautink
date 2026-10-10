@@ -147,7 +147,7 @@ The five editors and their contract port as-is (logic in TypeScript, new UI chro
 
 ### 4.5 First run and settings (M8)
 - Empty state: one prompt box with a diagram-type picker, example chips, and "start from" cards (blank, templates, import, from a codebase).
-- Settings: appearance, default model, Claude Code connection status, codebase folder, backup and restore.
+- Settings: appearance, agent (Claude or Codex, ADR-002), default model, the chosen agent CLI's connection status, codebase folder, backup and restore.
 
 ---
 

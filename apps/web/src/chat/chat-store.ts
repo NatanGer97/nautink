@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 
-import { currentAgentName } from './agent-name.ts';
+import { agentName } from './agent-name.ts';
 
+import type { AgentId } from '@nautink/contracts/agents';
 import type { StoreApi, UseBoundStore } from 'zustand';
 
 /** Assistant message index → the edit step its diagram is in, for one diagram. */
@@ -11,6 +12,8 @@ export type ReplyEdits = Readonly<Record<number, number>>;
 export interface ChatData {
   /** The diagram whose reply is streaming, or `null` when Claude is idle. One reply at a time. */
   busyDiagramId: string | null;
+  /** The agent writing the streaming reply, even if the user picks another meanwhile; `null` when idle. */
+  busyAgent: AgentId | null;
   /** When the streaming reply started (`Date.now()`), for the elapsed time; `null` when idle. */
   startedAt: number | null;
   controller: AbortController | null;
@@ -25,7 +28,7 @@ export interface ChatData {
 }
 
 export interface ChatActions {
-  begin: (diagramId: string, controller: AbortController) => void;
+  begin: (diagramId: string, controller: AbortController, agent: AgentId) => void;
   end: (announcement: string) => void;
   /** Aborts the streaming reply, if any. */
   stop: () => void;
@@ -40,6 +43,7 @@ export type ChatState = ChatData & ChatActions;
 
 const INITIAL_CHAT: ChatData = {
   busyDiagramId: null,
+  busyAgent: null,
   startedAt: null,
   controller: null,
   isDiscarded: false,
@@ -49,6 +53,14 @@ const INITIAL_CHAT: ChatData = {
 };
 
 type SetChat = StoreApi<ChatState>['setState'];
+
+/** The run fields once no reply streams. */
+const IDLE_RUN: Pick<ChatData, 'busyDiagramId' | 'busyAgent' | 'startedAt' | 'controller'> = {
+  busyDiagramId: null,
+  busyAgent: null,
+  startedAt: null,
+  controller: null,
+};
 
 function linkActions(set: SetChat): Pick<ChatActions, 'linkReplyEdit' | 'forgetReplyEdits'> {
   return {
@@ -68,17 +80,18 @@ function linkActions(set: SetChat): Pick<ChatActions, 'linkReplyEdit' | 'forgetR
 
 function runActions(set: SetChat): Pick<ChatActions, 'begin' | 'end' | 'announce'> {
   return {
-    begin: (diagramId, controller): void => {
+    begin: (diagramId, controller, agent): void => {
       set({
         busyDiagramId: diagramId,
+        busyAgent: agent,
         startedAt: Date.now(),
         controller,
         isDiscarded: false,
-        announcement: `${currentAgentName()} is replying.`,
+        announcement: `${agentName(agent)} is replying.`,
       });
     },
     end: (announcement): void => {
-      set({ busyDiagramId: null, startedAt: null, controller: null, announcement });
+      set({ ...IDLE_RUN, announcement });
     },
     announce: (announcement): void => {
       set({ announcement });

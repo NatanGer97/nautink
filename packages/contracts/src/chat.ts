@@ -34,6 +34,17 @@ const selectionSchema: z.ZodType<ChatSelection> = z.object({
   kinds: z.array(z.string()).exactOptional(),
 });
 
+/**
+ * A CLI session id. It goes to the CLI as an argument (`codex exec resume <id>`), so it must not start
+ * with `-`: an id like `--dangerously-bypass-approvals-and-sandbox` would be read as a flag.
+ */
+const sessionIdSchema: z.ZodType<string> = z
+  .string()
+  .regex(
+    /^[A-Za-z0-9][A-Za-z0-9._-]*$/,
+    'sessionId must be letters, digits, ".", "_" or "-", not starting with "-"',
+  );
+
 const MODEL_SCHEMAS: Readonly<Record<AgentId, z.ZodType<string>>> = {
   claude: modelIdSchema,
   codex: codexModelSchema,
@@ -48,7 +59,7 @@ export const chatRequestSchema: z.ZodType<ChatRequest> = z
   .object({
     message: z.string().trim().min(1, 'message is required'),
     code: z.string(),
-    sessionId: z.string().min(1).nullable(),
+    sessionId: sessionIdSchema.nullable(),
     // Clients older than ADR-002 send no agent: they mean Claude.
     agent: agentIdSchema.default('claude'),
     model: z.string().min(1).nullable(),

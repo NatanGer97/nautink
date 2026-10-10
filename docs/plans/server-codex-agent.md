@@ -40,7 +40,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - context - additive contract change; web keeps compiling
   - Files: `packages/contracts/src/chat.ts`, `packages/contracts/src/chat.test.ts`, `apps/server` callers of `ChatRequest`
   - Red: `chatRequestSchema` parses `agent: 'codex'`; missing `agent` parses as `'claude'` (older clients); `agent: 'gpt'` fails; `model: 'opus'` with `agent: 'codex'` fails with message `model "opus" does not belong to agent "codex"`; `done` with `costUsd: null` parses
-  - Green: `agent: AgentId` (default `'claude'`); `model: string | null` checked by agent (Claude → `MODEL_IDS`, Codex → `codexModelSchema`); `costUsd: number | null`
+  - Green: `sessionId` must not start with `-` (Codex takes it as an argument, so `--dangerously-…` would be a flag; added after review); `agent: AgentId` (default `'claude'`); `model: string | null` checked by agent (Claude → `MODEL_IDS`, Codex → `codexModelSchema`); `costUsd: number | null`
   - Verify: `pnpm --filter @nautink/contracts test && pnpm typecheck`
   - Acceptance: contract tests green, `pnpm typecheck` green across the monorepo
 

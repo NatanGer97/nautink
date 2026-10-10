@@ -281,6 +281,26 @@ describe('a Codex chat', () => {
     expect(chatRequests()[0]?.agent).toBe('codex');
   });
 
+  it('keeps naming the running reply after the agent it started with', async () => {
+    useUiStore.getState().setAgent('codex');
+    const stream = controlledStream();
+    replies.push(stream.response);
+    const user = await renderApp();
+    act(() => {
+      screen.getByLabelText('Message Codex').focus();
+    });
+    await user.keyboard('Draw a start{Meta>}{Enter}{/Meta}');
+    act(() => {
+      useUiStore.getState().setAgent('claude');
+    });
+    expect(screen.getByText('Codex is replying.')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Codex is working' })).toBeTruthy();
+    expect(screen.getByText('Codex is editing')).toBeTruthy();
+    act(() => {
+      stream.end();
+    });
+  });
+
   it('keeps naming an older reply by the agent that wrote it', async () => {
     const user = await renderApp();
     const id: string = useWorkspaceStore.getState().activeId ?? '';

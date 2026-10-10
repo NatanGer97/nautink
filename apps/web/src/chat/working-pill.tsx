@@ -2,8 +2,8 @@ import { Button } from '@nautink/ui/components/button';
 import { cn } from '@nautink/ui/lib/utils';
 import { LoaderCircle } from 'lucide-react';
 
-import { useAgentName } from './agent-name.ts';
 import { elapsedSeconds, useClaudeActivity } from './claude-activity.ts';
+import { useReplyingAgentName } from './replying-agent.ts';
 import { stopChat } from './send-chat.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { CANVAS_PLACEMENTS } from '../review/review-bar-room.ts';
@@ -43,7 +43,7 @@ function WorkingPill({
   placement: (typeof CANVAS_PLACEMENTS)[DiagramView];
 }): ReactElement {
   const seconds: number = elapsedSeconds(activity.startedAt, useNow(TICK_MS));
-  const name: string = useAgentName();
+  const name: string = useReplyingAgentName();
   return (
     <section
       aria-label={`${name} is working`}
