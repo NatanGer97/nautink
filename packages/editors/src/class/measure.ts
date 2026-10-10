@@ -6,14 +6,16 @@ import type { ClassAttr, ClassItem, ClassMethod, ClassNote } from './types.ts';
 import type { Size } from '@nautink/visual-core/geometry';
 import type { TextMeasurer } from '@nautink/visual-core/text-measure';
 
-const FAMILY: string = "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif";
+// The app's fonts (PRD §6.2): Geist for names and notes, Geist Mono for members (M3).
+const SANS: string = "Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif";
+const MONO: string = "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
 /** The CSS fonts the class renderer uses; measure text in these. */
 export const FONT: Readonly<Record<'name' | 'member' | 'stereo' | 'note', string>> = {
-  name: `700 13px ${FAMILY}`,
-  member: `12px ${FAMILY}`,
-  stereo: `11px ${FAMILY}`,
-  note: `12px ${FAMILY}`,
+  name: `600 13px ${SANS}`,
+  member: `12px ${MONO}`,
+  stereo: `11px ${SANS}`,
+  note: `12px ${SANS}`,
 };
 
 /** Member row height. */
