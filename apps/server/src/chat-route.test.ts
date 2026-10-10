@@ -101,6 +101,17 @@ describe('POST /api/chat', () => {
     expect(recorded.cwd).toBe(scratch);
   });
 
+  it('runs Claude for an older client that sends no agent', async () => {
+    useScenario('reply');
+    const url = await start();
+    const withoutAgent: Record<string, unknown> = { ...REQUEST };
+    delete withoutAgent.agent;
+    await readEvents(await postJson(`${url}/api/chat`, withoutAgent));
+    expect((await readRecord()).argv).toEqual(
+      buildClaudeArgs({ sessionId: null, model: null, isRepoAware: false }),
+    );
+  });
+
   it('passes model, session and selection, and runs in the repo dir with read-only tools', async () => {
     useScenario('reply');
     const repoDir = await makeTempDir('repo');

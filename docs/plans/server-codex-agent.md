@@ -84,7 +84,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: `curl /api/models` lists this machine's Codex models
 
-- [ ] **T8 — Chat route picks the agent**
+- [x] **T8 — Chat route picks the agent**
   - context - wire T3–T6 together
   - Files: `apps/server/src/chat-route.ts`, `apps/server/src/chat-route.test.ts`, `apps/server/tests/fake-codex.ts` (new), `apps/server/tests/test-server.ts`
   - Red: with a fake Codex (scenarios `reply`, `tool`, `failed`, `crash`, `hang`), `agent:'codex'` streams `session → delta → done`, tool steps, `error` on `turn.failed`, `error` with stderr on crash, kill on client close; resume passes the session id; repo-aware run uses the repo dir as cwd; `agent` missing still runs Claude
