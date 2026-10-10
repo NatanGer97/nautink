@@ -10,6 +10,7 @@ import { cn } from '@nautink/ui/lib/utils';
 import { ChevronDown, Redo2, Undo2 } from 'lucide-react';
 
 import { redoStep, undoStep } from './edit-history.ts';
+import { useHistoryOverride } from './history-guard.ts';
 import { relativeTime } from './relative-time.ts';
 import { useNow } from './use-now.ts';
 import { useActiveEditStack, useWorkspaceStore } from './use-workspace.ts';
@@ -71,13 +72,19 @@ function StepItem({ entry, index, current, now, onJump }: StepItemProps): ReactE
 }
 
 /** The caret next to Undo: every step, newest first; picking one jumps there (M7). */
-function StepMenu({ stack }: { stack: EditStack | undefined }): ReactElement {
+function StepMenu({
+  stack,
+  isHeld,
+}: {
+  stack: EditStack | undefined;
+  isHeld: boolean;
+}): ReactElement {
   const jumpTo: (index: number) => void = useWorkspaceStore((state) => state.jumpTo);
   const now: number = useNow();
   const entries: readonly EditEntry[] = stack?.entries ?? [];
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild disabled={entries.length <= 1}>
+      <DropdownMenuTrigger asChild disabled={isHeld || entries.length <= 1}>
         <IconButton label="Undo history" icon={<ChevronDown />} className="w-5 [&_svg]:size-3" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -108,30 +115,43 @@ function StepMenu({ stack }: { stack: EditStack | undefined }): ReactElement {
   );
 }
 
+/** The steps undo and redo would take, or what undo does instead while a guard holds the history. */
+function useNextSteps(): { undo: string | null; redo: string | null; isHeld: boolean } {
+  const stack: EditStack | undefined = useActiveEditStack();
+  const override: string | null = useHistoryOverride(useWorkspaceStore((state) => state.activeId));
+  if (override !== null) {
+    return { undo: override, redo: null, isHeld: true };
+  }
+  return {
+    undo: (stack === undefined ? undefined : undoStep(stack))?.label ?? null,
+    redo: (stack === undefined ? undefined : redoStep(stack))?.label ?? null,
+    isHeld: false,
+  };
+}
+
 /** Top bar ↶ ↷ for the open diagram, with the step menu (PRD §3.5, M7). */
 export function UndoRedoControls(): ReactElement {
   const stack: EditStack | undefined = useActiveEditStack();
   const undo: () => void = useWorkspaceStore((state) => state.undo);
   const redo: () => void = useWorkspaceStore((state) => state.redo);
-  const nextUndo: EditEntry | undefined = stack === undefined ? undefined : undoStep(stack);
-  const nextRedo: EditEntry | undefined = stack === undefined ? undefined : redoStep(stack);
+  const next: { undo: string | null; redo: string | null; isHeld: boolean } = useNextSteps();
   return (
     <div className="flex items-center">
       <div className="flex items-center rounded-control has-[[aria-expanded=true]]:bg-muted">
         <IconButton
-          label={nextUndo === undefined ? 'Undo' : `Undo: ${nextUndo.label}`}
+          label={next.undo === null ? 'Undo' : `Undo: ${next.undo}`}
           shortcut={shortcutLabel(SHORTCUTS.undo)}
           icon={<Undo2 />}
-          isDisabled={nextUndo === undefined}
+          isDisabled={next.undo === null}
           onClick={undo}
         />
-        <StepMenu stack={stack} />
+        <StepMenu stack={stack} isHeld={next.isHeld} />
       </div>
       <IconButton
-        label={nextRedo === undefined ? 'Redo' : `Redo: ${nextRedo.label}`}
+        label={next.redo === null ? 'Redo' : `Redo: ${next.redo}`}
         shortcut={shortcutLabel(SHORTCUTS.redo)}
         icon={<Redo2 />}
-        isDisabled={nextRedo === undefined}
+        isDisabled={next.redo === null}
         onClick={redo}
       />
     </div>

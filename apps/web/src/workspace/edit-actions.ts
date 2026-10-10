@@ -6,6 +6,7 @@ import {
   jumpEdit,
   recordEdit,
 } from './edit-history.ts';
+import { historyOverride, runHistoryOverride } from './history-guard.ts';
 import { clip } from './text.ts';
 import { applyPatch, ensureStack, findDiagram, setStack } from './workspace-context.ts';
 
@@ -109,6 +110,13 @@ function closeGroupAction(ctx: StoreContext): EditActions['closeEditGroup'] {
   };
 }
 
+/** Moves through the history unless a guard holds it (`history-guard.ts`): then nothing moves. */
+function guardedMove(ctx: StoreContext, target: (stack: EditStack) => number | undefined): void {
+  if (historyOverride(ctx.get().activeId) === null) {
+    moveTo(ctx, target);
+  }
+}
+
 /** `applyEdit`, `amendEdit`, the typing group, undo, redo and jumps. */
 export function editActions(ctx: StoreContext): EditActions {
   return {
@@ -116,15 +124,17 @@ export function editActions(ctx: StoreContext): EditActions {
     amendEdit: amendEditAction(ctx),
     closeEditGroup: closeGroupAction(ctx),
     undo: (): void => {
-      moveTo(ctx, (stack) => (stack.index > 0 ? stack.index - 1 : undefined));
+      if (!runHistoryOverride(ctx.get().activeId)) {
+        moveTo(ctx, (stack) => (stack.index > 0 ? stack.index - 1 : undefined));
+      }
     },
     redo: (): void => {
-      moveTo(ctx, (stack) =>
+      guardedMove(ctx, (stack) =>
         stack.index < stack.entries.length - 1 ? stack.index + 1 : undefined,
       );
     },
     jumpTo: (index: number): void => {
-      moveTo(ctx, () => index);
+      guardedMove(ctx, () => index);
     },
   };
 }

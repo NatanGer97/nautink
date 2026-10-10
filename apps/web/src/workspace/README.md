@@ -63,6 +63,13 @@ undo/redo stack (`edit-history.ts`, 200 steps, session only) and queues the save
   showing the code must follow the store, not keep its own undo stack.
 - **Keyboard:** ⌘Z / ⌘⇧Z / ⌘Y run the history everywhere except text fields. A code editor that
   wants them (Monaco) puts `data-edit-history="app"` on its container (`history-shortcuts.ts`).
+- **History guard (`history-guard.ts`):** another feature can take over undo for a diagram without
+  the workspace importing it. `registerHistoryGuard({ undoInstead, runInstead, subscribe })` installs
+  one (the result removes it). While `undoInstead(diagramId)` names something, `undo()` calls
+  `runInstead(diagramId)` instead of moving, `redo()` and `jumpTo()` do nothing, the top bar says
+  "Undo: <name>" with redo and the step menu off, and ⌘K enables Undo only. The review registers one
+  (`review/review-history-guard.ts`, mounted by `App`): while Claude's proposal is open, undo
+  rejects it ("Reject Claude's change").
 
 ## Files
 
@@ -73,6 +80,7 @@ undo/redo stack (`edit-history.ts`, 200 steps, session only) and queues the save
 | `*-actions.ts`, `load-action.ts` | The actions, grouped by concern |
 | `autosave.ts` | Debounced, ordered writes with retry |
 | `undo-redo-controls.tsx`, `history-shortcuts.ts` | Top bar ↶ ↷ with the step menu; ⌘Z / ⌘⇧Z / ⌘Y |
+| `history-guard.ts` | The seam that lets another feature take over undo for a diagram (Claude's proposal) |
 | `workspace-commands.ts`, `diagram-commands.ts`, `use-workspace-commands.ts` | The workspace's ⌘K commands |
 | `untouched.ts` | `isUntouchedWorkspace`: only the blank diagram of a first start (first run, restore) |
 | `two-tab-notice.ts` | `BroadcastChannel('nautink')`: both tabs warn that their edits overwrite each other (PRD §11) |

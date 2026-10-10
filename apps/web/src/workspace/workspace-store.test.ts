@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { BLANK_FLOWCHART } from './blank-diagram.ts';
 import { currentEntry, TYPING_GROUP } from './edit-history.ts';
+import { registerHistoryGuard } from './history-guard.ts';
 import { pickActiveId } from './load-action.ts';
 import { selectActiveDiagram, selectActiveStack } from './use-workspace.ts';
 import { createTestWorkspace, loadedWorkspace } from '../../tests/workspace-fixtures.ts';
@@ -312,6 +313,27 @@ describe('edit actions', () => {
     redo();
     await flushSaves();
     expect((await getDiagram(workspace.db(), active(workspace).id)).code).toBe('flowchart TD\nAB');
+  });
+
+  it('lets a history guard take over undo, and holds redo and jumps meanwhile', async () => {
+    const workspace = await loadedWorkspace();
+    const { applyEdit, undo, redo, jumpTo } = workspace.store.getState();
+    applyEdit('flowchart TD\nA', { label: 'Pasted code', source: 'code' });
+    undo();
+    const runInstead = vi.fn();
+    const unregister = registerHistoryGuard({
+      undoInstead: () => 'Reject it',
+      runInstead,
+      subscribe: () => (): void => undefined,
+    });
+    redo();
+    jumpTo(1);
+    expect(active(workspace).code).toBe(BLANK_FLOWCHART);
+    undo();
+    expect(runInstead).toHaveBeenCalledWith(active(workspace).id);
+    unregister();
+    redo();
+    expect(active(workspace).code).toBe('flowchart TD\nA');
   });
 
   it('closes the typing group on request', async () => {

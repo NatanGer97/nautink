@@ -100,6 +100,27 @@ describe('reviewing a change in the app', () => {
     expect(await within(chatPanel()).findByText(/· 3 changes/)).toBeTruthy();
   });
 
+  it('undo rejects an open proposal instead of changing the code, and redo waits', async () => {
+    const user = await renderAndSend(AFTER);
+    await proposalBar();
+    const banner = screen.getByRole('banner');
+    expect(within(banner).getByRole('button', { name: 'Redo' }).getAttribute('aria-disabled')).toBe(
+      'true',
+    );
+    await user.click(within(banner).getByRole('button', { name: "Undo: Reject Claude's change" }));
+    expect(screen.queryByRole('region', { name: "Claude's proposal" })).toBeNull();
+    expect(within(chatPanel()).getByText('Rejected · diagram unchanged')).toBeTruthy();
+    expect(code()).toBe('flowchart TD\n');
+    await user.click(within(chatPanel()).getByRole('button', { name: 'Show again' }));
+    await proposalBar();
+    act(() => {
+      (document.activeElement as HTMLElement | null)?.blur();
+    });
+    fireEvent.keyDown(window, { key: 'z', metaKey: true });
+    expect(screen.queryByRole('region', { name: "Claude's proposal" })).toBeNull();
+    expect(code()).toBe('flowchart TD\n');
+  });
+
   it('accepts from the bar, and hides the bar while a version is viewed', async () => {
     const user = await renderAndSend(AFTER);
     const bar = await proposalBar();

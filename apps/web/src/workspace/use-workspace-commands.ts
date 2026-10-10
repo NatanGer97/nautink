@@ -2,6 +2,7 @@ import { sortDiagrams } from '@nautink/storage/diagram-order';
 import { useMemo } from 'react';
 
 import { buildDiagramCommands, OPEN_COMMAND_LIMIT } from './diagram-commands.ts';
+import { useHistoryOverride } from './history-guard.ts';
 import { selectActiveDiagram, selectActiveStack, useWorkspaceStore } from './use-workspace.ts';
 import { buildEditCommands } from './workspace-commands.ts';
 import { useRegisterCommands } from '../commands/use-commands.ts';
@@ -35,8 +36,9 @@ function selectCanRedo(state: WorkspaceData): boolean {
 
 /** Registers the workspace's ⌘K commands, re-registering when what they can do changes. */
 export function useWorkspaceCommands(): void {
-  const canUndo: boolean = useWorkspaceStore(selectCanUndo);
-  const canRedo: boolean = useWorkspaceStore(selectCanRedo);
+  const isHeld: boolean = useHistoryOverride(useWorkspaceStore((state) => state.activeId)) !== null;
+  const canUndo: boolean = useWorkspaceStore(selectCanUndo) || isHeld;
+  const canRedo: boolean = useWorkspaceStore(selectCanRedo) && !isHeld;
   const isPinned: boolean = useWorkspaceStore(
     (state) => selectActiveDiagram(state)?.pinned === true,
   );

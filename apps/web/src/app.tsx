@@ -8,6 +8,7 @@ import { buildShellCommands } from './commands/shell-commands.ts';
 import { useRegisterCommands } from './commands/use-commands.ts';
 import { useViewCommands } from './edit/use-view-commands.ts';
 import { FeatureHost } from './feature-host.tsx';
+import { useReviewHistoryGuard } from './review/review-history-guard.ts';
 import { AppShell } from './shell/app-shell.tsx';
 import { TemplatesDialog } from './shell/templates-dialog.tsx';
 import { useAppliedTheme } from './shell/use-applied-theme.ts';
@@ -35,6 +36,7 @@ export function App(): ReactElement {
   useGlobalShortcuts();
   useWorkspaceLifecycle();
   useHistoryShortcuts();
+  useReviewHistoryGuard();
   useWorkspaceCommands();
   useTwoTabNotice();
   useChatFeature();
