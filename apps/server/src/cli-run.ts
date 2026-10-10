@@ -55,10 +55,11 @@ class RunTracker {
   }
 
   readOutput(chunk: string): void {
+    if (this.hasEnded) {
+      // Output after the agent's own error is not part of the reply.
+      return;
+    }
     for (const event of this.splitter.push(chunk).flatMap(this.options.parseLine)) {
-      if (this.hasEnded) {
-        return;
-      }
       if (event.type === 'error') {
         // The agent reported its own failure: that is the end of the run.
         this.end(event.message);

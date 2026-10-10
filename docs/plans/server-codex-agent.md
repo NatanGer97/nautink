@@ -92,7 +92,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: both agents covered end to end through HTTP
 
-- [ ] **T9 — Docs and changeset**
+- [x] **T9 — Docs and changeset**
   - context - PRD and README name only Claude
   - Files: `docs/PRD.md` (§2 non-goals, §3.1, §7.4 health), `README.md` (requirements, `CODEX_BIN`, diagram), `.changeset/server-codex-agent.md`
   - Red: n/a (docs) — `pnpm format:check` is the check

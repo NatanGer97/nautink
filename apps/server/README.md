@@ -12,6 +12,7 @@ pnpm --filter @nautink/server start
 |---|---|---|
 | `API_PORT` | `8791` | Port on 127.0.0.1 |
 | `CLAUDE_BIN` | `claude` | The Claude Code CLI to run |
+| `CODEX_BIN` | `codex` | The Codex CLI to run when the user picks Codex (ADR-002) |
 | `REPO_DIR` | none | A codebase Claude may read at startup (repo-aware mode) |
 
 The prompt Claude gets is built in `src/prompt.ts` (`SYSTEM_PROMPT_VERSION`, `buildPrompt`). A

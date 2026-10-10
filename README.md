@@ -76,9 +76,11 @@ own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI on your ma
 ## Requirements
 
 - **Node 22** (22.18 or newer) and **pnpm 9**.
-- **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)**, installed and logged in, for the
-  chat. Nautink runs the `claude` command on your `PATH` (set `CLAUDE_BIN` to use another). Without it,
-  everything except the chat still works, and Settings shows the connection status.
+- **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** or
+  **[Codex CLI](https://github.com/openai/codex)**, installed and logged in, for the chat. Nautink
+  runs the `claude` or `codex` command on your `PATH` (set `CLAUDE_BIN` or `CODEX_BIN` to use
+  another). Without one, everything except the chat still works, and Settings shows the connection
+  status.
 - A current Chrome, Edge, Safari or Firefox.
 
 ## Quick start
@@ -100,7 +102,7 @@ pnpm build
 NODE_ENV=production pnpm --filter @nautink/server start
 ```
 
-Then open http://127.0.0.1:8791. The server settings (`API_PORT`, `CLAUDE_BIN`, `REPO_DIR`) are in
+Then open http://127.0.0.1:8791. The server settings (`API_PORT`, `CLAUDE_BIN`, `CODEX_BIN`, `REPO_DIR`) are in
 [`apps/server/README.md`](apps/server/README.md).
 
 ## How it works
@@ -119,7 +121,9 @@ Then open http://127.0.0.1:8791. The server settings (`API_PORT`, `CLAUDE_BIN`, 
 - **The local server** turns each chat message into one `claude -p` run with the diagram and your
   prompt, and streams the reply back as Server-Sent Events. It keeps Claude lean: no MCP servers, no
   slash commands, no user settings, and no tools at all unless you choose a codebase folder, which
-  allows read-only `Read`, `Grep` and `Glob`.
+  allows read-only `Read`, `Grep` and `Glob`. With Codex it runs `codex exec` instead, always in a
+  read-only sandbox and without your Codex config (see
+  [ADR-002](docs/adr/002-codex-agent.md)).
 - **Mermaid** renders the preview and parses the code for the visual editors, so what you see is what
   GitHub and other Mermaid hosts will show.
 

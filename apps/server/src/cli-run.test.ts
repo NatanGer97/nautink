@@ -1,5 +1,6 @@
 import { chmod, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { startCliRun } from './cli-run.ts';
@@ -41,8 +42,8 @@ function toEvents(line: string): ChatEvent[] {
 }
 
 async function run(bin: string, name = 'fake'): Promise<{ events: ChatEvent[]; ends: number }> {
-  const events: ChatEvent[] = [];
-  let ends: number = 0;
+  // One object, so a test can look again after more output arrives.
+  const state: { events: ChatEvent[]; ends: number } = { events: [], ends: 0 };
   await new Promise<void>((resolve) => {
     startCliRun({
       name,
@@ -52,15 +53,15 @@ async function run(bin: string, name = 'fake'): Promise<{ events: ChatEvent[]; e
       prompt: 'hi',
       parseLine: toEvents,
       emit: (event: ChatEvent) => {
-        events.push(event);
+        state.events.push(event);
       },
       onEnd: () => {
-        ends += 1;
+        state.ends += 1;
         resolve();
       },
     });
   });
-  return { events, ends };
+  return state;
 }
 
 describe('startCliRun', () => {
@@ -76,11 +77,14 @@ describe('startCliRun', () => {
     ]);
   });
 
-  it('ends on an error event from the parser, with no second error', async () => {
-    const bin: string = await script('failing', 'cat > /dev/null; echo fail; exit 1');
-    expect(await run(bin)).toEqual({
-      events: [{ type: 'error', message: 'the turn failed' }],
-      ends: 1,
-    });
+  it('ends on an error event from the parser, ignoring later output and the exit', async () => {
+    const bin: string = await script(
+      'failing',
+      'cat > /dev/null; echo fail; sleep 0.1; echo late; exit 1',
+    );
+    const result = await run(bin);
+    // Give the late line and the exit time to arrive: neither may add an event or a second end.
+    await sleep(400);
+    expect(result).toEqual({ events: [{ type: 'error', message: 'the turn failed' }], ends: 1 });
   });
 });
