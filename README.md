@@ -77,7 +77,7 @@ through your own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) o
 
 ## Requirements
 
-- **Node 22** (22.18 or newer) and **pnpm 9**.
+- **Node 22** (22.18 or newer).
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** or
   **[Codex CLI](https://github.com/openai/codex)**, installed and logged in, for the chat. Nautink
   runs the `claude` or `codex` command on your `PATH` (set `CLAUDE_BIN` or `CODEX_BIN` to use
@@ -88,24 +88,24 @@ through your own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) o
 ## Quick start
 
 ```bash
+npx nautink
+```
+
+This starts Nautink on http://127.0.0.1:8791 (localhost only) and opens it in your browser. Stop it
+with Ctrl+C. `npx nautink --help` lists the options (`--port`, `--no-open`); the settings
+(`API_PORT`, `CLAUDE_BIN`, `CODEX_BIN`, `REPO_DIR`) are in [`apps/cli/README.md`](apps/cli/README.md).
+
+`npx nautink` works once the first release is on npm. Until then, or to work on Nautink itself, run
+it from source with pnpm 9:
+
+```bash
 git clone https://github.com/NatanGer97/nautink.git
 cd nautink
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:5190. `pnpm dev` starts the web app (port 5190) and the local server (port
-8791, on 127.0.0.1 only).
-
-To run the built app from one process instead:
-
-```bash
-pnpm build
-NODE_ENV=production pnpm --filter @nautink/server start
-```
-
-Then open http://127.0.0.1:8791. The server settings (`API_PORT`, `CLAUDE_BIN`, `CODEX_BIN`, `REPO_DIR`) are in
-[`apps/server/README.md`](apps/server/README.md).
+Then open http://localhost:5190. [CONTRIBUTING.md](CONTRIBUTING.md#running-the-app) has the details.
 
 ## How it works
 

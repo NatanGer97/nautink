@@ -49,6 +49,11 @@ jobs:
 
       - run: pnpm check
 
+      # `pnpm check` built apps/cli; this packs it, installs the tarball with npm into an empty
+      # folder and runs the installed `nautink` command, the way `npx nautink` users get it.
+      - name: Smoke test the installed nautink package
+        run: pnpm check:pack
+
       # `!cancelled()` on every assertion: a pull request that fails the graph above is exactly the
       # one most likely to have weakened a gate, so the assertions still have to report.
       - name: Assert every lint fixture still fires

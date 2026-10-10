@@ -41,6 +41,7 @@ alone with `pnpm dev:web` or `pnpm dev:server`. The server's settings (`API_PORT
 | ---------------------- | ---------------------------------------------------------------------------- |
 | `apps/web`             | The React app: shell, panels, canvas, chat, code drawer, history, export     |
 | `apps/server`          | The local Node bridge to the Claude Code CLI (Express, SSE)                  |
+| `apps/cli`             | The published `nautink` package: one command that runs server and web app   |
 | `packages/contracts`   | Zod schemas for the server API and its SSE events, shared by web and server  |
 | `packages/editors`     | Pure model, edit operations and layout for the five visual editors           |
 | `packages/visual-core` | The editor contract, diagram type detection, commit labels, positions        |
@@ -53,6 +54,12 @@ alone with `pnpm dev:web` or `pnpm dev:server`. The server's settings (`API_PORT
 Libraries have no build step: each package ships its TypeScript source and you import the file that
 owns a symbol (`@nautink/contracts/chat`). Feature folders in `apps/web/src` have a `README.md` that
 explains their seams; read it before changing that folder.
+
+`apps/cli` is the one exception to "no build step": Node will not strip types inside
+`node_modules`, so `pnpm --filter nautink build` bundles the command, the server and the workspace
+packages into `apps/cli/dist/cli.js` and copies the built web app next to it. `pnpm check:pack` packs
+that, installs it with npm into an empty folder and checks the installed `nautink` command serves the
+app; CI runs it after `pnpm check`.
 
 ## The gates
 
