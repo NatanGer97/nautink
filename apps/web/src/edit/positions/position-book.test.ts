@@ -61,9 +61,42 @@ describe('PositionBook', () => {
     await vi.advanceTimersByTimeAsync(POSITION_SAVE_DELAY_MS);
     expect(await store.load(KEY)).toEqual({});
     book.setCanSave(true);
+    expect(book.get()).toEqual({});
     book.set('A', { x: 4, y: 4 });
     await vi.advanceTimersByTimeAsync(POSITION_SAVE_DELAY_MS);
     expect(await store.load(KEY)).toEqual({ A: { x: 4, y: 4 } });
+  });
+
+  it('drops what was placed during a pause and saves only the diagram again', async () => {
+    const store = new MemoryPositionStore();
+    await store.save(KEY, { A: { x: 1, y: 1 } });
+    const { book } = createBook(store);
+    await book.load();
+    book.set('B', { x: 2, y: 2 });
+    book.setCanSave(false);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(await store.load(KEY)).toEqual({ A: { x: 1, y: 1 }, B: { x: 2, y: 2 } });
+    // Claude's proposal: a full layout moves A and adds C. None of it may stick.
+    book.replace({ A: { x: 90, y: 90 }, B: { x: 2, y: 2 }, C: { x: 50, y: 50 } });
+    await vi.advanceTimersByTimeAsync(POSITION_SAVE_DELAY_MS);
+    book.setCanSave(true);
+    expect(book.get()).toEqual({ A: { x: 1, y: 1 }, B: { x: 2, y: 2 } });
+    book.set('B', { x: 3, y: 3 });
+    await vi.advanceTimersByTimeAsync(POSITION_SAVE_DELAY_MS);
+    expect(await store.load(KEY)).toEqual({ A: { x: 1, y: 1 }, B: { x: 3, y: 3 } });
+    book.setCanSave(true);
+    expect(book.get()).toEqual({ A: { x: 1, y: 1 }, B: { x: 3, y: 3 } });
+  });
+
+  it('opened while paused, it resumes with the saved positions only', async () => {
+    const store = new MemoryPositionStore();
+    await store.save(KEY, { A: { x: 1, y: 1 } });
+    const { book } = createBook(store, false);
+    book.set('C', { x: 50, y: 50 });
+    await book.load();
+    expect(book.get()).toEqual({ A: { x: 1, y: 1 }, C: { x: 50, y: 50 } });
+    book.setCanSave(true);
+    expect(book.get()).toEqual({ A: { x: 1, y: 1 } });
   });
 
   it('reports a store that fails, and still opens the canvas', async () => {

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { editCode, readCode, skipFirstRun } from './helpers.ts';
+import { editCode, readCode, skipFirstRun, switchView } from './helpers.ts';
 
 import type { Locator, Page, Route } from '@playwright/test';
 
@@ -126,6 +126,30 @@ const CASES: readonly ReviewCase[] = [
   },
 ];
 
+/** The flowchart editor's saved positions for the open diagram, straight from IndexedDB. */
+async function savedFlowPositions(page: Page): Promise<Record<string, { x: number; y: number }>> {
+  return page.evaluate(async () => {
+    const db: IDBDatabase = await new Promise((resolve, reject) => {
+      const request: IDBOpenDBRequest = indexedDB.open('nautink');
+      request.onsuccess = (): void => {
+        resolve(request.result);
+      };
+      request.onerror = (): void => {
+        reject(request.error ?? new Error('open failed'));
+      };
+    });
+    const rows: { ns: string; positions: Record<string, { x: number; y: number }> }[] =
+      await new Promise((resolve) => {
+        const request: IDBRequest = db.transaction('positions').objectStore('positions').getAll();
+        request.onsuccess = (): void => {
+          resolve(request.result as never);
+        };
+      });
+    db.close();
+    return rows.find((row) => row.ns === 'flow')?.positions ?? {};
+  });
+}
+
 /** A cold dev server and Mermaid's first parse can be slow while workers share the machine. */
 const SLOW = { timeout: 20_000 };
 
@@ -136,6 +160,32 @@ test.beforeEach(async ({ context, page }) => {
 });
 
 test.describe('review Claude’s change', () => {
+  test('a proposal that goes away unreviewed leaves the saved positions as they were', async ({
+    page,
+  }) => {
+    const before = 'flowchart LR\n  A[Start] --> B[Check]\n  B --> C[Done]';
+    const after =
+      'flowchart TD\n  A[Start] --> F{Fraud?}\n  F --> B[Check]\n  F --> G[Reject]\n  B --> C[Done]';
+    await editCode(page, before);
+    await switchView(page, 'Edit');
+    await expect
+      .poll(async () => Object.keys(await savedFlowPositions(page)).sort(), SLOW)
+      .toEqual(['A', 'B', 'C']);
+    const saved = await savedFlowPositions(page);
+    await cannedChat(page, [replyBody(fenced(after))]);
+    await send(page, 'Add a fraud check');
+    await expect(proposalBar(page)).toBeVisible(SLOW);
+    // New chat drops the proposal while the editor stays open (Reject remounts the editor).
+    await chatPanel(page).getByRole('button', { name: 'New chat' }).click();
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: /new chat/i })
+      .click();
+    await expect(proposalBar(page)).toBeHidden();
+    await page.waitForTimeout(1000);
+    expect(await savedFlowPositions(page)).toEqual(saved);
+  });
+
   test('a reload during review applies nothing, and Review again brings the proposal back', async ({
     page,
   }) => {
