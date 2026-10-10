@@ -52,7 +52,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: Claude chat tests unchanged and green
 
-- [ ] **T4 — Codex output parser**
+- [x] **T4 — Codex output parser**
   - context - map Codex JSONL to `ChatEvent`s
   - Files: `apps/server/src/codex-json.ts` (new), `apps/server/src/codex-json.test.ts`
   - Red: tests per event: `thread.started` → `session{sessionId, model}` (model = requested or `default`); first `agent_message` → `delta`; later ones → `turn` + `delta`; `command_execution` started → `tool{label:"Run rg --files"}` (unwraps `/bin/zsh -lc "…"`, clips to 80 chars); `turn.completed` → `done{text: last message, durationMs from injected clock, costUsd: null, isError:false}`; `turn.failed` → `error{message}`; top-level `error` (reconnect notice), reasoning items, non-JSON lines → nothing
