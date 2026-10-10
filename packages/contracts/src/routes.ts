@@ -4,6 +4,7 @@ export interface ApiRoutes {
   readonly health: '/api/health';
   readonly repo: '/api/repo';
   readonly chat: '/api/chat';
+  readonly models: '/api/models';
 }
 
 export const API_ROUTES: ApiRoutes = {
@@ -11,6 +12,7 @@ export const API_ROUTES: ApiRoutes = {
   health: '/api/health',
   repo: '/api/repo',
   chat: '/api/chat',
+  models: '/api/models',
 };
 
 export type ApiRoute = ApiRoutes[keyof ApiRoutes];

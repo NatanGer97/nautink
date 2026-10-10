@@ -88,6 +88,7 @@ describe('server info schemas', () => {
 
   it('name every route and model', () => {
     expect(API_ROUTES.chat).toBe('/api/chat');
+    expect(API_ROUTES.models).toBe('/api/models');
     expect(MODEL_LABELS.opus).toBe('Opus');
   });
 });

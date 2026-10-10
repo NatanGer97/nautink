@@ -28,7 +28,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
 
 ## Tasks
 
-- [ ] **T1 — Agent ids and per-agent models in contracts**
+- [x] **T1 — Agent ids and per-agent models in contracts**
   - context - one source for agent ids, labels, CLI names and model lists
   - Files: `packages/contracts/src/agents.ts` (new), `packages/contracts/src/models.ts`, `packages/contracts/src/models.test.ts` (new), `packages/contracts/package.json` (export)
   - Red: tests for `AGENT_IDS` (`claude`, `codex`), `AGENT_LABELS` (`Claude`, `Codex`), `AGENT_CLI_NAMES` (`Claude Code`, `Codex CLI`); `codexModelSchema` accepts `gpt-6-astra`, rejects `opus`, `''` and `a b`; `modelsResponseSchema` parses `{ claude: [{id,label}], codex: [] }`; fail on missing module
