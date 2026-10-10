@@ -86,6 +86,47 @@ describe('useUiStore', () => {
   });
 });
 
+describe('agent preference', () => {
+  it('defaults to Claude and keeps older saves that lack it', async () => {
+    expect(DEFAULT_UI_PREFS.agent).toBe('claude');
+    const older: Record<string, unknown> = { ...DEFAULT_UI_PREFS, themePreference: 'dark' };
+    delete older.agent;
+    window.localStorage.setItem(UI_STORAGE_KEY, JSON.stringify({ state: older, version: 1 }));
+    await useUiStore.persist.rehydrate();
+    expect(useUiStore.getState()).toMatchObject({ agent: 'claude', themePreference: 'dark' });
+  });
+
+  it('remembers the agent and resets the model when it changes', () => {
+    useUiStore.getState().setDefaultModel('opus');
+    useUiStore.getState().setAgent('codex');
+    expect(useUiStore.getState()).toMatchObject({ agent: 'codex', defaultModel: null });
+    const saved = JSON.parse(window.localStorage.getItem(UI_STORAGE_KEY) ?? '{}') as {
+      state: Record<string, unknown>;
+    };
+    expect(saved.state.agent).toBe('codex');
+    useUiStore.getState().setDefaultModel('gpt-6-astra');
+    expect(useUiStore.getState().defaultModel).toBe('gpt-6-astra');
+  });
+
+  it('keeps the model when the agent is picked again', () => {
+    useUiStore.getState().setAgent('codex');
+    useUiStore.getState().setDefaultModel('gpt-6-astra');
+    useUiStore.getState().setAgent('codex');
+    expect(useUiStore.getState().defaultModel).toBe('gpt-6-astra');
+  });
+
+  it("drops a saved model that is not the saved agent's, keeping the rest", () => {
+    const saved = { ...DEFAULT_UI_PREFS, themePreference: 'dark', defaultModel: 'gpt-6-astra' };
+    expect(parseSavedUiPrefs(saved)).toEqual({
+      ...DEFAULT_UI_PREFS,
+      themePreference: 'dark',
+      defaultModel: null,
+    });
+    const codex = { ...DEFAULT_UI_PREFS, agent: 'codex', defaultModel: 'gpt-6-astra' };
+    expect(parseSavedUiPrefs(codex)).toEqual(codex);
+  });
+});
+
 describe('parseSavedUiPrefs', () => {
   it('returns the defaults for anything that does not parse', () => {
     expect(parseSavedUiPrefs(undefined)).toEqual(DEFAULT_UI_PREFS);

@@ -1,4 +1,4 @@
-import { MODEL_IDS, MODEL_LABELS } from '@nautink/contracts/models';
+import { CLAUDE_MODEL_OPTIONS, MODEL_IDS, MODEL_LABELS } from '@nautink/contracts/models';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,19 +11,21 @@ import { ChevronDown } from 'lucide-react';
 import { CHIP_CLASS } from './chip-button.tsx';
 import { useUiStore } from '../state/ui-store.ts';
 
-import type { ModelId } from '@nautink/contracts/models';
 import type { ReactElement } from 'react';
 
 /** The radio value for Claude Code's own default model. */
 const DEFAULT_VALUE: string = 'default';
 
 /** "Default" or the model's name. */
-export function modelLabel(model: ModelId | null): string {
-  return model === null ? 'Default' : MODEL_LABELS[model];
+export function modelLabel(model: string | null): string {
+  if (model === null) {
+    return 'Default';
+  }
+  return CLAUDE_MODEL_OPTIONS.find((option) => option.id === model)?.label ?? model;
 }
 
-function toModel(value: string): ModelId | null {
-  const model: ModelId | undefined = MODEL_IDS.find((id) => id === value);
+function toModel(value: string): string | null {
+  const model: string | undefined = MODEL_IDS.find((id) => id === value);
   if (model === undefined && value !== DEFAULT_VALUE) {
     throw new Error(`Unknown model "${value}".`);
   }
@@ -32,8 +34,8 @@ function toModel(value: string): ModelId | null {
 
 /** The chat header's model chip (M1). It sets the remembered default model, as v1's picker did. */
 export function ModelChip(): ReactElement {
-  const model: ModelId | null = useUiStore((state) => state.defaultModel);
-  const setModel: (model: ModelId | null) => void = useUiStore((state) => state.setDefaultModel);
+  const model: string | null = useUiStore((state) => state.defaultModel);
+  const setModel: (model: string | null) => void = useUiStore((state) => state.setDefaultModel);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger

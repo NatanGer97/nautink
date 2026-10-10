@@ -33,7 +33,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/storage test`
   - Acceptance: old backups import unchanged
 
-- [ ] **T2 — Agent preference in the UI store**
+- [x] **T2 — Agent preference in the UI store**
   - context - remembered like `defaultModel`
   - Files: `apps/web/src/state/ui-prefs.ts`, `apps/web/src/state/ui-store.ts`, their tests
   - Red: default agent is `claude`; saved prefs without `agent` keep the rest; `setAgent('codex')` resets `defaultModel` to `null`; saved `agent:'claude'` with `defaultModel:'gpt-6-astra'` falls back to `null`
@@ -51,8 +51,8 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
 
 - [ ] **T4 — Settings: agent picker, per-agent connection and model list**
   - context - M8 settings
-  - Files: `apps/web/src/settings/settings-fields.tsx`, `apps/web/src/settings/connection-row.tsx`, `apps/web/src/settings/health.ts`, `apps/web/src/settings/use-connection-status.ts`, `apps/web/src/settings/models.ts` (new, fetch `GET /api/models`), `apps/web/src/chat/model-chip.tsx`, tests
-  - Red: Settings shows an "Agent" control (Claude / Codex); the connection row title is `Claude Code` or `Codex CLI` and its status comes from `health[agent]`; missing Codex shows the server's error; the default model select and the model chip list `Default` plus the selected agent's models from `/api/models`; an empty Codex list shows only `Default`; a remembered Codex model missing from the list resets to `Default`
+  - Files: `apps/web/src/settings/settings-fields.tsx`, `apps/web/src/settings/connection-row.tsx`, `apps/web/src/settings/health.ts`, `apps/web/src/settings/use-connection-status.ts`, `apps/web/src/settings/models.ts` (new, fetch `GET /api/models`), `apps/web/src/chat/model-chip.tsx`, `apps/web/src/chat/chat-commands.ts` (⌘K model commands), tests
+  - Red: Settings shows an "Agent" control (Claude / Codex); the connection row title is `Claude Code` or `Codex CLI` and its status comes from `health[agent]`; missing Codex shows the server's error; the default model select and the model chip list `Default` plus the selected agent's models from `/api/models`; an empty Codex list shows only `Default`; ⌘K "Switch to …" commands list the agent's models; a remembered Codex model missing from the list resets to `Default`
   - Green: `AgentField` (ToggleGroup like Appearance); `toConnectionStatus(health, agent)`; `useModelOptions(agent)` fetches once per session
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: picking Codex changes the connection row and both model lists

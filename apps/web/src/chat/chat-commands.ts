@@ -5,15 +5,14 @@ import { askClaudeToFix, stopChat } from './send-chat.ts';
 
 import type { AppCommand } from '../commands/command-registry.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
-import type { ModelId } from '@nautink/contracts/models';
 
 /** What the chat commands depend on; they are registered again when it changes. */
 export interface ChatCommandState {
   isBusy: boolean;
   /** The open diagram's parse error, checked when the palette opens; `null` when it parses. */
   fixError: MermaidError | null;
-  model: ModelId | null;
-  setModel: (model: ModelId | null) => void;
+  model: string | null;
+  setModel: (model: string | null) => void;
 }
 
 function fixCommand(state: ChatCommandState): AppCommand {
@@ -47,7 +46,7 @@ function conversationCommands(state: ChatCommandState): AppCommand[] {
 }
 
 function modelCommands(state: ChatCommandState): AppCommand[] {
-  const choices: { model: ModelId | null; name: string }[] = [
+  const choices: { model: string | null; name: string }[] = [
     { model: null, name: 'the default model' },
     ...MODEL_IDS.map((id) => ({ model: id, name: MODEL_LABELS[id] })),
   ];

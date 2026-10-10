@@ -11,7 +11,6 @@ import { selectActiveDiagram, useWorkspaceStore } from '../workspace/use-workspa
 
 import type { AppCommand } from '../commands/command-registry.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
-import type { ModelId } from '@nautink/contracts/models';
 
 /** Fired on `window` by the code drawer's "Ask Claude to fix" (`detail: { message, line }`). */
 export const ASK_CLAUDE_TO_FIX_EVENT: string = 'nautink:ask-claude-to-fix';
@@ -73,7 +72,7 @@ function usePaletteParseError(): MermaidError | null {
 
 function useChatCommands(): void {
   const isBusy: boolean = useChatStore((state) => state.busyDiagramId !== null);
-  const model: ModelId | null = useUiStore((state) => state.defaultModel);
+  const model: string | null = useUiStore((state) => state.defaultModel);
   const fixError: MermaidError | null = usePaletteParseError();
   const commands: AppCommand[] = useMemo(
     () =>

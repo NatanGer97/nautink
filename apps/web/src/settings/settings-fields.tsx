@@ -19,15 +19,14 @@ import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { ConnectionCheck } from './use-connection-status.ts';
-import type { ModelId } from '@nautink/contracts/models';
 import type { ThemePreference } from '@nautink/ui/theme';
 import type { ReactElement } from 'react';
 
 /** The Select value for "use Claude Code's own default". */
 const DEFAULT_MODEL_VALUE: string = 'default';
 
-function toModel(value: string): ModelId | null {
-  const model: ModelId | undefined = MODEL_IDS.find((id) => id === value);
+function toModel(value: string): string | null {
+  const model: string | undefined = MODEL_IDS.find((id) => id === value);
   if (model === undefined && value !== DEFAULT_MODEL_VALUE) {
     throw new Error(`Unknown model "${value}".`);
   }
@@ -73,8 +72,8 @@ export function AppearanceField(): ReactElement {
 
 /** The model new chats start with: Claude Code's default, or one of the named models. */
 export function DefaultModelField(): ReactElement {
-  const model: ModelId | null = useUiStore((state) => state.defaultModel);
-  const setModel: (value: ModelId | null) => void = useUiStore((state) => state.setDefaultModel);
+  const model: string | null = useUiStore((state) => state.defaultModel);
+  const setModel: (value: string | null) => void = useUiStore((state) => state.setDefaultModel);
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor="settings-model" className="text-xs text-muted-foreground">

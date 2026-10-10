@@ -9,7 +9,6 @@ import type { FetchLike } from './chat-client.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
 import type { ProposalReview } from '../review/review-store.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
-import type { ModelId } from '@nautink/contracts/models';
 
 const ERROR_TOAST_MS: number = 6000;
 
@@ -19,7 +18,7 @@ export interface ChatDeps {
   validate: (code: string) => Promise<MermaidError | null>;
   workspace: () => WorkspaceState;
   /** The model to ask for; `null` is Claude Code's default. */
-  model: () => ModelId | null;
+  model: () => string | null;
   /** True when the chat panel shows the reply, so an error needs no extra notice. */
   isChatOpen: () => boolean;
   notifyError: (message: string) => void;
