@@ -1,10 +1,8 @@
 import { buildSystemPrompt } from './prompt.ts';
 
-import type { ModelId } from '@nautink/contracts/models';
-
 export interface ClaudeArgsOptions {
   sessionId: string | null;
-  model: ModelId | null;
+  model: string | null;
   isRepoAware: boolean;
 }
 

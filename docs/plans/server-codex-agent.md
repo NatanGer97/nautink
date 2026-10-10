@@ -36,11 +36,11 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/contracts test`
   - Acceptance: agents, model options and the models response importable from `@nautink/contracts`
 
-- [ ] **T2 — `agent` on `ChatRequest`, nullable `costUsd`, `codex` in health**
+- [x] **T2 — `agent` on `ChatRequest`, nullable `costUsd`**
   - context - additive contract change; web keeps compiling
-  - Files: `packages/contracts/src/chat.ts`, `packages/contracts/src/chat.test.ts`, `packages/contracts/src/server-info.ts`, its test
-  - Red: `chatRequestSchema` parses `agent: 'codex'`; missing `agent` parses as `'claude'` (older clients); `agent: 'gpt'` fails; `model: 'opus'` with `agent: 'codex'` fails with message `model "opus" does not belong to agent "codex"`; `done` with `costUsd: null` parses; health with `codex` entry parses
-  - Green: `agent: AgentId` (default `'claude'`); `model: string | null` checked by agent (Claude → `MODEL_IDS`, Codex → `codexModelSchema`); `costUsd: number | null`; `HealthResponse.codex` with same shape as `claude`
+  - Files: `packages/contracts/src/chat.ts`, `packages/contracts/src/chat.test.ts`, `apps/server` callers of `ChatRequest`
+  - Red: `chatRequestSchema` parses `agent: 'codex'`; missing `agent` parses as `'claude'` (older clients); `agent: 'gpt'` fails; `model: 'opus'` with `agent: 'codex'` fails with message `model "opus" does not belong to agent "codex"`; `done` with `costUsd: null` parses
+  - Green: `agent: AgentId` (default `'claude'`); `model: string | null` checked by agent (Claude → `MODEL_IDS`, Codex → `codexModelSchema`); `costUsd: number | null`
   - Verify: `pnpm --filter @nautink/contracts test && pnpm typecheck`
   - Acceptance: contract tests green, `pnpm typecheck` green across the monorepo
 
@@ -69,8 +69,8 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Acceptance: args match a manual run that works (`codex exec … -`), checked once by hand and noted in the PR
 
 - [ ] **T6 — `CODEX_BIN` config and Codex in health**
-  - context - same pattern as `CLAUDE_BIN`
-  - Files: `apps/server/src/config.ts`, `config.test.ts`, `apps/server/src/health.ts`, `health.test.ts`, `apps/server/src/info-routes.ts`, `info-routes.test.ts`, `apps/server/src/app.ts`, `apps/server/src/server.ts`
+  - context - same pattern as `CLAUDE_BIN`; health contract gains `codex` here so the tree stays green (moved from T2)
+  - Files: `packages/contracts/src/server-info.ts`, `apps/web/src/settings/health.ts` (type only), `apps/server/src/config.ts`, `config.test.ts`, `apps/server/src/health.ts`, `health.test.ts`, `apps/server/src/info-routes.ts`, `info-routes.test.ts`, `apps/server/src/app.ts`, `apps/server/src/server.ts`
   - Red: `CODEX_BIN` defaults to `codex`, empty string is an error; `parseVersion('codex-cli 0.154.0') === '0.154.0'`; ENOENT says `"codex" was not found. Install Codex CLI or set CODEX_BIN.`; `GET /api/health` returns both entries, checked in parallel
   - Green: generic `checkCli(bin, cliName, envVar, timeoutMs)`; health route runs both
   - Verify: `pnpm --filter @nautink/server test`

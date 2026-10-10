@@ -26,6 +26,7 @@ const REQUEST: ChatRequest = {
   message: 'Add a retry path',
   code: 'flowchart TD\n  a --> b',
   sessionId: null,
+  agent: 'claude',
   model: null,
   selection: null,
 };

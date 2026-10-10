@@ -92,6 +92,7 @@ describe('sendChat', () => {
       message: 'Draw A to B',
       code: before,
       sessionId: null,
+      agent: 'claude',
       model: 'sonnet',
       selection: null,
     });

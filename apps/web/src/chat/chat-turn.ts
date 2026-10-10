@@ -50,6 +50,7 @@ function buildRequest(turn: Turn, attempt: Attempt): ChatRequest {
     message: attempt.message,
     code: diagram?.code ?? turn.before,
     sessionId: diagram?.sessionId ?? null,
+    agent: 'claude',
     model: turn.deps.model(),
     selection: turn.selection,
   };

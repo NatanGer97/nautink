@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-import { modelIdSchema } from './models.ts';
+import { agentIdSchema } from './agents.ts';
+import { codexModelSchema, modelIdSchema } from './models.ts';
 
-import type { ModelId } from './models.ts';
+import type { AgentId } from './agents.ts';
 
 /**
  * Items the user selected on the canvas; Claude limits its change to them (PRD §4.1). The three
@@ -20,7 +21,10 @@ export interface ChatRequest {
   message: string;
   code: string;
   sessionId: string | null;
-  model: ModelId | null;
+  /** Which CLI answers (ADR-002). */
+  agent: AgentId;
+  /** One of the agent's models, or `null` for the CLI's own default. */
+  model: string | null;
   selection: ChatSelection | null;
 }
 
@@ -30,13 +34,35 @@ const selectionSchema: z.ZodType<ChatSelection> = z.object({
   kinds: z.array(z.string()).exactOptional(),
 });
 
-export const chatRequestSchema: z.ZodType<ChatRequest> = z.object({
-  message: z.string().trim().min(1, 'message is required'),
-  code: z.string(),
-  sessionId: z.string().min(1).nullable(),
-  model: modelIdSchema.nullable(),
-  selection: selectionSchema.nullable(),
-});
+const MODEL_SCHEMAS: Readonly<Record<AgentId, z.ZodType<string>>> = {
+  claude: modelIdSchema,
+  codex: codexModelSchema,
+};
+
+/** Whether `model` can be sent to `agent`. `null` (the CLI's default) belongs to every agent. */
+export function isModelOfAgent(model: string | null, agent: AgentId): boolean {
+  return model === null || MODEL_SCHEMAS[agent].safeParse(model).success;
+}
+
+export const chatRequestSchema: z.ZodType<ChatRequest> = z
+  .object({
+    message: z.string().trim().min(1, 'message is required'),
+    code: z.string(),
+    sessionId: z.string().min(1).nullable(),
+    // Clients older than ADR-002 send no agent: they mean Claude.
+    agent: agentIdSchema.default('claude'),
+    model: z.string().min(1).nullable(),
+    selection: selectionSchema.nullable(),
+  })
+  .superRefine((request, context) => {
+    if (!isModelOfAgent(request.model, request.agent)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['model'],
+        message: `model "${String(request.model)}" does not belong to agent "${request.agent}"`,
+      });
+    }
+  });
 
 /** One event in the `POST /api/chat` SSE stream. `type` is the SSE event name. */
 export type ChatEvent =
@@ -50,7 +76,8 @@ export type ChatEvent =
       text: string;
       isError: boolean;
       durationMs: number;
-      costUsd: number;
+      /** `null` when the agent reports no cost (Codex). */
+      costUsd: number | null;
     }
   | { type: 'error'; message: string };
 
@@ -67,7 +94,7 @@ export const chatEventSchema: z.ZodType<ChatEvent> = z.discriminatedUnion('type'
     text: z.string(),
     isError: z.boolean(),
     durationMs: z.number().nonnegative(),
-    costUsd: z.number().nonnegative(),
+    costUsd: z.number().nonnegative().nullable(),
   }),
   z.object({ type: z.literal('error'), message: z.string() }),
 ]);

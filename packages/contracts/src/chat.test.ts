@@ -14,6 +14,7 @@ const VALID_REQUEST = {
   message: 'Add a retry path',
   code: 'flowchart TD\n  a --> b',
   sessionId: null,
+  agent: 'claude',
   model: 'sonnet',
   selection: { ids: ['a'], labels: ['Start'] },
 };
@@ -49,6 +50,31 @@ describe('chatRequestSchema', () => {
     expect(() => chatRequestSchema.parse({ ...VALID_REQUEST, selection })).toThrow();
   });
 
+  it('runs Claude when an older client sends no agent', () => {
+    const withoutAgent: Record<string, unknown> = { ...VALID_REQUEST };
+    delete withoutAgent.agent;
+    expect(chatRequestSchema.parse(withoutAgent).agent).toBe('claude');
+  });
+
+  it('accepts a Codex request with a Codex model', () => {
+    const request = { ...VALID_REQUEST, agent: 'codex', model: 'gpt-6-astra' };
+    expect(chatRequestSchema.parse(request)).toEqual(request);
+  });
+
+  it('rejects an unknown agent', () => {
+    expect(chatRequestSchema.safeParse({ ...VALID_REQUEST, agent: 'gpt' }).success).toBe(false);
+  });
+
+  it.each([
+    ['codex', 'opus'],
+    ['claude', 'gpt-6-astra'],
+  ])('rejects agent %s with model %s', (agent: string, model: string) => {
+    const result = chatRequestSchema.safeParse({ ...VALID_REQUEST, agent, model });
+    expect(result.error?.issues[0]?.message).toBe(
+      `model "${model}" does not belong to agent "${agent}"`,
+    );
+  });
+
   it('rejects an unknown model and an empty selection', () => {
     expect(() => chatRequestSchema.parse({ ...VALID_REQUEST, model: 'gpt' })).toThrow();
     const emptySelection = { ...VALID_REQUEST, selection: { ids: [], labels: [] } };
@@ -64,6 +90,7 @@ describe('chatEventSchema', () => {
       { type: 'turn' },
       { type: 'tool', label: 'Read src/app.ts' },
       { type: 'done', sessionId: 's1', text: 'ok', isError: false, durationMs: 10, costUsd: 0 },
+      { type: 'done', sessionId: 's1', text: 'ok', isError: false, durationMs: 10, costUsd: null },
       { type: 'error', message: 'claude exited with code 1' },
     ];
     for (const event of events) {
