@@ -122,6 +122,16 @@ describe('App shell', () => {
     expect(within(settings).getByText('2.1.0')).toBeTruthy();
   });
 
+  it('links to the license texts the build ships with, in a new tab', async () => {
+    useUiStore.getState().setSettingsOpen(true);
+    renderApp();
+    const settings = await screen.findByRole('dialog', { name: 'Settings' });
+    const link = await within(settings).findByRole('link', { name: /Open-source licenses/ });
+    expect(link.getAttribute('href')).toBe('/third-party-licenses.txt');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+  });
+
   it('picks a default model in settings', async () => {
     useUiStore.getState().setSettingsOpen(true);
     const user = renderApp();

@@ -77,6 +77,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm test:release-tag
 
+      - name: Assert the license check still fails a copyleft dependency
+        if: ${{ !cancelled() }}
+        run: pnpm test:license-gate
+
       # Pull requests only: a push to `main` has no base to diff against. The "Version Packages"
       # pull request is exempt — it consumes changesets rather than adding one.
       - name: Require a changeset for a source change
