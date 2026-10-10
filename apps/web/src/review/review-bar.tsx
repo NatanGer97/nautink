@@ -65,10 +65,10 @@ function ShowDiffButton(): ReactElement {
 export interface ReviewBarProps {
   proposal: Proposal;
   /**
-   * Floating over the canvas (M2), lower down below a visual editor's toolbar, or at the top of
-   * the code drawer for a code diff.
+   * Floating over the canvas (M2), lower down below a visual editor's toolbar and read-only note
+   * (Edit, Split), or at the top of the code drawer for a code diff.
    */
-  placement: 'canvas' | 'editor' | 'drawer';
+  placement: 'canvas' | 'editor' | 'split' | 'drawer';
 }
 
 const FLOATING: string =
@@ -77,6 +77,7 @@ const FLOATING: string =
 const PLACEMENT_CLASSES: Readonly<Record<ReviewBarProps['placement'], string>> = {
   canvas: `${FLOATING} top-4`,
   editor: `${FLOATING} top-16`,
+  split: `${FLOATING} top-26`,
   drawer: 'shrink-0 border-b border-border-subtle py-1.5 pr-2 pl-3.5',
 };
 

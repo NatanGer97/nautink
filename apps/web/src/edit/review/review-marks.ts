@@ -46,14 +46,17 @@ export const EDGE_MARK_CLASSES: Readonly<Record<ReviewMark, string>> = {
   removed: 'review-removed opacity-70 [&_path]:stroke-destructive! [&_path]:[stroke-dasharray:4_4]',
 };
 
-/** SVG groups of an editor that draws its own diagram (sequence). */
+/**
+ * SVG groups of an editor that draws its own diagram (sequence). Transparent hit areas
+ * (`stroke-transparent`, `data-hit`) keep their look.
+ */
 export const SVG_MARK_CLASSES: Readonly<Record<ReviewMark, string>> = {
   added:
-    'review-added [&_:is(rect,path,line,polygon)]:stroke-success! [&_:is(rect,path,line,polygon)]:[stroke-dasharray:5_3]',
+    'review-added [&_:is(rect,path,line,polygon):not([data-hit],.stroke-transparent)]:stroke-success! [&_:is(rect,path,line,polygon):not([data-hit],.stroke-transparent)]:[stroke-dasharray:5_3]',
   changed:
-    'review-changed [&_:is(rect,path,line,polygon)]:stroke-accent-ink! [&_:is(rect,path,line,polygon)]:[stroke-width:2px]',
+    'review-changed [&_:is(rect,path,line,polygon):not([data-hit],.stroke-transparent)]:stroke-accent-ink! [&_:is(rect,path,line,polygon):not([data-hit],.stroke-transparent)]:[stroke-width:2px]',
   removed:
-    'review-removed opacity-60 [&_:is(rect,path,line,polygon)]:stroke-destructive! [&_:is(rect,path,line,polygon)]:[stroke-dasharray:4_4] [&_text]:fill-destructive! [&_text]:line-through',
+    'review-removed opacity-60 [&_:is(rect,path,line,polygon):not([data-hit],.stroke-transparent)]:stroke-destructive! [&_:is(rect,path,line,polygon):not([data-hit],.stroke-transparent)]:[stroke-dasharray:4_4] [&_text]:fill-destructive! [&_text]:line-through',
 };
 
 /** Items (nodes or edges) with their mark's class added. Unmarked items are returned as they are. */
