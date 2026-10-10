@@ -26,6 +26,7 @@ export interface UiActions {
   setActivePanel: (panel: PanelId | null) => void;
   toggleCodeDrawer: () => void;
   setCodeDrawerOpen: (isOpen: boolean) => void;
+  setLibraryOpen: (isOpen: boolean) => void;
   setThemePreference: (preference: ThemePreference) => void;
   setDefaultModel: (model: ModelId | null) => void;
   setPaletteOpen: (isOpen: boolean) => void;
@@ -47,7 +48,7 @@ const INITIAL_OVERLAYS: UiOverlays = {
 
 type LayoutActions = Pick<
   UiActions,
-  'togglePanel' | 'setActivePanel' | 'toggleCodeDrawer' | 'setCodeDrawerOpen'
+  'togglePanel' | 'setActivePanel' | 'toggleCodeDrawer' | 'setCodeDrawerOpen' | 'setLibraryOpen'
 >;
 
 function layoutActions(set: SetUiState): LayoutActions {
@@ -63,6 +64,9 @@ function layoutActions(set: SetUiState): LayoutActions {
     },
     setCodeDrawerOpen: (isOpen: boolean): void => {
       set({ isCodeDrawerOpen: isOpen });
+    },
+    setLibraryOpen: (isOpen: boolean): void => {
+      set({ isLibraryOpen: isOpen });
     },
   };
 }

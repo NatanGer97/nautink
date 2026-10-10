@@ -10,6 +10,7 @@ import { FlowMarkers } from './flow-markers.tsx';
 import { FlowToolbar } from './flow-toolbar.tsx';
 import { useFlowEditor } from './use-flow-editor.ts';
 import { useFlowProps } from './use-flow-props.ts';
+import { useUiStore } from '../../state/ui-store.ts';
 import { CanvasHint } from '../canvas/canvas-notices.tsx';
 import { EditorCanvas } from '../canvas/editor-canvas.tsx';
 import { useFitNow } from '../canvas/use-canvas-fit.ts';
@@ -24,6 +25,20 @@ import type { FlowGraph } from '@nautink/editors/flow/model';
 import type { ReactElement, RefObject } from 'react';
 
 const HALF: number = 0.5;
+
+/** The open library tab; whether the library is open is remembered across reloads (v1). */
+function useLibraryTab(): [FlowLibraryTab | null, (tab: FlowLibraryTab | null) => void] {
+  const isOpen: boolean = useUiStore((ui) => ui.isLibraryOpen);
+  const setOpen: (isOpen: boolean) => void = useUiStore((ui) => ui.setLibraryOpen);
+  const [tab, setTab] = useState<FlowLibraryTab>('shapes');
+  const show = (next: FlowLibraryTab | null): void => {
+    if (next !== null) {
+      setTab(next);
+    }
+    setOpen(next !== null);
+  };
+  return [isOpen ? tab : null, show];
+}
 
 /** Adds a shape at the middle of the visible canvas (a click on the toolbar or a library tile). */
 function useAddAtCenter(
@@ -77,7 +92,7 @@ function FlowCanvas(props: VisualEditorProps): ReactElement {
   const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
   const state: FlowEditorState = useFlowEditor(props);
   const { core, selection, context } = state;
-  const [libraryTab, setLibraryTab] = useState<FlowLibraryTab | null>(null);
+  const [libraryTab, setLibraryTab] = useLibraryTab();
   const addAtCenter: (spec: NewShape) => void = useAddAtCenter(rootRef, state);
   useFlowKeys(rootRef, state);
   const graph: FlowGraph | null = core.model;

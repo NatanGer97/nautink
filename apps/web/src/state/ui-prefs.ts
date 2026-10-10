@@ -17,6 +17,8 @@ export const PANEL_IDS: readonly PanelId[] = ['chat', 'diagrams', 'history'];
 export interface UiPrefs {
   activePanel: PanelId | null;
   isCodeDrawerOpen: boolean;
+  /** The visual editor's library panel (v1's `mc.library`), for every diagram. */
+  isLibraryOpen: boolean;
   themePreference: ThemePreference;
   /** `null` means Claude Code's own default model. */
   defaultModel: ModelId | null;
@@ -25,6 +27,7 @@ export interface UiPrefs {
 export const DEFAULT_UI_PREFS: UiPrefs = {
   activePanel: 'chat',
   isCodeDrawerOpen: false,
+  isLibraryOpen: false,
   themePreference: 'system',
   defaultModel: null,
 };
@@ -32,6 +35,8 @@ export const DEFAULT_UI_PREFS: UiPrefs = {
 export const uiPrefsSchema: z.ZodType<UiPrefs> = z.object({
   activePanel: z.enum(PANEL_IDS).nullable(),
   isCodeDrawerOpen: z.boolean(),
+  // Saves from before this field existed keep the rest of their preferences.
+  isLibraryOpen: z.boolean().default(false),
   themePreference: z.enum(THEME_PREFERENCES),
   defaultModel: z.enum(MODEL_IDS).nullable(),
 });
@@ -41,6 +46,7 @@ export function pickUiPrefs(state: UiPrefs): UiPrefs {
   return {
     activePanel: state.activePanel,
     isCodeDrawerOpen: state.isCodeDrawerOpen,
+    isLibraryOpen: state.isLibraryOpen,
     themePreference: state.themePreference,
     defaultModel: state.defaultModel,
   };

@@ -51,6 +51,19 @@ describe('useUiStore', () => {
     expect(useUiStore.getState().themePreference).toBe('system');
   });
 
+  it('remembers whether the library is open, and keeps older saves that lack it', async () => {
+    useUiStore.getState().setLibraryOpen(true);
+    const saved = JSON.parse(window.localStorage.getItem(UI_STORAGE_KEY) ?? '{}') as {
+      state: Record<string, unknown>;
+    };
+    expect(saved.state.isLibraryOpen).toBe(true);
+    const older: Record<string, unknown> = { ...DEFAULT_UI_PREFS, themePreference: 'dark' };
+    delete older.isLibraryOpen;
+    window.localStorage.setItem(UI_STORAGE_KEY, JSON.stringify({ state: older, version: 1 }));
+    await useUiStore.persist.rehydrate();
+    expect(useUiStore.getState()).toMatchObject({ isLibraryOpen: false, themePreference: 'dark' });
+  });
+
   it('ignores the canvas mode an earlier build saved: the view is per diagram now', async () => {
     window.localStorage.setItem(
       UI_STORAGE_KEY,

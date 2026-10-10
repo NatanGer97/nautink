@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-import { centerOf, dragBy, editCode, readCode, skipFirstRun, switchView } from './helpers.ts';
+import {
+  canvasNode,
+  centerOf,
+  dragBy,
+  editCode,
+  readCode,
+  skipFirstRun,
+  switchView,
+} from './helpers.ts';
 
 import type { Locator, Page } from '@playwright/test';
 
@@ -143,5 +151,26 @@ test.describe('class editor', () => {
     await render.getByText('Cat', { exact: true }).click();
     const inspector: Locator = page.getByRole('region', { name: 'Inspector' });
     await expect(inspector.getByLabel('Name', { exact: true })).toHaveValue('Cat');
+  });
+});
+
+// The library preference is the viewer's, not the diagram's; only the flowchart has a library.
+test.describe('library open state', () => {
+  test('stays open across a reload once opened', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();
+    await editCode(page, 'flowchart TD\n  A[Start] --> B[Done]\n');
+    await switchView(page, 'Edit');
+    await expect(canvasNode(page, 'A')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Library' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Library', exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Library' })).toBeVisible();
+    await page.reload();
+    await expect(canvasNode(page, 'A')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Library' })).toBeVisible();
+    await page.getByRole('button', { name: 'Close library' }).click();
+    await page.reload();
+    await expect(canvasNode(page, 'A')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Library' })).toHaveCount(0);
   });
 });

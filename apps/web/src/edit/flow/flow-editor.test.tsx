@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { FlowEditor } from './flow-editor.tsx';
+import { useUiStore } from '../../state/ui-store.ts';
 import { CLAUDE_EDITING } from '../read-only-reason.ts';
 import { requestSelection, useCanvasSelectionStore } from '../selection/canvas-selection.ts';
 import { SYNTAX_ERROR_REASON } from '../use-editor-core.ts';
@@ -16,6 +17,15 @@ vi.mock('../positions/app-position-store.ts', async () => {
   const { MemoryPositionStore: Store } = await import('@nautink/visual-core/positions');
   return { appPositionStore: new Store() };
 });
+
+const BASE_PROPS: VisualEditorProps = {
+  diagramId: 'd1',
+  code: CODE,
+  isDark: false,
+  readOnlyReason: null,
+  canSavePositions: true,
+  onChange: () => undefined,
+};
 
 function renderEditor(overrides: Partial<VisualEditorProps> = {}): {
   onChange: ReturnType<typeof vi.fn>;
@@ -110,6 +120,22 @@ describe('FlowEditor', () => {
     expect(within(library).getByRole('combobox', { name: 'Icon pack' })).toBeTruthy();
     await user.click(within(library).getByRole('button', { name: 'Close library' }));
     expect(screen.queryByRole('region', { name: 'Library' })).toBeNull();
+  });
+
+  it('reopens the library on the next open when it was left open (v1)', async () => {
+    const user = userEvent.setup();
+    const first = render(
+      <TooltipProvider>
+        <FlowEditor {...BASE_PROPS} />
+      </TooltipProvider>,
+    );
+    await screen.findByTestId('flow-node-A');
+    await user.click(screen.getByRole('button', { name: 'Library' }));
+    first.unmount();
+    renderEditor();
+    await screen.findByTestId('flow-node-A');
+    expect(screen.getByRole('region', { name: 'Library' })).toBeTruthy();
+    expect(useUiStore.getState().isLibraryOpen).toBe(true);
   });
 
   it('is read-only while Claude edits, and keeps the last canvas on a syntax error', async () => {
