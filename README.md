@@ -153,7 +153,7 @@ See [SECURITY.md](SECURITY.md) for the threat model and how to report a vulnerab
 | --- | --- |
 | ⌘K | Command palette |
 | ⌘/ | Focus the chat |
-| ⌘↵ | Send the message |
+| ↵ or ⌘↵ | Send the message (⇧↵ adds a new line) |
 | ⌘Z | Undo |
 | ⇧⌘Z or ⌘Y | Redo |
 | ⌘S | Save a version |

@@ -3,17 +3,12 @@ import { useChatStore } from './chat-store.ts';
 import { useReplyingAgentName } from './replying-agent.ts';
 import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
+import { isSendKey } from './send-key.ts';
 import { submitDraft } from './submit-draft.ts';
-import { matchesShortcut, SHORTCUTS } from '../lib/shortcuts.ts';
 import { useActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { Diagram } from '@nautink/storage/records';
-import type { KeyboardEvent, ReactElement } from 'react';
-
-function isSendKey(event: KeyboardEvent<HTMLInputElement>): boolean {
-  const isPlainEnter: boolean = event.key === 'Enter' && !event.shiftKey;
-  return !event.nativeEvent.isComposing && (isPlainEnter || matchesShortcut(event, SHORTCUTS.send));
-}
+import type { ReactElement } from 'react';
 
 /**
  * The floating prompt bar shown while the chat panel is closed (M3, M7). It edits the same draft

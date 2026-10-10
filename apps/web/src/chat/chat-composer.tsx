@@ -5,8 +5,9 @@ import { useChatStore } from './chat-store.ts';
 import { useReplyingAgentName } from './replying-agent.ts';
 import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
+import { isSendKey } from './send-key.ts';
 import { submitDraft } from './submit-draft.ts';
-import { matchesShortcut, SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
+import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
@@ -51,7 +52,7 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
     }
   };
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>): void => {
-    if (!event.nativeEvent.isComposing && matchesShortcut(event, SHORTCUTS.send)) {
+    if (isSendKey(event)) {
       event.preventDefault();
       send();
     }
@@ -80,8 +81,7 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
         />
         <div className="flex items-center justify-between">
           <span className="text-2xs text-faint">
-            {shortcutLabel(SHORTCUTS.send)} to send · {shortcutLabel(SHORTCUTS.focusComposer)} to
-            focus
+            ↵ to send · ⇧↵ for a new line · {shortcutLabel(SHORTCUTS.focusComposer)} to focus
           </span>
           <SendButton
             isStreaming={busyId !== null && busyId === diagram?.id}
