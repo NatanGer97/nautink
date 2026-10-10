@@ -2,9 +2,11 @@ name: Release
 
 # Turns the changesets that have landed on `main` into bumped versions and changelogs — as a
 # pull request, not a push to the branch, so a release stays something a human reads and approves.
-# Merging the "Version Packages" pull request is what bumps the versions. The next run then finds no
-# pending changesets and runs the publish script, which only tags: every workspace is private and
-# nothing goes to a registry. The action pushes those tags and creates a GitHub Release for each.
+# Merging the "Version Packages" pull request is what bumps the versions. Every workspace is in one
+# `fixed` group, so they all move to the same version. The next run then finds no pending changesets
+# and runs the publish script, scripts/tag-release.ts, which only tags: every workspace is private and
+# nothing goes to a registry. It pushes one `v<version>` tag for the whole app and creates one GitHub
+# Release from the workspaces' changelogs, and does nothing when that version is already tagged.
 on:
   push:
     branches: [main]
@@ -48,13 +50,15 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # v2 is the line built for Changesets v3: it reads the tags from `CHANGESETS_OUTPUT`, which
-      # `changeset git-tag` writes. v1 looks for output v3 no longer prints.
+      # v2 is the line built for Changesets v3. The publish script makes the tag and the Release
+      # itself, so the action's own per-package Releases are off.
       - name: Open the "Version Packages" pull request, or tag and release
         uses: changesets/action@v2
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           version-script: pnpm changeset version
-          publish-script: pnpm changeset git-tag
-          create-github-releases: true
+          publish-script: pnpm release:tag
+          create-github-releases: false
           commit-message: "chore(release): version packages"
           pr-title: "chore(release): version packages"
