@@ -1,0 +1,19 @@
+{
+  "name": "@nautink/site",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "The Nautink marketing page: one static page, built with Vite.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "geist": "^1.7.2",
+    "vite": "^8.3.4"
+  }
+}

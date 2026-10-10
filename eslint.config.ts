@@ -17,9 +17,10 @@ const TEST_FILES = [
   '**/*.spec.tsx',
   '**/tests/**',
 ];
-// Browser code: the web app and every package that renders React or touches the DOM.
+// Browser code: the web app, the marketing page, and every package that renders React or touches the DOM.
 const BROWSER_FILES = [
   '**/apps/web/**/*.{ts,tsx}',
+  '**/apps/site/**/*.{ts,tsx}',
   '**/packages/ui/**/*.{ts,tsx}',
   '**/packages/visual-core/**/*.{ts,tsx}',
   '**/packages/editors/**/*.{ts,tsx}',

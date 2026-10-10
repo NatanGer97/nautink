@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nautink — Mermaid diagrams with Claude, on your machine</title>
+    <meta
+      name="description"
+      content="Nautink is a free, open-source, local-first app for Mermaid diagrams. Edit by hand, in code, or by chatting with Claude, and review every change before it lands."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta property="og:title" content="Nautink" />
+    <meta
+      property="og:description"
+      content="Mermaid diagrams you shape by hand, in code, or by chatting with Claude. Every change Claude proposes waits for your review."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/png" href="/favicon.png" media="(prefers-color-scheme: light)" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/favicon-dark.png"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <nav class="nav container" aria-label="Main">
+        <a class="brand" href="#top" aria-label="Nautink home">
+          <picture>
+            <source
+              srcset="../../docs/brand/nautink-logo-dark.webp"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img src="../../docs/brand/nautink-logo.webp" alt="Nautink" width="132" height="29" />
+          </picture>
+        </a>
+        <ul class="nav-links">
+          <li><a href="#review">Review</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#privacy">Privacy</a></li>
+        </ul>
+        <a class="button button-small button-ghost" href="https://github.com/NatanGer97/nautink">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+            />
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- Hero -->
+      <section class="hero" id="top">
+        <div class="container hero-copy">
+          <p class="eyebrow">
+            <span>Open source</span><span aria-hidden="true">·</span><span>Local-first</span
+            ><span aria-hidden="true">·</span><span>MIT</span>
+          </p>
+          <h1>Draw Mermaid diagrams by hand, in code, or&nbsp;with&nbsp;Claude.</h1>
+          <p class="lede">
+            Nautink is one canvas for Mermaid. Ask Claude for a change and it shows up as a proposal
+            you accept or reject. Your diagrams stay in your browser, and the chat runs through your
+            own Claude Code.
+          </p>
+          <div class="cta-row">
+            <a class="button button-primary" href="#start">Get started</a>
+            <a class="button button-ghost" href="https://github.com/NatanGer97/nautink">
+              Star on GitHub
+            </a>
+          </div>
+        </div>
+        <div class="container">
+          <figure class="window hero-shot">
+            <div class="window-bar" aria-hidden="true">
+              <span></span><span></span><span></span>
+              <p>localhost:5190</p>
+            </div>
+            <picture>
+              <source
+                srcset="../../docs/screenshots/dark.webp"
+                media="(prefers-color-scheme: dark)"
+              />
+              <img
+                src="../../docs/screenshots/workspace.webp"
+                alt="The Nautink workspace: a checkout flowchart drawn by Claude, with the chat beside it"
+                width="2880"
+                height="1800"
+                fetchpriority="high"
+              />
+            </picture>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Review before apply -->
+      <section class="section" id="review" aria-labelledby="review-title">
+        <div class="container split">
+          <div class="split-copy">
+            <p class="kicker">Review before apply</p>
+            <h2 id="review-title">Claude proposes. You decide.</h2>
+            <p>
+              Every change Claude makes lands on the canvas as a proposal. New parts are dashed in
+              green, removed parts are struck through, and nothing is saved until you say so.
+            </p>
+            <ul class="checks">
+              <li>Accept with <kbd>Enter</kbd>, reject with <kbd>Esc</kbd>.</li>
+              <li>Accepting is one undo step and one saved version.</li>
+              <li>If Claude's code does not parse, Nautink asks it to fix it.</li>
+            </ul>
+          </div>
+
+          <div class="demo" data-state="proposal" aria-labelledby="demo-caption">
+            <p class="sr-only" id="demo-caption">
+              Try it: a flowchart with a proposed change from Claude, which you can accept or
+              reject.
+            </p>
+            <div class="demo-chat">
+              <p class="bubble bubble-user">Retry a failed payment up to three times</p>
+              <p class="bubble-meta">
+                <span class="claude-badge" aria-hidden="true">C</span> Claude
+              </p>
+              <p class="bubble bubble-claude">
+                I added a retry step: three failed payments notify the customer.
+              </p>
+            </div>
+            <div class="demo-canvas">
+              <div class="review-bar" role="group" aria-label="Proposal">
+                <p class="review-status" aria-live="polite">
+                  <span class="when-proposal"><strong>5 changes</strong></span>
+                  <span class="when-proposal legend legend-added">Added 4</span>
+                  <span class="when-proposal legend legend-removed">Removed 1</span>
+                  <span class="when-accepted"><strong>Accepted.</strong> Saved as version 3.</span>
+                  <span class="when-rejected"><strong>Rejected.</strong> Nothing changed.</span>
+                </p>
+                <div class="review-actions">
+                  <button
+                    type="button"
+                    class="button button-small button-ghost when-proposal"
+                    data-action="reject"
+                  >
+                    Reject <kbd>Esc</kbd>
+                  </button>
+                  <button
+                    type="button"
+                    class="button button-small button-primary when-proposal"
+                    data-action="accept"
+                  >
+                    Accept <kbd>↵</kbd>
+                  </button>
+                  <button
+                    type="button"
+                    class="button button-small button-ghost when-done"
+                    data-action="replay"
+                  >
+                    Replay
+                  </button>
+                </div>
+              </div>
+              <svg
+                class="flow"
+                viewBox="0 0 520 420"
+                role="img"
+                aria-label="Checkout flowchart with a proposed retry step"
+              >
+                <defs>
+                  <marker
+                    id="arrow"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M0 0 10 5 0 10z" fill="context-stroke" />
+                  </marker>
+                </defs>
+
+                <!-- Edges that stay -->
+                <path class="edge" d="M260 64V88" marker-end="url(#arrow)" />
+                <path class="edge" d="M190 140H130V248" marker-end="url(#arrow)" />
+                <text class="edge-label" x="158" y="132">Yes</text>
+
+                <!-- Edge Claude removes -->
+                <g class="removed">
+                  <path class="edge" d="M260 190V372H328" marker-end="url(#arrow)" />
+                  <text class="edge-label strike" x="268" y="300">No</text>
+                </g>
+
+                <!-- Parts Claude adds -->
+                <g class="added">
+                  <path class="edge" d="M330 140H405V248" marker-end="url(#arrow)" />
+                  <text class="edge-label" x="350" y="132">No</text>
+                  <path class="edge" d="M405 294V348" marker-end="url(#arrow)" />
+                  <text class="edge-label" x="414" y="326">3 failures</text>
+                  <path class="edge" d="M480 272H504V42H332" marker-end="url(#arrow)" />
+                  <text class="edge-label" x="420" y="34">retry</text>
+                  <rect class="node" x="330" y="250" width="150" height="44" rx="2" />
+                  <text class="node-label" x="405" y="277">Retry payment</text>
+                </g>
+
+                <!-- Nodes that stay -->
+                <rect class="node node-round" x="190" y="20" width="140" height="44" rx="22" />
+                <text class="node-label" x="260" y="47">Charge card</text>
+                <path class="node" d="M260 90 330 140 260 190 190 140z" />
+                <text class="node-label" x="260" y="145">Payment ok?</text>
+                <rect class="node" x="60" y="250" width="140" height="44" rx="2" />
+                <text class="node-label" x="130" y="277">Ship order</text>
+                <rect class="node" x="330" y="350" width="150" height="44" rx="2" />
+                <text class="node-label" x="405" y="377">Notify customer</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Three ways to edit -->
+      <section class="section section-tint" id="modes" aria-labelledby="modes-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="kicker">One canvas, three ways in</p>
+            <h2 id="modes-title">Chat, drag, or type. It is all plain Mermaid.</h2>
+            <p>
+              Every visual edit writes Mermaid code, and every line of code updates the canvas. What
+              you see is what GitHub and other Mermaid hosts will show.
+            </p>
+          </div>
+
+          <div class="tabs">
+            <div class="tab-list" role="tablist" aria-label="Ways to edit">
+              <button
+                type="button"
+                role="tab"
+                id="tab-edit"
+                aria-controls="panel-edit"
+                aria-selected="true"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-split"
+                aria-controls="panel-split"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                Split
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-review"
+                aria-controls="panel-review"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                Chat
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-history"
+                aria-controls="panel-history"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                History
+              </button>
+            </div>
+
+            <div class="tab-panel" role="tabpanel" id="panel-edit" aria-labelledby="tab-edit">
+              <p>
+                <strong>Five visual editors</strong> for flowcharts, UML class, sequence, ER and
+                state diagrams. Drag shapes, draw links, and tune each part in a floating inspector.
+              </p>
+              <figure class="window">
+                <img
+                  src="../../docs/screenshots/edit.webp"
+                  alt="Edit mode: the flowchart editor with a node selected and its inspector open"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                />
+              </figure>
+            </div>
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-split"
+              aria-labelledby="tab-split"
+              hidden
+            >
+              <p>
+                <strong>Split</strong> puts the visual editor beside Mermaid's own render, with the
+                selection mirrored between them. Click a shape in Preview to jump to its line of
+                code.
+              </p>
+              <figure class="window">
+                <img
+                  src="../../docs/screenshots/split.webp"
+                  alt="Split: the visual editor beside Mermaid's render"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                />
+              </figure>
+            </div>
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-review"
+              aria-labelledby="tab-review"
+              hidden
+            >
+              <p>
+                <strong>Chat with Claude.</strong> Describe a diagram or a change and watch it build
+                on the canvas. Select a few nodes to ask about just those, and Claude leaves the
+                rest alone.
+              </p>
+              <figure class="window">
+                <img
+                  src="../../docs/screenshots/review.webp"
+                  alt="Claude proposes five changes: a new retry step shown dashed in green, a removed link struck through"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                />
+              </figure>
+            </div>
+            <div
+              class="tab-panel"
+              role="tabpanel"
+              id="panel-history"
+              aria-labelledby="tab-history"
+              hidden
+            >
+              <p>
+                <strong>History and versions.</strong> Undo and redo cover every change. Each Claude
+                edit saves a version: view, compare and restore up to 50 per diagram.
+              </p>
+              <figure class="window">
+                <img
+                  src="../../docs/screenshots/history.webp"
+                  alt="The history panel with Claude versions and a saved version"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                />
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feature grid -->
+      <section class="section" id="features" aria-labelledby="features-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="kicker">Features</p>
+            <h2 id="features-title">Everything a diagram needs, nothing it does not.</h2>
+          </div>
+          <ul class="feature-grid">
+            <li>
+              <h3>Live build</h3>
+              <p>While Claude replies, new nodes fade in on the canvas as they arrive.</p>
+            </li>
+            <li>
+              <h3>Pick your model</h3>
+              <p>Default, Opus, Sonnet or Haiku. Stop a reply, or use a quick action under it.</p>
+            </li>
+            <li>
+              <h3>Codebase-aware chat</h3>
+              <p>
+                Let Claude read a project folder, read-only, so it draws your real architecture.
+              </p>
+            </li>
+            <li>
+              <h3>Code drawer</h3>
+              <p>
+                Monaco with Mermaid highlighting, autocomplete per diagram type, and errors on their
+                line.
+              </p>
+            </li>
+            <li>
+              <h3>Many diagrams</h3>
+              <p>
+                Search titles and content, filter by type, pin, rename, duplicate and delete with
+                undo.
+              </p>
+            </li>
+            <li>
+              <h3>15 templates</h3>
+              <p>Starters for process, software design, data, planning and charts.</p>
+            </li>
+            <li>
+              <h3>Export anywhere</h3>
+              <p>
+                SVG or PNG, copy the image, code, Markdown or an HTML embed, or open in
+                mermaid.live.
+              </p>
+            </li>
+            <li>
+              <h3>Import and back up</h3>
+              <p>
+                Drop <code>.mmd</code> or Markdown files in. Back up everything to one JSON file.
+              </p>
+            </li>
+            <li>
+              <h3>Keyboard first</h3>
+              <p><kbd>⌘K</kbd> reaches every action. Light, dark, or follow your system.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="section section-tint" id="how" aria-labelledby="how-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="kicker">How it works</p>
+            <h2 id="how-title">Three small pieces, all on your machine.</h2>
+          </div>
+          <ol class="pipeline">
+            <li class="stage">
+              <p class="stage-where">Browser</p>
+              <h3>Nautink web app</h3>
+              <p>Canvas, editors and chat. Every diagram, chat and version lives in IndexedDB.</p>
+            </li>
+            <li class="hop" aria-hidden="true"><span>/api</span><span>SSE</span></li>
+            <li class="stage">
+              <p class="stage-where">Your machine</p>
+              <h3>Local server</h3>
+              <p>
+                Listens on <code>127.0.0.1</code> only. Turns each message into one Claude Code run.
+              </p>
+            </li>
+            <li class="hop" aria-hidden="true"><span>spawns</span><span>stream</span></li>
+            <li class="stage">
+              <p class="stage-where">Your login</p>
+              <h3>Claude Code CLI</h3>
+              <p>
+                Runs <code>claude -p</code> with no tools, unless you pick a folder for read-only
+                access.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Privacy -->
+      <section class="section" id="privacy" aria-labelledby="privacy-title">
+        <div class="container privacy">
+          <div>
+            <p class="kicker">Privacy</p>
+            <h2 id="privacy-title">No account. No cloud. No telemetry.</h2>
+            <p>
+              Your diagrams never leave your browser, except when you send a chat message. Then your
+              own Claude Code sends the diagram and your message to Anthropic, exactly as if you
+              used Claude Code yourself.
+            </p>
+          </div>
+          <ul class="privacy-list">
+            <li><strong>No sign-up.</strong> Clone it, run it, use it.</li>
+            <li><strong>No analytics.</strong> The app tracks nothing.</li>
+            <li><strong>No third-party calls.</strong> Fonts and icons are bundled.</li>
+            <li><strong>Works without Claude.</strong> Everything but the chat runs offline.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Quick start -->
+      <section class="section section-start" id="start" aria-labelledby="start-title">
+        <div class="container start">
+          <h2 id="start-title">Up and running in a minute.</h2>
+          <p>
+            You need Node 22, pnpm 9, and
+            <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> logged in for
+            the chat.
+          </p>
+          <div class="terminal">
+            <div class="terminal-bar">
+              <p>Terminal</p>
+              <button
+                type="button"
+                class="button button-small copy-button"
+                data-copy="install-commands"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="install-commands">git clone https://github.com/NatanGer97/nautink.git
+cd nautink
+pnpm install
+pnpm dev</code></pre>
+          </div>
+          <p class="start-note">Then open <code>http://localhost:5190</code>.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>
+          Nautink is open source under the MIT license. The Nautink name and logo are not covered by
+          it.
+        </p>
+        <ul class="footer-links">
+          <li><a href="https://github.com/NatanGer97/nautink">GitHub</a></li>
+          <li>
+            <a href="https://github.com/NatanGer97/nautink/blob/main/SECURITY.md">Security</a>
+          </li>
+          <li><a href="https://mermaid.js.org">Mermaid</a></li>
+        </ul>
+      </div>
+    </footer>
+  </body>
+</html>
