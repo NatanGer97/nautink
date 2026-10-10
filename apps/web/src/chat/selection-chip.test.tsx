@@ -37,7 +37,8 @@ function chatRequests(): ChatRequest[] {
 async function renderApp(): Promise<{ user: ReturnType<typeof userEvent.setup>; id: string }> {
   const user = userEvent.setup();
   render(<App />);
-  await screen.findByRole('group', { name: 'Diagram preview' });
+  // The app loads its workspace from IndexedDB first; give a loaded test run time for it.
+  await screen.findByRole('group', { name: 'Diagram preview' }, { timeout: 10_000 });
   const id = selectActiveDiagram(useWorkspaceStore.getState())?.id ?? '';
   return { user, id };
 }
