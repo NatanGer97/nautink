@@ -46,6 +46,18 @@ describe('loadConfig', () => {
     );
   });
 
+  it('accepts a REPO_DIR inside the home folder only, like a folder chosen in the app', () => {
+    expect(() => loadConfig({ REPO_DIR: home }, home)).toThrow(
+      `REPO_DIR must be inside your home folder (${home}): ${home}`,
+    );
+    expect(() => loadConfig({ REPO_DIR: path.dirname(home) }, home)).toThrow(
+      'REPO_DIR must be inside your home folder',
+    );
+    expect(loadConfig({ REPO_DIR: path.join(home, 'app') }, home).repoDir).toBe(
+      path.join(home, 'app'),
+    );
+  });
+
   it('rejects an out-of-range port, an empty one and a REPO_DIR that is a file', () => {
     expect(() => loadConfig({ API_PORT: '70000' }, home)).toThrow('API_PORT must be at most 65535');
     expect(() => loadConfig({ API_PORT: '' }, home)).toThrow('API_PORT must be a whole number');

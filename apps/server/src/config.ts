@@ -2,7 +2,7 @@ import { realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 
-import { expandHome } from './repo-dir.ts';
+import { expandHome, isStrictlyInside } from './repo-dir.ts';
 
 /** The server's settings, read once from the environment at startup. */
 export interface ServerConfig {
@@ -31,6 +31,26 @@ function toExistingDirectory(input: string, context: z.RefinementCtx<string>): s
   return z.NEVER;
 }
 
+/**
+ * The same rule as a folder chosen in the app (`resolveRepoDir`): strictly inside the home folder,
+ * symlinks followed. The home folder itself holds keys and tokens Claude must not read.
+ */
+function toHomeFolder(
+  homeDir: string,
+): (input: string, context: z.RefinementCtx<string>) => string {
+  return (input: string, context: z.RefinementCtx<string>): string => {
+    const realHome: string = realpathSync(homeDir);
+    if (isStrictlyInside(input, realHome)) {
+      return input;
+    }
+    context.addIssue({
+      code: 'custom',
+      message: `REPO_DIR must be inside your home folder (${realHome}): ${input}`,
+    });
+    return z.NEVER;
+  };
+}
+
 const portSchema: z.ZodType<number, string | undefined> = z
   .string()
   .regex(/^\d+$/, 'API_PORT must be a whole number')
@@ -45,6 +65,7 @@ function createRepoDirSchema(homeDir: string): z.ZodType<string | undefined, str
     .transform((input: string, context: z.RefinementCtx<string>) =>
       toExistingDirectory(expandHome(input, homeDir), context),
     )
+    .transform(toHomeFolder(homeDir))
     .optional();
 }
 

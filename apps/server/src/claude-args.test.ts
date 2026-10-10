@@ -13,12 +13,12 @@ const LEAN_ARGS = [
 ];
 
 describe('buildClaudeArgs', () => {
-  it('runs headless with v1 lean flags and no tools by default', () => {
+  it('runs headless with lean flags, no settings and no tools by default', () => {
     expect(buildClaudeArgs({ sessionId: null, model: null, isRepoAware: false })).toEqual([
       ...LEAN_ARGS,
       buildSystemPrompt(false),
       '--setting-sources',
-      'project',
+      '',
       '--strict-mcp-config',
       '--mcp-config',
       '{"mcpServers":{}}',
