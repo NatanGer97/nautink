@@ -48,7 +48,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - context - `claude-run.ts` hard-codes the stream-json parser and the name `claude` in exit messages
   - Files: `apps/server/src/cli-run.ts` (renamed from `claude-run.ts`), `apps/server/src/cli-run.test.ts`, `apps/server/src/chat-route.ts`
   - Red: test that a run with a custom `parseLine` emits its events, and that an exit without result says `codex exited with code 2` when `bin` is `codex`; an `error` event from the parser ends the run with no second error
-  - Green: `startCliRun({ bin, args, cwd, prompt, parseLine, emit, onEnd })`; exit text uses the bin's base name; parser `error` counts as the end
+  - Green: `startCliRun({ name, bin, args, cwd, prompt, parseLine, emit, onEnd })`; exit text uses `name` (not the bin path, so fake CLIs in tests keep the real name); parser `error` counts as the end
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: Claude chat tests unchanged and green
 
