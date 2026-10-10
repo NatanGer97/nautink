@@ -116,8 +116,8 @@ describe('POST /api/chat', () => {
     );
     expect(recorded.argv).toContain('Read,Grep,Glob');
     expect(recorded.cwd).toBe(repoDir);
-    expect(recorded.stdin).toContain('Selected nodes (id: label):\n- a: "Start"');
-    expect(recorded.stdin).toContain('Limit your changes to these nodes and their direct links');
+    expect(recorded.stdin).toContain('Selected on the canvas (id: label):\n- a: "Start"');
+    expect(recorded.stdin).toContain('Limit your changes to these items and their direct links');
   });
 
   it('reports tool steps and turns', async () => {
