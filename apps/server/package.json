@@ -20,7 +20,10 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@nautink/editors": "workspace:^",
     "@types/express": "^5.0.6",
-    "@types/node": "^22"
+    "@types/node": "^22",
+    "jsdom": "^30.1.2",
+    "mermaid": "^12.1.0"
   }
 }
