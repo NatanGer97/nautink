@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { IDBFactory } from 'fake-indexeddb';
 import { afterEach, beforeEach, vi } from 'vitest';
 
@@ -46,6 +46,9 @@ Element.prototype.releasePointerCapture = (): undefined => undefined;
 Element.prototype.setPointerCapture = (): undefined => undefined;
 installMatchMedia();
 installLocalBroadcastChannel();
+// `findBy*` and `waitFor` wait 1 s by default. Mounting the whole app takes longer than that when the
+// machine is busy, which failed unrelated tests at random. 5 s stays under the 15 s test timeout.
+configure({ asyncUtilTimeout: 5000 });
 
 // Mermaid cannot lay out diagrams in jsdom (no SVG geometry) and is slow to import, so every test
 // that mounts the app gets a renderer that answers at once. `render-diagram.test.ts` unmocks it.
