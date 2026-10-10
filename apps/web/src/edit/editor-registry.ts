@@ -23,6 +23,7 @@ export function lazyEditor(load: () => Promise<VisualEditorComponent>): LazyVisu
 export const VISUAL_EDITORS: EditorRegistry = {
   flow: lazyEditor(async () => (await import('./flow/flow-editor.tsx')).FlowEditor),
   er: lazyEditor(async () => (await import('./er/er-editor.tsx')).ErEditor),
+  state: lazyEditor(async () => (await import('./state/state-editor.tsx')).StateEditor),
 };
 
 /** The editor id for `code` when the app has that editor, else null. */
