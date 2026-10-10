@@ -44,7 +44,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/contracts test && pnpm typecheck`
   - Acceptance: contract tests green, `pnpm typecheck` green across the monorepo
 
-- [ ] **T3 — Generic CLI run**
+- [x] **T3 — Generic CLI run**
   - context - `claude-run.ts` hard-codes the stream-json parser and the name `claude` in exit messages
   - Files: `apps/server/src/cli-run.ts` (renamed from `claude-run.ts`), `apps/server/src/cli-run.test.ts`, `apps/server/src/chat-route.ts`
   - Red: test that a run with a custom `parseLine` emits its events, and that an exit without result says `codex exited with code 2` when `bin` is `codex`; an `error` event from the parser ends the run with no second error
