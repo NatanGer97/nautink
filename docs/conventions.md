@@ -18,7 +18,7 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 | `scripts/check-coverage-gate.ts` | Proves an uncovered file still fails each gated package's coverage threshold |
 | `scripts/check-changeset.ts` | Fails a pull request that changes `apps/` or `packages/` source without a changeset |
 | `scripts/check-bundle-budget.ts` | Fails a web build whose entry, initial or lazy JavaScript is over its gzip budget (see [Bundle budgets](#bundle-budgets)) |
-| `.github/workflows/ci.yml` | Install, the full check graph, then the gate assertions, the changeset check, and `format:check` |
+| `.github/workflows/ci.yml` | Two jobs: `check` (install, the full check graph, then the gate assertions, the changeset check, and `format:check`) and `e2e` (the web app's Playwright suite in headless Chromium, report and traces uploaded on failure) |
 | `.github/workflows/release.yml` | Turns landed changesets into a "Version Packages" pull request, then tags and releases |
 | `.husky/pre-commit` / `.husky/pre-push` | The two local git gates; installed by `prepare` on `pnpm install` |
 | `.claude/hooks/lint-edited-file.ts` | The Claude Code `PostToolUse` hook, registered in `.claude/settings.json` |
@@ -84,7 +84,7 @@ exports, `console`.
 | An agent writes a file | Claude Code `PostToolUse` hook: format, `eslint --fix`, feed leftovers back to the agent |
 | `git commit` | Husky + lint-staged over staged files |
 | `git push` | `pnpm lint` + `lint:fixtures` + `check:agents` + `test:changeset-gate` + `test:bundle-budget-gate` + `test:coverage-gate` |
-| A pull request, and every push to `main` | The full check graph, the same gate assertions, the changeset check (pull requests only), then `format:check` |
+| A pull request, and every push to `main` | The full check graph, the same gate assertions, the changeset check (pull requests only), then `format:check`; the e2e suite in a parallel job |
 
 Warnings (`no-magic-numbers`, `no-inline-comments`, `no-warning-comments`) block the first two
 gates and not the last two: an agent or a commit has to deal with them there and then, while a

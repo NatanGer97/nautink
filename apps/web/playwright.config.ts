@@ -8,11 +8,12 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   // Each worker drives a browser against one shared dev server; more than 3 starved that server on a
-  // 12-core laptop and tests timed out at random.
-  workers: 3,
+  // 12-core laptop and tests timed out at random. A CI runner has 2 to 4 cores, so it runs 2.
+  workers: process.env.CI ? 2 : 3,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  reporter: 'list',
+  // CI also writes the HTML report, which the workflow uploads with the traces when a test fails.
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: { baseURL: BASE_URL, trace: 'on-first-retry' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
