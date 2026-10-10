@@ -25,7 +25,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
 
 ## Tasks
 
-- [ ] **T1 — Records remember the agent**
+- [x] **T1 — Records remember the agent**
   - context - attribution and session ownership survive reloads and backups
   - Files: `packages/storage/src/records.ts`, `packages/storage/src/backup-v1.ts`, tests in `packages/storage/src/`
   - Red: `ChatMessage.agent`, `Version.agent` and `Diagram.sessionAgent` round-trip through a backup; a backup without them still imports; an unknown agent value fails the backup with a clear error

@@ -239,6 +239,9 @@ importers:
 
   packages/storage:
     dependencies:
+      '@nautink/contracts':
+        specifier: workspace:^
+        version: link:../contracts
       idb:
         specifier: ^8.0.4
         version: 8.0.4
