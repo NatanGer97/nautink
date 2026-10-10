@@ -1,9 +1,11 @@
+import { AGENT_CLI_NAMES } from '@nautink/contracts/agents';
 import { Button } from '@nautink/ui/components/button';
 import { FolderOpen, LayoutGrid, Square, Upload } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { FirstRunPromptBox } from './first-run-prompt-box.tsx';
 import { finishFirstRun } from './first-run-store.ts';
+import { useAgentName } from '../chat/agent-name.ts';
 import { openFiles, pickAndRestoreBackup } from '../import/import-files.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
@@ -17,36 +19,38 @@ interface StartCard {
   run: () => void;
 }
 
-const START_CARDS: readonly StartCard[] = [
-  {
-    title: 'Blank canvas',
-    label: 'Pick a type, draw it yourself',
-    icon: <Square />,
-    run: finishFirstRun,
-  },
-  {
-    title: 'Templates',
-    label: '14 examples to adapt',
-    icon: <LayoutGrid />,
-    run: (): void => {
-      useUiStore.getState().setTemplatesOpen(true);
+function startCards(name: string): readonly StartCard[] {
+  return [
+    {
+      title: 'Blank canvas',
+      label: 'Pick a type, draw it yourself',
+      icon: <Square />,
+      run: finishFirstRun,
     },
-  },
-  {
-    title: 'Import',
-    label: '.mmd, .md or a backup file',
-    icon: <Upload />,
-    run: () => void openFiles(),
-  },
-  {
-    title: 'From a codebase',
-    label: 'Claude reads a local folder',
-    icon: <FolderOpen />,
-    run: (): void => {
-      useUiStore.getState().setSettingsOpen(true);
+    {
+      title: 'Templates',
+      label: '14 examples to adapt',
+      icon: <LayoutGrid />,
+      run: (): void => {
+        useUiStore.getState().setTemplatesOpen(true);
+      },
     },
-  },
-];
+    {
+      title: 'Import',
+      label: '.mmd, .md or a backup file',
+      icon: <Upload />,
+      run: () => void openFiles(),
+    },
+    {
+      title: 'From a codebase',
+      label: `${name} reads a local folder`,
+      icon: <FolderOpen />,
+      run: (): void => {
+        useUiStore.getState().setSettingsOpen(true);
+      },
+    },
+  ];
+}
 
 /** While the screen shows no panel is open; opening one from the rail leaves the screen. */
 function useLeaveOnPanel(): void {
@@ -61,13 +65,14 @@ function useLeaveOnPanel(): void {
 }
 
 function StartCards(): ReactElement {
+  const name: string = useAgentName();
   return (
     <section aria-labelledby="first-run-start" className="mt-4.5 flex flex-col gap-2.5">
       <h2 id="first-run-start" className="text-xs font-medium text-faint">
         Or start from
       </h2>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        {START_CARDS.map((card) => (
+        {startCards(name).map((card) => (
           <button
             key={card.title}
             type="button"
@@ -91,6 +96,8 @@ function StartCards(): ReactElement {
 
 /** The first-run screen (M8): one prompt to start, or start from blank, templates, import or code. */
 export function FirstRunScreen(): ReactElement {
+  const name: string = useAgentName();
+  const cliName: string = useUiStore((state) => AGENT_CLI_NAMES[state.agent]);
   useLeaveOnPanel();
   return (
     <main
@@ -103,7 +110,7 @@ export function FirstRunScreen(): ReactElement {
             What do you want to diagram?
           </h1>
           <p className="text-base leading-relaxed text-muted-foreground">
-            Describe it and Claude drafts the first version. Then edit it on the canvas, in code, or
+            Describe it and {name} drafts the first version. Then edit it on the canvas, in code, or
             by asking for changes.
           </p>
         </div>
@@ -111,7 +118,7 @@ export function FirstRunScreen(): ReactElement {
         <StartCards />
         <div className="mt-4 flex flex-col gap-1 text-xs text-faint">
           <p>
-            Runs on your local Claude Code. Diagrams are stored in this browser; back them up from
+            Runs on your local {cliName}. Diagrams are stored in this browser; back them up from
             Settings.
           </p>
           <p>

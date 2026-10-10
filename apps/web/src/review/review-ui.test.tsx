@@ -75,6 +75,24 @@ async function proposalBar(): Promise<HTMLElement> {
   return screen.findByRole('region', { name: "Claude's proposal" }, TURN_END);
 }
 
+describe('reviewing a Codex change', () => {
+  it('names Codex in the proposal bar and on the canvas', async () => {
+    useUiStore.getState().setAgent('codex');
+    replies.push(() => eventsResponse(replyEvents(fenced(AFTER))));
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole('group', { name: 'Diagram preview' });
+    act(() => {
+      screen.getByLabelText('Message Codex').focus();
+    });
+    await user.keyboard('Change it{Meta>}{Enter}{/Meta}');
+    const bar = await screen.findByRole('region', { name: "Codex's proposal" }, TURN_END);
+    await waitFor(() => {
+      expect(bar.textContent).toContain('Codex proposes 3 changes');
+    }, TURN_END);
+  });
+});
+
 describe('reviewing a change in the app', () => {
   it('shows the bar and the waiting card, rejects, shows again and accepts with Enter', async () => {
     const user = await renderAndSend(AFTER);

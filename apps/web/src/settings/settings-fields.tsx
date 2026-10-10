@@ -14,6 +14,7 @@ import { isThemePreference, THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/
 import { CodebaseSetting } from './codebase-setting.tsx';
 import { ConnectionRow } from './connection-row.tsx';
 import { DEFAULT_MODEL_VALUE, toModel, useModelOptions } from './models.ts';
+import { useAgentName } from '../chat/agent-name.ts';
 import { backUpAll, pickAndRestoreBackup } from '../import/import-files.ts';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { useUiStore } from '../state/ui-store.ts';
@@ -130,8 +131,9 @@ export function DefaultModelField(): ReactElement {
   );
 }
 
-/** Whether Claude's changes wait on the canvas for Accept or Reject (PRD §4.2). */
+/** Whether the agent's changes wait on the canvas for Accept or Reject (PRD §4.2). */
 export function ReviewChangesField(): ReactElement {
+  const name: string = useAgentName();
   const isOn: boolean = useUiStore((state) => state.shouldReviewChanges);
   const setReviewChanges: (isOn: boolean) => void = useUiStore((state) => state.setReviewChanges);
   return (
@@ -141,7 +143,7 @@ export function ReviewChangesField(): ReactElement {
           Review changes before applying
         </label>
         <span id="settings-review-hint" className="text-xs text-muted-foreground">
-          Claude&apos;s changes wait on the canvas until you accept them.
+          {name}&apos;s changes wait on the canvas until you accept them.
         </span>
       </span>
       <Switch

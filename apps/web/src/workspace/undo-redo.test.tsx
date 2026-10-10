@@ -63,7 +63,7 @@ describe('undo and redo in the top bar', () => {
     const menu = await screen.findByRole('menu');
     const items = within(menu).getAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
-      expect.stringMatching(/^Claude: Link a to bClaude · just nowNow$/),
+      expect.stringMatching(/^Claude: Link a to bAgent · just nowNow$/),
       expect.stringMatching(/^Pasted codeCode · just now$/),
       expect.stringMatching(/^New blank flowchartTemplate · just now$/),
     ]);

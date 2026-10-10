@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   acceptProposal,
   DIAGRAM_CHANGED,
-  PROPOSAL_GONE,
+  proposalGone,
   rejectProposal,
   REVIEW_BUSY,
   showAgainBlocker,
@@ -222,7 +222,9 @@ describe('accept, reject and show again', () => {
       DIAGRAM_CHANGED,
     );
     expect(showAgainBlocker({ proposal, code, isBusy: true })).toBe(REVIEW_BUSY);
-    expect(showAgainBlocker({ proposal: undefined, code, isBusy: false })).toBe(PROPOSAL_GONE);
+    expect(showAgainBlocker({ proposal: undefined, code, isBusy: false })).toBe(
+      proposalGone('Claude'),
+    );
     h.workspace.store.getState().applyEdit('flowchart LR', { label: 'Typed', source: 'code' });
     showProposalAgain(id, 1);
     expect(useReviewStore.getState().open).toEqual({});

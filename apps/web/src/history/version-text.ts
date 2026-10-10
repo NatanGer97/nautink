@@ -1,3 +1,5 @@
+import { agentName } from '../chat/agent-name.ts';
+
 import type { Version, VersionKind } from '@nautink/storage/records';
 
 /** Badge words per kind (v1's `KIND_LABELS`), plus the current code. */
@@ -7,6 +9,11 @@ export const KIND_LABELS: Readonly<Record<VersionKind | 'current', string>> = {
   manual: 'Saved',
   restore: 'Before restore',
 };
+
+/** A version's badge: an agent version names the agent that wrote it ("Codex"). */
+export function kindLabel(version: Pick<Version, 'kind' | 'agent'>): string {
+  return version.kind === 'claude' ? agentName(version.agent) : KIND_LABELS[version.kind];
+}
 
 /** The muted badge tones from M5. */
 export const KIND_BADGE_CLASSES: Readonly<Record<VersionKind | 'current', string>> = {

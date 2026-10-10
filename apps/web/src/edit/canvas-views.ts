@@ -1,6 +1,7 @@
 import { diagramKeyword, typeName } from '@nautink/storage/diagram-type';
 
 import { editorIdFor, VISUAL_EDITORS } from './editor-registry.ts';
+import { currentAgentName } from '../chat/agent-name.ts';
 
 import type { EditorRegistry } from './editor-registry.ts';
 import type { DiagramView } from '@nautink/storage/records';
@@ -32,7 +33,7 @@ export function viewAvailability(
   const reason: string | null =
     hasEditor || isEmpty
       ? null
-      : `Visual editing isn't available for ${typeName(code)} diagrams. Change it in code, or ask Claude.`;
+      : `Visual editing isn't available for ${typeName(code)} diagrams. Change it in code, or ask ${currentAgentName()}.`;
   return { hasEditor, isEmpty, reason };
 }
 

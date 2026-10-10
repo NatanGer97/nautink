@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ClassEditor } from './class-editor.tsx';
 import { DARK_CODE_NODE_FILL } from '../canvas/code-colors.ts';
-import { CLAUDE_EDITING } from '../read-only-reason.ts';
+import { agentEditingText } from '../read-only-reason.ts';
 import { requestSelection, useCanvasSelectionStore } from '../selection/canvas-selection.ts';
 import { SYNTAX_ERROR_REASON } from '../use-editor-core.ts';
 
@@ -204,7 +204,7 @@ describe('ClassEditor', () => {
   });
 
   it('is read-only while Claude edits, and keeps the last canvas on a syntax error', async () => {
-    const { rerender } = renderEditor({ readOnlyReason: CLAUDE_EDITING });
+    const { rerender } = renderEditor({ readOnlyReason: agentEditingText('Claude') });
     await screen.findByTestId('class-node-Animal');
     // Claude's working pill on the canvas says so; the editor shows no note of its own.
     expect(screen.queryByRole('status')).toBeNull();

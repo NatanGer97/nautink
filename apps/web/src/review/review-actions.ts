@@ -1,4 +1,5 @@
 import { changeCount, useReviewStore } from './review-store.ts';
+import { agentName, currentAgentName } from '../chat/agent-name.ts';
 import { useChatStore } from '../chat/chat-store.ts';
 import { findTurnDiagram } from '../chat/turn-edit.ts';
 import { saveTurnVersions } from '../chat/turn-versions.ts';
@@ -13,7 +14,9 @@ export const DIAGRAM_CHANGED: string =
   'The diagram changed after this reply, so its proposal cannot be shown again.';
 
 /** Shown on "Show again" when the proposal is no longer kept (a reload, a new chat). */
-export const PROPOSAL_GONE: string = 'This proposal is no longer available. Ask Claude again.';
+export function proposalGone(name: string): string {
+  return `This proposal is no longer available. Ask ${name} again.`;
+}
 
 /** Shown on "Show again" while another proposal or a reply is on this diagram. */
 export const REVIEW_BUSY: string = 'Finish the current review or reply first.';
@@ -101,7 +104,7 @@ export interface ShowAgainState {
 /** Why the reply's proposal cannot be shown again now, or `null` when it can. */
 export function showAgainBlocker({ proposal, code, isBusy }: ShowAgainState): string | null {
   if (proposal === undefined || code === undefined) {
-    return PROPOSAL_GONE;
+    return proposalGone(currentAgentName());
   }
   if (isBusy) {
     return REVIEW_BUSY;
@@ -124,5 +127,6 @@ export function showProposalAgain(diagramId: string, messageIndex: number): void
   }
   review.openProposal(proposal);
   markReplies(proposal, undefined);
-  useChatStore.getState().announce(`Claude proposes ${String(changesOf(proposal))} changes.`);
+  const name: string = agentName(proposal.agent);
+  useChatStore.getState().announce(`${name} proposes ${String(changesOf(proposal))} changes.`);
 }

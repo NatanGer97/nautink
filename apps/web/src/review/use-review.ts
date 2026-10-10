@@ -1,16 +1,19 @@
 import { useReviewStore } from './review-store.ts';
+import { agentName, useAgentName } from '../chat/agent-name.ts';
 
 import type { Proposal, ProposalReview, ReviewData } from './review-store.ts';
 import type { StructuralReview } from '@nautink/editors/review/review-diagram';
 import type { Diagram } from '@nautink/storage/records';
 
-/** Shown on the canvas and in the code drawer while a proposal waits for review. */
-export const REVIEWING: string =
-  "Reviewing Claude's change · read-only until you accept or reject it";
+/** Shown on the canvas and in the code drawer while `name`'s proposal waits for review. */
+export function reviewingText(name: string): string {
+  return `Reviewing ${name}'s change · read-only until you accept or reject it`;
+}
 
-/** Shown while Claude writes a proposal into a diagram (review on). */
-export const CLAUDE_PROPOSING: string =
-  'Claude is writing a change for you to review. Editing is paused until you accept or reject it.';
+/** Shown while the agent writes a proposal into a diagram (review on). */
+export function proposingText(name: string): string {
+  return `${name} is writing a change for you to review. Editing is paused until you accept or reject it.`;
+}
 
 /** The code the canvas shows for a diagram: the live build, the open proposal, or its own code. */
 export function shownCode(diagram: Pick<Diagram, 'id' | 'code'>, review: ReviewData): string {
@@ -37,14 +40,17 @@ export function useOpenProposal(diagramId: string | undefined): Proposal | undef
 
 /** Why the canvas and code cannot be edited because of a review, or `null`. */
 export function useReviewReadOnlyReason(diagramId: string | undefined): string | null {
+  const name: string = useAgentName();
   return useReviewStore((state) => {
     if (diagramId === undefined) {
       return null;
     }
-    if (diagramId in state.open) {
-      return REVIEWING;
+    const proposal: Proposal | undefined = state.open[diagramId];
+    if (proposal !== undefined) {
+      return reviewingText(agentName(proposal.agent));
     }
-    return diagramId in state.live ? CLAUDE_PROPOSING : null;
+    // A live build runs for the turn just sent, so it is the chosen agent's.
+    return diagramId in state.live ? proposingText(name) : null;
   });
 }
 

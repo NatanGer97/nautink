@@ -1,5 +1,6 @@
 import { LazyDiff } from './lazy-diff.tsx';
 import { ReviewBar } from './review-bar.tsx';
+import { agentName } from '../chat/agent-name.ts';
 
 import type { Proposal } from './review-store.ts';
 import type { ReactElement } from 'react';
@@ -18,7 +19,7 @@ export function CodeReview({ proposal }: { proposal: Proposal }): ReactElement {
           role="status"
           className="shrink-0 border-b border-border-subtle bg-subtle px-3.5 py-1.5 text-xs text-muted-foreground"
         >
-          Claude&apos;s proposal · accept or reject it on the canvas
+          {agentName(proposal.agent)}&apos;s proposal · accept or reject it on the canvas
         </p>
       )}
       <LazyDiff before={proposal.before} after={proposal.after} />

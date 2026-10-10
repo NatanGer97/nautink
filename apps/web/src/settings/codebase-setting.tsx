@@ -3,6 +3,7 @@ import { Input } from '@nautink/ui/components/input';
 import { useEffect, useRef, useState } from 'react';
 
 import { useRepoStore } from './repo-store.ts';
+import { useAgentName } from '../chat/agent-name.ts';
 
 import type { RepoLoadStatus } from './repo-store.ts';
 import type { ReactElement, RefObject, SyntheticEvent } from 'react';
@@ -55,6 +56,7 @@ interface RepoFormProps {
 
 /** Type or paste a folder path; the server checks it exists and is a folder. */
 function RepoForm({ initialPath, onDone }: RepoFormProps): ReactElement {
+  const name: string = useAgentName();
   const [path, setPath] = useState<string>(initialPath);
   const isSaving: boolean = useRepoStore((state) => state.isSaving);
   const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement>(null);
@@ -86,7 +88,7 @@ function RepoForm({ initialPath, onDone }: RepoFormProps): ReactElement {
         }}
       />
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-faint">Claude can read files in this folder.</span>
+        <span className="text-xs text-faint">{name} can read files in this folder.</span>
         <span className="flex gap-1">
           <Button type="button" variant="ghost" size="xs" onClick={onDone}>
             Cancel
@@ -102,6 +104,7 @@ function RepoForm({ initialPath, onDone }: RepoFormProps): ReactElement {
 
 /** The codebase Claude can read (M8): shown from `GET /api/info`, saved with `POST /api/repo`. */
 export function CodebaseSetting(): ReactElement {
+  const name: string = useAgentName();
   const repoDir: string | null = useRepoStore((state) => state.repoDir);
   const status: RepoLoadStatus = useRepoStore((state) => state.status);
   const saveError: string | null = useRepoStore((state) => state.saveError);
@@ -115,7 +118,7 @@ export function CodebaseSetting(): ReactElement {
   };
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-xs text-muted-foreground">Codebase Claude can read</span>
+      <span className="text-xs text-muted-foreground">Codebase {name} can read</span>
       {isEditing ? (
         <RepoForm initialPath={repoDir ?? ''} onDone={stopEditing} />
       ) : (

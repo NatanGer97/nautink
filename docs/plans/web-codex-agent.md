@@ -65,7 +65,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: no hard-coded "Claude" left in `apps/web/src/chat/` outside comments and tests
 
-- [ ] **T6 — Review, edit, code, history, settings and first-run strings**
+- [x] **T6 — Review, edit, code, history, settings and first-run strings**
   - context - the rest of the 45 strings
   - Files: `review/review-bar.tsx`, `review-actions.ts`, `review-history-guard.ts`, `use-review.ts`, `edit/read-only-reason.ts`, `edit/canvas-views.ts`, `edit/selection-prompt/selection-prompt.tsx`, `shell/code-drawer.tsx`, `code/ask-claude-to-fix.ts`, `history/version-text.ts`, `workspace/undo-redo-controls.tsx`, `settings/codebase-setting.tsx`, `settings/repo-badge.tsx`, `first-run/first-run-screen.tsx`, tests
   - Red: with agent `codex`: `Codex proposes 3 changes`, `Ask Codex about these 2…`, `Codebase Codex can read`, read-only reason names Codex; a version with `agent:'codex'` shows `Codex` in history
