@@ -60,11 +60,16 @@ describe('GET /api/health', () => {
     expect(health.error).toContain('was not found');
   });
 
-  it('reports a failing CLI and a CLI that does not answer', async () => {
-    const url = await start({ healthTimeoutMs: 300 });
+  it('reports a failing CLI', async () => {
+    // The default timeout: a short one turns a slow start under a loaded test run into "hang".
+    const url = await start();
     vi.stubEnv('FAKE_CLAUDE_SCENARIO', 'version-fail');
     const failed = await fetchHealth(url);
     expect(failed.error).toContain('--version" failed');
+  });
+
+  it('reports a CLI that does not answer', async () => {
+    const url = await start({ healthTimeoutMs: 300 });
     vi.stubEnv('FAKE_CLAUDE_SCENARIO', 'hang');
     const hung = await fetchHealth(url);
     expect(hung).toEqual({
