@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@nautink/ui/components/select';
+import { Switch } from '@nautink/ui/components/switch';
 import { ToggleGroup, ToggleGroupItem } from '@nautink/ui/components/toggle-group';
 import { isThemePreference, THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/theme';
 
@@ -95,6 +96,31 @@ export function DefaultModelField(): ReactElement {
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+/** Whether Claude's changes wait on the canvas for Accept or Reject (PRD §4.2). */
+export function ReviewChangesField(): ReactElement {
+  const isOn: boolean = useUiStore((state) => state.shouldReviewChanges);
+  const setReviewChanges: (isOn: boolean) => void = useUiStore((state) => state.setReviewChanges);
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <span className="flex flex-col gap-0.5">
+        <label htmlFor="settings-review" className="font-medium">
+          Review changes before applying
+        </label>
+        <span id="settings-review-hint" className="text-xs text-muted-foreground">
+          Claude&apos;s changes wait on the canvas until you accept them.
+        </span>
+      </span>
+      <Switch
+        id="settings-review"
+        aria-describedby="settings-review-hint"
+        className="mt-0.5"
+        checked={isOn}
+        onCheckedChange={setReviewChanges}
+      />
     </div>
   );
 }

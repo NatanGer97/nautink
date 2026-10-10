@@ -29,6 +29,7 @@ export interface UiActions {
   setLibraryOpen: (isOpen: boolean) => void;
   setThemePreference: (preference: ThemePreference) => void;
   setDefaultModel: (model: ModelId | null) => void;
+  setReviewChanges: (isOn: boolean) => void;
   setPaletteOpen: (isOpen: boolean) => void;
   setSettingsOpen: (isOpen: boolean) => void;
   setTemplatesOpen: (isOpen: boolean) => void;
@@ -73,13 +74,16 @@ function layoutActions(set: SetUiState): LayoutActions {
 
 function preferenceActions(
   set: SetUiState,
-): Pick<UiActions, 'setThemePreference' | 'setDefaultModel'> {
+): Pick<UiActions, 'setThemePreference' | 'setDefaultModel' | 'setReviewChanges'> {
   return {
     setThemePreference: (preference: ThemePreference): void => {
       set({ themePreference: preference });
     },
     setDefaultModel: (model: ModelId | null): void => {
       set({ defaultModel: model });
+    },
+    setReviewChanges: (isOn: boolean): void => {
+      set({ shouldReviewChanges: isOn });
     },
   };
 }

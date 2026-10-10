@@ -132,6 +132,18 @@ describe('App shell', () => {
     expect(useUiStore.getState().defaultModel).toBeNull();
   });
 
+  it('turns change review off and on in settings, on by default', async () => {
+    useUiStore.getState().setSettingsOpen(true);
+    const user = renderApp();
+    const settings = await screen.findByRole('dialog', { name: 'Settings' });
+    const toggle = within(settings).getByRole('switch', { name: 'Review changes before applying' });
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
+    await user.click(toggle);
+    expect(useUiStore.getState().shouldReviewChanges).toBe(false);
+    await user.click(toggle);
+    expect(useUiStore.getState().shouldReviewChanges).toBe(true);
+  });
+
   it('opens the template gallery and hands off to chat', async () => {
     const user = renderApp();
     await user.click(screen.getByRole('button', { name: 'Templates' }));

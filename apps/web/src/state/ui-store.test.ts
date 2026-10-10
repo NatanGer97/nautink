@@ -64,6 +64,18 @@ describe('useUiStore', () => {
     expect(useUiStore.getState()).toMatchObject({ isLibraryOpen: false, themePreference: 'dark' });
   });
 
+  it('remembers change review, and turns it on for older saves that lack it', async () => {
+    useUiStore.getState().setReviewChanges(false);
+    const saved = JSON.parse(window.localStorage.getItem(UI_STORAGE_KEY) ?? '{}') as {
+      state: Record<string, unknown>;
+    };
+    expect(saved.state.shouldReviewChanges).toBe(false);
+    const older: Record<string, unknown> = { ...DEFAULT_UI_PREFS, shouldReviewChanges: undefined };
+    window.localStorage.setItem(UI_STORAGE_KEY, JSON.stringify({ state: older, version: 1 }));
+    await useUiStore.persist.rehydrate();
+    expect(useUiStore.getState().shouldReviewChanges).toBe(true);
+  });
+
   it('ignores the canvas mode an earlier build saved: the view is per diagram now', async () => {
     window.localStorage.setItem(
       UI_STORAGE_KEY,

@@ -8,6 +8,7 @@ import {
   BackupField,
   CodebaseField,
   DefaultModelField,
+  ReviewChangesField,
 } from './settings-fields.tsx';
 import { useConnectionStatus } from './use-connection-status.ts';
 import { focusOverlayContainer } from '../shell/focus-overlay.ts';
@@ -21,7 +22,7 @@ export interface SettingsPopoverProps {
   children: ReactNode;
 }
 
-/** Settings (M8): appearance, default model, Claude Code connection, codebase and backup. */
+/** Settings (M8): appearance, default model, change review, Claude Code connection, codebase and backup. */
 export function SettingsPopover({ children }: SettingsPopoverProps): ReactElement {
   const isOpen: boolean = useUiStore((state) => state.isSettingsOpen);
   const setOpen: (isOpen: boolean) => void = useUiStore((state) => state.setSettingsOpen);
@@ -53,6 +54,7 @@ export function SettingsPopover({ children }: SettingsPopoverProps): ReactElemen
         </div>
         <AppearanceField />
         <DefaultModelField />
+        <ReviewChangesField />
         <ConnectionRow status={connection.status} onRecheck={connection.recheck} />
         <CodebaseField />
         <BackupField />

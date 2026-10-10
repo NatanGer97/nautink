@@ -22,6 +22,8 @@ export interface UiPrefs {
   themePreference: ThemePreference;
   /** `null` means Claude Code's own default model. */
   defaultModel: ModelId | null;
+  /** Claude's changes wait on the canvas for Accept or Reject (PRD §4.2). On by default. */
+  shouldReviewChanges: boolean;
 }
 
 export const DEFAULT_UI_PREFS: UiPrefs = {
@@ -30,6 +32,7 @@ export const DEFAULT_UI_PREFS: UiPrefs = {
   isLibraryOpen: false,
   themePreference: 'system',
   defaultModel: null,
+  shouldReviewChanges: true,
 };
 
 export const uiPrefsSchema: z.ZodType<UiPrefs> = z.object({
@@ -39,6 +42,7 @@ export const uiPrefsSchema: z.ZodType<UiPrefs> = z.object({
   isLibraryOpen: z.boolean().default(false),
   themePreference: z.enum(THEME_PREFERENCES),
   defaultModel: z.enum(MODEL_IDS).nullable(),
+  shouldReviewChanges: z.boolean().default(true),
 });
 
 /** Picks the preference fields out of a larger state object. */
@@ -49,6 +53,7 @@ export function pickUiPrefs(state: UiPrefs): UiPrefs {
     isLibraryOpen: state.isLibraryOpen,
     themePreference: state.themePreference,
     defaultModel: state.defaultModel,
+    shouldReviewChanges: state.shouldReviewChanges,
   };
 }
 
