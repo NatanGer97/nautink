@@ -120,6 +120,24 @@ export function updateNode(context: FlowActionContext, id: string, patch: Partia
   run(context, (g) => [ops.updateNode(g, id, patch), editLabel('node', nodeName(g, id), patch)]);
 }
 
+/** One patch for several nodes as one step: "Changed shape of 3 nodes". */
+export function updateNodes(
+  context: FlowActionContext,
+  ids: readonly string[],
+  patch: Partial<FlowNode>,
+): void {
+  if (ids.length > 0) {
+    run(context, (g) => [
+      ops.updateNodes(g, ids, patch),
+      editLabel(
+        'node',
+        ids.length === 1 ? nodeName(g, ids[0] ?? '') : `${String(ids.length)} nodes`,
+        patch,
+      ),
+    ]);
+  }
+}
+
 export function updateEdge(context: FlowActionContext, id: string, patch: Partial<FlowEdge>): void {
   run(context, (g) => [ops.updateEdge(g, id, patch), editLabel('link', edgeName(g, id), patch)]);
 }

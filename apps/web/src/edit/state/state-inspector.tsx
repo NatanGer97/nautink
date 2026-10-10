@@ -18,7 +18,7 @@ import {
   Membership,
   SIDE_CHOICES,
 } from './state-inspector-parts.tsx';
-import { endName, stateName } from './state-names.ts';
+import { endName, stateName, transitionName } from './state-names.ts';
 import { NO_SELECTION } from './state-types.ts';
 import { InspectorActions, InspectorButton, InspectorCard } from '../canvas/inspector-card.tsx';
 import { ChoiceField, CommitField, SelectField } from '../canvas/inspector-fields.tsx';
@@ -66,10 +66,13 @@ function DeleteButton({ context, selection }: Pick<Shared, 'context' | 'selectio
 
 function ManyInspector({ model, context, isReadOnly, selection }: Shared): ReactElement {
   const states: string[] = selection.nodes.filter((id) => stateById(model, id));
-  const names: string = selection.nodes.map((id) => stateName(model, id)).join(', ');
+  const names: string = [
+    ...selection.nodes.map((id) => stateName(model, id)),
+    ...selection.edges.map((id) => transitionName(model, id)),
+  ].join(', ');
   return (
     <InspectorCard
-      title={`${String(selection.nodes.length)} selected`}
+      title={`${String(selection.nodes.length + selection.edges.length)} selected`}
       subtitle={names}
       isReadOnly={isReadOnly}
     >
@@ -378,7 +381,7 @@ export function StateInspector({
   ...shared
 }: StateInspectorProps): ReactElement | null {
   const { model, selection } = shared;
-  if (selection.nodes.length > 1) {
+  if (selection.nodes.length + selection.edges.length > 1) {
     return <ManyInspector {...shared} />;
   }
   const one: string | null = selection.nodes[0] ?? selection.group;

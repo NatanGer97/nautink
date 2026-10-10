@@ -2,7 +2,7 @@ import { findItem } from '@nautink/editors/sequence/model';
 
 import { BlockPanel } from './block-panel.tsx';
 import { MessagePanel } from './message-panel.tsx';
-import { BoxPanel, ParticipantPanel } from './participant-panel.tsx';
+import { BoxPanel, ParticipantPanel, ParticipantsPanel } from './participant-panel.tsx';
 import { ActivationPanel, AutonumberPanel, NotePanel, RowsPanel } from './row-panels.tsx';
 
 import type { SequenceActionContext } from './sequence-actions.ts';
@@ -52,7 +52,7 @@ function ItemsPanel({
 }
 
 /**
- * The floating inspector (M1), shown only while something is selected: one participant, a box,
+ * The floating inspector (M1), shown only while something is selected: one or several participants, a box,
  * one row of any kind, or several rows (v1's Inspector). Its fields write labelled undo steps.
  */
 export function SequenceInspector({
@@ -62,6 +62,9 @@ export function SequenceInspector({
   const [only] = selection.ids;
   if (selection.kind === 'items') {
     return <ItemsPanel {...props} ids={selection.ids} />;
+  }
+  if (selection.kind === 'participant' && selection.ids.length > 1) {
+    return <ParticipantsPanel {...props} ids={selection.ids} />;
   }
   if (selection.kind === 'participant' && selection.ids.length === 1) {
     const participant: Participant | undefined = props.model.participants.find(

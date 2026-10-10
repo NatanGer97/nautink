@@ -21,6 +21,17 @@ export function participantSelection(id: string): SequenceSelection {
   return { kind: 'participant', ids: [id] };
 }
 
+/** Shift/⌘-click on a header: adds the participant to the selected ones, or takes it out. */
+export function toggledParticipant(selection: SequenceSelection, id: string): SequenceSelection {
+  if (selection.kind !== 'participant') {
+    return participantSelection(id);
+  }
+  const ids: string[] = selection.ids.includes(id)
+    ? selection.ids.filter((other) => other !== id)
+    : [...selection.ids, id];
+  return ids.length === 0 ? NO_SELECTION : { kind: 'participant', ids };
+}
+
 export function itemSelection(ids: readonly string[], anchor?: string): SequenceSelection {
   return anchor === undefined ? { kind: 'items', ids } : { kind: 'items', ids, anchor };
 }

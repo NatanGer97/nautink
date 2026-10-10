@@ -171,6 +171,9 @@ describe('ErEditor', () => {
     await screen.findByTestId('er-group-SALES');
     const many = await selectItems(['CUSTOMER', 'ORDER']);
     expect(within(many).getByRole('heading', { name: '2 entities' })).toBeTruthy();
+    const mixed = await selectItems(['CUSTOMER', 'R_CUSTOMER_ORDER_0']);
+    expect(within(mixed).getByRole('heading', { name: '2 items' })).toBeTruthy();
+    expect(within(mixed).getByText('CUSTOMER, CUSTOMER → ORDER')).toBeTruthy();
     const group = await selectItems(['SALES']);
     expect(within(group).getByRole('heading', { name: 'Group' })).toBeTruthy();
     await user.click(within(group).getByRole('button', { name: 'Ungroup' }));

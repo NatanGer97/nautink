@@ -5,7 +5,7 @@ import { nearestCol, nearestSlot } from '@nautink/editors/sequence/layout';
 import { isDescendantKey } from '@nautink/editors/sequence/tree';
 
 import { clickedRow } from './sequence-selection.ts';
-import { itemSelection, participantSelection } from './sequence-types.ts';
+import { itemSelection, participantSelection, toggledParticipant } from './sequence-types.ts';
 
 import type { SequenceSelection } from './sequence-types.ts';
 import type { Point, ViewTransform } from '../../preview/view-math.ts';
@@ -23,7 +23,7 @@ const SELF_SLACK: number = 8;
 /** What a press started on. */
 export type DragStart =
   | { mode: 'pan'; view: ViewTransform }
-  | { mode: 'col'; id: string }
+  | { mode: 'col'; id: string; isShift?: boolean }
   | { mode: 'link'; from: string; x: number }
   | { mode: 'item'; id: string; ids: readonly string[]; isShift: boolean };
 
@@ -154,6 +154,15 @@ function rowOutcome(session: SessionOf<'item'>, at: Point, scene: DragScene): Dr
   return { kind: 'moveRows', ids, slot: slotOf(slot) };
 }
 
+function clickedHeader(
+  start: Extract<DragStart, { mode: 'col' }>,
+  selection: SequenceSelection,
+): SequenceSelection {
+  return start.isShift === true
+    ? toggledParticipant(selection, start.id)
+    : participantSelection(start.id);
+}
+
 /** What the press does when it ends at canvas point `at`. */
 export function dragOutcome(session: DragSession, at: Point, scene: DragScene): DragOutcome {
   const { start } = session;
@@ -161,7 +170,7 @@ export function dragOutcome(session: DragSession, at: Point, scene: DragScene): 
     case 'col':
       return session.isMoved
         ? columnOutcome(start.id, at, scene)
-        : { kind: 'select', selection: participantSelection(start.id) };
+        : { kind: 'select', selection: clickedHeader(start, scene.selection) };
     case 'link':
       return linkOutcome({ ...session, start }, at, scene);
     case 'item':

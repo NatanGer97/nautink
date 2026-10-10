@@ -226,6 +226,28 @@ describe('SequenceEditor', () => {
     expect(onChange.mock.lastCall?.[1]).toMatch(/^Added note on /);
   });
 
+  it('puts several participants in a box, or deletes them, from one inspector', async () => {
+    const { onChange } = renderEditor({
+      code: 'sequenceDiagram\n    participant A as Alice\n    participant C\n    A->>B: Hello\n',
+    });
+    await screen.findByTestId('sequence-participant-A');
+    fireEvent.pointerDown(screen.getByTestId('sequence-participant-A'), { button: 0 });
+    fireEvent.pointerUp(window);
+    fireEvent.pointerDown(screen.getByTestId('sequence-participant-B'), {
+      button: 0,
+      shiftKey: true,
+    });
+    fireEvent.pointerUp(window);
+    expect(within(inspector()).getByRole('heading', { name: '2 participants' })).toBeTruthy();
+    expect(within(inspector()).getByRole('button', { name: 'Delete' })).toBeTruthy();
+    fireEvent.click(within(inspector()).getByRole('button', { name: 'Put in a box' }));
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.stringMatching(/box Group\n\s+participant A as Alice\n\s+participant B\n\s+end/),
+      'Put Alice, B in a box',
+    );
+    expect(within(inspector()).getByRole('heading', { name: 'Box' })).toBeTruthy();
+  });
+
   it('draws participants and messages, and renames a participant from the inspector', async () => {
     const { onChange } = renderEditor();
     const user = userEvent.setup();

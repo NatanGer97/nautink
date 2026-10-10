@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyModel, parse } from './model.ts';
 import {
   addParticipant,
+  boxParticipants,
   deleteParticipant,
   moveParticipant,
   participantRefs,
@@ -158,6 +159,19 @@ describe('moving and boxes', () => {
     expect(order(fresh)[2]).toBe('C@box5');
     expect(order(setParticipantBox(boxes, 'C', 'box9'))[2]).toBe('C@box9');
     expect(setParticipantBox(boxes, 'nope', null)).toBe(boxes);
+  });
+
+  it('puts several participants in one new box, side by side, leaving created ones out', async () => {
+    const boxes = await read(SEQUENCE_FIXTURES.boxes!);
+    const boxed = boxParticipants(boxes, ['E', 'A']);
+    expect(boxed.id).toBe('box5');
+    expect(order(boxed.model)).toEqual(['A@box5', 'E@box5', 'B@box1', 'C@box2', 'D@box3']);
+    const lifecycle = await read(SEQUENCE_FIXTURES.lifecycle!);
+    const created = lifecycle.participants.find((participant) => participant.isCreated)!;
+    const plain = lifecycle.participants.find((participant) => !participant.isCreated)!;
+    const one = boxParticipants(lifecycle, [created.id, plain.id]);
+    expect(one.model.participants.find((item) => item.id === created.id)?.box).toBeNull();
+    expect(() => boxParticipants(lifecycle, [created.id])).toThrow('can go in a box');
   });
 
   it('removes a box, keeping its members', async () => {

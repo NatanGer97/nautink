@@ -176,6 +176,10 @@ describe('StateEditor', () => {
     await screen.findByTestId('state-node-Idle');
     const start = await inspectorFor(['start:']);
     expect(within(start).getByText(/In Top level/)).toBeTruthy();
+    const links = await inspectorFor(['t0', 't1']);
+    expect(within(links).getByRole('heading', { name: '2 selected' })).toBeTruthy();
+    expect(within(links).queryByRole('button', { name: 'Wrap in composite' })).toBeNull();
+    expect(within(links).getByRole('button', { name: 'Delete' })).toBeTruthy();
     const many = await inspectorFor(['Idle', 'Busy']);
     expect(within(many).getByRole('heading', { name: '2 selected' })).toBeTruthy();
     await user.click(within(many).getByRole('button', { name: 'Wrap in composite' }));

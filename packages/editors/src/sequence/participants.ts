@@ -270,6 +270,29 @@ export function setParticipantBox(
   return pruneBoxes(normalizeOrder({ ...created.model, participants: list }));
 }
 
+/**
+ * Puts participants in one new box ("Group"), side by side in column order. Created participants
+ * cannot join a box and stay where they are. Throws when none of `ids` can go in a box.
+ */
+export function boxParticipants(model: SequenceModel, ids: readonly string[]): Edited {
+  const [first, ...rest] = model.participants.filter(
+    (participant: Participant) => ids.includes(participant.id) && !participant.isCreated,
+  );
+  if (first === undefined) {
+    throw new Error(`None of ${ids.join(', ')} can go in a box`);
+  }
+  const started: SequenceModel = setParticipantBox(model, first.id, 'new');
+  const boxId: string = String(started.boxes.at(-1)?.id);
+  return {
+    model: rest.reduce(
+      (next: SequenceModel, participant: Participant) =>
+        setParticipantBox(next, participant.id, boxId),
+      started,
+    ),
+    id: boxId,
+  };
+}
+
 export function updateBox(
   model: SequenceModel,
   id: string,

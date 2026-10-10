@@ -3,6 +3,7 @@ import { participantRefs, validParticipantId } from '@nautink/editors/sequence/p
 import { toast } from 'sonner';
 
 import {
+  boxParticipants,
   removeBox,
   renameParticipant,
   setParticipantBox,
@@ -72,6 +73,45 @@ function BoxMembership({
         setParticipantBox(context, participant.id, box === '' ? null : box);
       }}
     />
+  );
+}
+
+/** Several participants: put them in one box, or delete them with every row on them (v1). */
+export function ParticipantsPanel({
+  model,
+  context,
+  isReadOnly,
+  ids,
+}: PanelProps & { ids: readonly string[] }): ReactElement {
+  const canBox: boolean = model.participants.some(
+    (participant) => ids.includes(participant.id) && !participant.isCreated,
+  );
+  return (
+    <InspectorCard
+      title={`${String(ids.length)} participants`}
+      subtitle={ids.join(', ')}
+      isReadOnly={isReadOnly}
+    >
+      <InspectorActions>
+        {canBox ? (
+          <InspectorButton
+            onClick={() => {
+              boxParticipants(context, ids);
+            }}
+          >
+            Put in a box
+          </InspectorButton>
+        ) : null}
+        <InspectorButton
+          isDestructive
+          onClick={() => {
+            deleteSelection(context);
+          }}
+        >
+          Delete
+        </InspectorButton>
+      </InspectorActions>
+    </InspectorCard>
   );
 }
 

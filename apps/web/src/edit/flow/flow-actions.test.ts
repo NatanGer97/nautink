@@ -16,6 +16,7 @@ import {
   updateEdge,
   updateGroup,
   updateNode,
+  updateNodes,
 } from './flow-actions.ts';
 import { NO_SELECTION } from './flow-types.ts';
 import { testContext } from '../../../tests/flow-fixtures.ts';
@@ -75,6 +76,17 @@ describe('flowchart actions', () => {
     expect(lastLabel(context)).toBe('Reversed link Check → Done');
     connect(context, 'A', 'C');
     expect(lastLabel(context)).toBe('Connected Begin → Done');
+  });
+
+  it('gives several nodes one shape as one step', () => {
+    const context = testContext();
+    updateNodes(context, [], { shape: 'hex' });
+    expect(context.commits).not.toHaveBeenCalled();
+    updateNodes(context, ['A', 'C'], { shape: 'hex' });
+    expect(lastLabel(context)).toBe('Changed shape of 2 nodes');
+    expect(context.graph().nodes.map((node) => node.shape)).toEqual(['hex', 'diam', 'hex']);
+    updateNodes(context, ['B'], { shape: 'rect' });
+    expect(lastLabel(context)).toBe('Changed shape of Check');
   });
 
   it('renames only when the label changed', () => {

@@ -56,6 +56,21 @@ export function updateNode(graph: FlowGraph, id: string, patch: Partial<FlowNode
   };
 }
 
+/** Applies one patch to several nodes (a shape for the whole selection). */
+export function updateNodes(
+  graph: FlowGraph,
+  ids: readonly string[],
+  patch: Partial<FlowNode>,
+): FlowGraph {
+  const picked: Set<string> = new Set<string>(ids);
+  return {
+    ...graph,
+    nodes: graph.nodes.map((node: FlowNode) =>
+      picked.has(node.id) ? { ...node, ...patch } : node,
+    ),
+  };
+}
+
 /** Adds a solid arrow (unless `edge` says otherwise) with the next free id for its ends. */
 export function addEdge(graph: FlowGraph, edge: NewFlowEdge): FlowGraph {
   const key: string = `${edge.source}_${edge.target}`;

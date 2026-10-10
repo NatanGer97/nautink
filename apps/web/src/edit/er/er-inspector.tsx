@@ -23,6 +23,7 @@ import {
   InspectorSection,
 } from '../canvas/inspector-card.tsx';
 import { ChoiceField, CommitField, SelectField } from '../canvas/inspector-fields.tsx';
+import { manyTitle } from '../canvas/many-title.ts';
 
 import type { ErActionContext } from './er-actions.ts';
 import type { ErCanvasSelection } from './er-types.ts';
@@ -256,13 +257,16 @@ function ManyInspector({
   context,
   isReadOnly,
 }: Shared & { selection: ErCanvasSelection }): ReactElement {
-  const names: string = selection.entities.map((name) => entityName(model, name)).join(', ');
+  const names: string = [
+    ...selection.entities.map((name) => entityName(model, name)),
+    ...selection.rels.map((id) => relName(model, id)),
+  ].join(', ');
+  const title: string = manyTitle([
+    { count: selection.entities.length, plural: 'entities' },
+    { count: selection.rels.length, plural: 'relationships' },
+  ]);
   return (
-    <InspectorCard
-      title={`${String(selection.entities.length)} entities`}
-      subtitle={names}
-      isReadOnly={isReadOnly}
-    >
+    <InspectorCard title={title} subtitle={names} isReadOnly={isReadOnly}>
       <InspectorActions>
         <InspectorButton
           isDestructive
@@ -277,7 +281,7 @@ function ManyInspector({
   );
 }
 
-/** The floating inspector (M1) for what is selected: an entity, a relationship, a group or many entities. */
+/** The floating inspector (M1) for what is selected: an entity, a relationship, a group or several items. */
 export function ErInspector({
   model,
   selection,
@@ -285,7 +289,7 @@ export function ErInspector({
   isReadOnly,
 }: ErInspectorProps): ReactElement | null {
   const shared: Shared = { model, context, isReadOnly };
-  if (selection.entities.length > 1) {
+  if (selection.entities.length + selection.rels.length > 1) {
     return <ManyInspector {...shared} selection={selection} />;
   }
   const entity: ErEntity | undefined = model.entities.find(

@@ -8,7 +8,10 @@ import { SelectField } from '../canvas/inspector-fields.tsx';
 import type { SelectOptionGroup } from '../canvas/inspector-fields.tsx';
 import type { ReactElement } from 'react';
 
-/** Every shape by category, plus the node's own shape when it is not in the library. */
+/** What the shape list shows when the selected nodes have different shapes. */
+export const MIXED_SHAPES: string = '';
+
+/** Every shape by category, plus the node's own shape when it is not in the library ("Mixed" for several). */
 export function shapeGroups(current: string): SelectOptionGroup[] {
   const groups: SelectOptionGroup[] = CATEGORIES.map((category) => ({
     label: category,
@@ -17,9 +20,11 @@ export function shapeGroups(current: string): SelectOptionGroup[] {
       label: shape.name,
     })),
   }));
-  return SHAPE_BY_ID.has(current)
-    ? groups
-    : [...groups, { label: 'Other', options: [{ value: current, label: current }] }];
+  if (SHAPE_BY_ID.has(current)) {
+    return groups;
+  }
+  const label: string = current === MIXED_SHAPES ? 'Mixed' : current;
+  return [...groups, { label: 'Other', options: [{ value: current, label }] }];
 }
 
 /** The quick shape grid (v1's palette) over the full shape list. */

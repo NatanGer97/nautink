@@ -13,6 +13,7 @@ import {
   updateEdge,
   updateGroup,
   updateNode,
+  updateNodes,
 } from './ops.ts';
 
 import type { FlowGraph } from './model.ts';
@@ -49,6 +50,11 @@ describe('nodes', () => {
 
   it('patches a node', () => {
     expect(updateNode(sample(), 'a', { label: 'New' }).nodes[0]!.label).toBe('New');
+  });
+
+  it('patches several nodes at once and leaves the others', () => {
+    const graph = updateNodes(sample(), ['a', 'c', 'gone'], { shape: 'circle' });
+    expect(graph.nodes.map((node) => node.shape)).toEqual(['circle', 'rect', 'circle']);
   });
 });
 

@@ -86,6 +86,41 @@ describe('FlowEditor', () => {
     ]);
   });
 
+  it('edits several selected items at once: one shape, group, duplicate and delete', async () => {
+    const { onChange } = renderEditor({
+      code: 'flowchart TD\n  A[Start] --> B(Done)\n  B --> C[End]\n',
+    });
+    const user = userEvent.setup();
+    await screen.findByTestId('flow-node-A');
+    act(() => {
+      requestSelection('d1', ['A', 'B']);
+    });
+    let inspector = await screen.findByRole('region', { name: 'Inspector' });
+    expect(within(inspector).getByRole('heading', { name: '2 nodes' })).toBeTruthy();
+    expect(within(inspector).getByRole('combobox', { name: 'All shapes' }).textContent).toBe(
+      'Mixed',
+    );
+    await user.click(within(inspector).getByRole('button', { name: 'Circle' }));
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.stringMatching(/A\(\(Start\)\)[\s\S]*B\(\(Done\)\)/),
+      'Changed shape of 2 nodes',
+    );
+    for (const action of ['Group', 'Duplicate', 'Delete']) {
+      expect(within(inspector).getByRole('button', { name: action })).toBeTruthy();
+    }
+    act(() => {
+      requestSelection('d1', ['L_A_B_0', 'L_B_C_0']);
+    });
+    inspector = await screen.findByRole('region', { name: 'Inspector' });
+    expect(within(inspector).getByRole('heading', { name: '2 links' })).toBeTruthy();
+    expect(within(inspector).queryByRole('button', { name: 'Group' })).toBeNull();
+    await user.click(within(inspector).getByRole('button', { name: 'Delete' }));
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.not.stringContaining('-->'),
+      'Deleted 2 items',
+    );
+  });
+
   it('adds a shape from the toolbar and deletes from the inspector', async () => {
     const { onChange } = renderEditor();
     const user = userEvent.setup();

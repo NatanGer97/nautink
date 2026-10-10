@@ -108,6 +108,19 @@ export function updateBox(
   );
 }
 
+/** Puts the participants side by side in one new box and selects it. */
+export function boxParticipants(context: SequenceActionContext, ids: readonly string[]): void {
+  const result: Edited | null = apply(
+    context,
+    (model) => people.boxParticipants(model, ids),
+    (model) =>
+      `Put ${clip(ids.map((id) => participantName(model, id)).join(', '), NAME_CLIP)} in a box`,
+  );
+  if (result !== null) {
+    context.select({ kind: 'box', ids: [result.id] });
+  }
+}
+
 export function removeBox(context: SequenceActionContext, id: string): void {
   apply(
     context,

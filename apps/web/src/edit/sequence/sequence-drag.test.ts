@@ -84,6 +84,30 @@ describe('drag previews', () => {
 });
 
 describe('drag outcomes', () => {
+  it('adds a header to the selected participants on a Shift/⌘-click, or takes it out', async () => {
+    const shift: DragStart = { mode: 'col', id: 'B', isShift: true };
+    const plain = await scene();
+    expect(dragOutcome(session(shift, false), { x: 0, y: 0 }, plain)).toEqual({
+      kind: 'select',
+      selection: participantSelection('B'),
+    });
+    const one = await scene({ selection: participantSelection('A') });
+    expect(dragOutcome(session(shift, false), { x: 0, y: 0 }, one)).toEqual({
+      kind: 'select',
+      selection: { kind: 'participant', ids: ['A', 'B'] },
+    });
+    const two = await scene({ selection: { kind: 'participant', ids: ['A', 'B'] } });
+    expect(dragOutcome(session(shift, false), { x: 0, y: 0 }, two)).toEqual({
+      kind: 'select',
+      selection: participantSelection('A'),
+    });
+    const onlyB = await scene({ selection: participantSelection('B') });
+    expect(dragOutcome(session(shift, false), { x: 0, y: 0 }, onlyB)).toEqual({
+      kind: 'select',
+      selection: NO_SELECTION,
+    });
+  });
+
   it('selects on a click', async () => {
     const drag = await scene();
     expect(dragOutcome(session({ mode: 'col', id: 'A' }, false), { x: 0, y: 0 }, drag)).toEqual({

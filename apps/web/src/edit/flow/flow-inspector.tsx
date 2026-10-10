@@ -11,17 +11,20 @@ import {
   updateEdge,
   updateGroup,
   updateNode,
+  updateNodes,
 } from './flow-actions.ts';
 import { AssetFields } from './flow-asset-fields.tsx';
-import { GROUP_DIRECTION_OPTIONS, ShapePicker } from './flow-inspector-parts.tsx';
+import { GROUP_DIRECTION_OPTIONS, MIXED_SHAPES, ShapePicker } from './flow-inspector-parts.tsx';
 import { edgeName, nodeName } from './flow-names.ts';
 import { NO_SELECTION } from './flow-types.ts';
 import { InspectorActions, InspectorButton, InspectorCard } from '../canvas/inspector-card.tsx';
 import { ChoiceField, CommitField, SelectField } from '../canvas/inspector-fields.tsx';
+import { manyTitle } from '../canvas/many-title.ts';
 
 import type { FlowActionContext } from './flow-actions.ts';
 import type { FlowSelection } from './flow-types.ts';
 import type { Choice, SelectOption } from '../canvas/inspector-fields.tsx';
+import type { SelectedCount } from '../canvas/many-title.ts';
 import type {
   FlowArrow,
   FlowEdge,
@@ -247,6 +250,67 @@ function GroupInspector({
   );
 }
 
+function manyCounts(selection: FlowSelection): SelectedCount[] {
+  return [
+    { count: selection.nodes.length, plural: 'nodes' },
+    { count: selection.edges.length, plural: 'links' },
+  ];
+}
+
+/** The selected nodes that have a shape (not icons or images), and their shape when they share one. */
+function bulkShape(graph: FlowGraph, ids: readonly string[]): { ids: string[]; shape: string } {
+  const shaped: FlowNode[] = graph.nodes.filter(
+    (node) => ids.includes(node.id) && node.icon === undefined && node.img === undefined,
+  );
+  const shapes: Set<string> = new Set<string>(shaped.map((node) => node.shape));
+  const [only] = shapes;
+  return {
+    ids: shaped.map((node) => node.id),
+    shape: shapes.size === 1 ? (only ?? '') : MIXED_SHAPES,
+  };
+}
+
+function ManyActions({
+  selection,
+  context,
+}: {
+  selection: FlowSelection;
+  context: FlowActionContext;
+}): ReactElement {
+  const hasNodes: boolean = selection.nodes.length > 0;
+  return (
+    <InspectorActions>
+      {hasNodes ? (
+        <InspectorButton
+          onClick={() => {
+            groupNodes(context, selection.nodes);
+          }}
+        >
+          Group
+        </InspectorButton>
+      ) : null}
+      {hasNodes ? (
+        <InspectorButton
+          onClick={() => {
+            duplicateNodes(context, selection.nodes);
+          }}
+        >
+          Duplicate
+        </InspectorButton>
+      ) : null}
+      <InspectorButton
+        isDestructive
+        onClick={() => {
+          deleteSelection(context, selection);
+        }}
+      >
+        Delete
+      </InspectorButton>
+    </InspectorActions>
+  );
+}
+
+/** Several nodes and links: one shape for all the nodes, Group, Duplicate and Delete. */
 function ManyInspector({
   graph,
   selection,
@@ -258,42 +322,33 @@ function ManyInspector({
   context: FlowActionContext;
   isReadOnly: boolean;
 }): ReactElement {
-  const names: string = selection.nodes.map((id) => nodeName(graph, id)).join(', ');
+  const names: string = [
+    ...selection.nodes.map((id) => nodeName(graph, id)),
+    ...selection.edges.map((id) => edgeName(graph, id)),
+  ].join(', ');
+  const shape: { ids: string[]; shape: string } = bulkShape(graph, selection.nodes);
   return (
     <InspectorCard
-      title={`${String(selection.nodes.length)} nodes`}
+      title={manyTitle(manyCounts(selection))}
       subtitle={names}
       isReadOnly={isReadOnly}
     >
-      <InspectorActions>
-        <InspectorButton
-          onClick={() => {
-            groupNodes(context, selection.nodes);
+      {shape.ids.length > 0 ? (
+        <ShapePicker
+          value={shape.shape}
+          onChange={(next) => {
+            if (next !== MIXED_SHAPES) {
+              updateNodes(context, shape.ids, { shape: next });
+            }
           }}
-        >
-          Group
-        </InspectorButton>
-        <InspectorButton
-          onClick={() => {
-            duplicateNodes(context, selection.nodes);
-          }}
-        >
-          Duplicate
-        </InspectorButton>
-        <InspectorButton
-          isDestructive
-          onClick={() => {
-            deleteSelection(context, selection);
-          }}
-        >
-          Delete
-        </InspectorButton>
-      </InspectorActions>
+        />
+      ) : null}
+      <ManyActions selection={selection} context={context} />
     </InspectorCard>
   );
 }
 
-/** The floating inspector (M1) for what is selected: a node, a link, a group or many nodes. */
+/** The floating inspector (M1) for what is selected: a node, a link, a group or several items. */
 export function FlowInspector({
   graph,
   selection,
@@ -306,7 +361,7 @@ export function FlowInspector({
     context,
     isReadOnly,
   };
-  if (selection.nodes.length > 1) {
+  if (selection.nodes.length + selection.edges.length > 1) {
     return <ManyInspector {...shared} selection={selection} />;
   }
   const node: FlowNode | undefined = graph.nodes.find((item) => item.id === selection.nodes[0]);

@@ -127,13 +127,18 @@ function rowStart(context: SequenceActionContext, id: string, isShift: boolean):
   return { mode: 'item', id, ids, isShift };
 }
 
+/** A press on a header: drag to reorder; Shift/⌘-click adds it to the selected participants. */
+function headStart(id: string, isShift: boolean): DragStart {
+  return isShift ? { mode: 'col', id, isShift } : { mode: 'col', id };
+}
+
 function canvasHandlers(
   start: StartPress,
   context: SequenceActionContext,
 ): SequencePointer['handlers'] {
   return {
     onHeadDown: (event, id): void => {
-      start(event, { mode: 'col', id });
+      start(event, headStart(id, event.shiftKey || event.metaKey));
     },
     onLifeDown: (event, col): void => {
       start(event, { mode: 'link', from: col.id, x: col.x });
