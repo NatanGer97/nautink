@@ -1,5 +1,5 @@
 // Pure class-model edits. Each returns a new model (some return { model, id }).
-import { ASSOCIATION, KINDS, noteIdFor, relationId, uniqueNsId } from './model.ts';
+import { ASSOCIATION, KINDS, noteIdFor, relationId, uniqueClassId, uniqueNsId } from './model.ts';
 import { attrFromText, methodFromText, nsParent } from './text.ts';
 
 import type { RelationKind } from './model.ts';
@@ -498,6 +498,63 @@ export function updateNamespace(
       namespace.id === id ? { ...namespace, ...patch } : namespace,
     ),
   };
+}
+
+// ---- duplicate ----
+
+/** What `duplicateClasses` made: the new model, and each copied class id → its copy's id. */
+export interface DuplicatedClasses {
+  model: ClassModel;
+  copies: Map<string, string>;
+}
+
+function copyClasses(model: ClassModel, ids: ReadonlySet<string>): DuplicatedClasses {
+  const copies: Map<string, string> = new Map<string, string>();
+  let next: ClassModel = model;
+  for (const item of model.classes.filter((candidate: ClassItem) => ids.has(candidate.id))) {
+    const id: string = uniqueClassId(next, item.id.replace(/\d+$/, '') || 'Class');
+    copies.set(item.id, id);
+    next = addClass(next, {
+      ...item,
+      id,
+      annotations: [...item.annotations],
+      attrs: item.attrs.map((attr: ClassAttr) => ({ ...attr })),
+      methods: item.methods.map((method: ClassMethod) => ({ ...method })),
+      css: [...item.css],
+    });
+  }
+  return { model: next, copies };
+}
+
+function copiedRelation(
+  relations: readonly ClassRelation[],
+  relation: ClassRelation,
+  copies: ReadonlyMap<string, string>,
+): ClassRelation | null {
+  const from: string | undefined = copies.get(relation.from);
+  const to: string | undefined = copies.get(relation.to);
+  const isLollipop: boolean = relation.t1 === 'lolli' || relation.t2 === 'lolli';
+  if (from === undefined || to === undefined || isLollipop) {
+    return null;
+  }
+  return { ...relation, id: relationId(relations, from, to), from, to };
+}
+
+/**
+ * Copies classes under fresh ids (`Order` → `Order1`, `Class1` → `Class2`), with the relations
+ * between them; each copy stays in its original's namespace. Relations to classes that were not
+ * copied, notes and lollipops stay with the originals.
+ */
+export function duplicateClasses(model: ClassModel, ids: readonly string[]): DuplicatedClasses {
+  const { model: withClasses, copies } = copyClasses(model, new Set<string>(ids));
+  const relations: ClassRelation[] = [...withClasses.relations];
+  for (const relation of model.relations) {
+    const copy: ClassRelation | null = copiedRelation(relations, relation, copies);
+    if (copy !== null) {
+      relations.push(copy);
+    }
+  }
+  return { model: { ...withClasses, relations }, copies };
 }
 
 // ---- delete ----

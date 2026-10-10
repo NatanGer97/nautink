@@ -8,6 +8,7 @@ import {
   addNote,
   addRelation,
   deleteItems,
+  duplicateClasses,
   groupInNamespace,
   moveMember,
   removeMember,
@@ -345,5 +346,37 @@ describe('deleteItems', () => {
     expect(next.notes).toEqual([]);
     expect(next.namespaces.map((namespace) => namespace.id)).toEqual(['Outer', 'Outer.Inner']);
     expect(deleteItems(model, {})).toEqual(model);
+  });
+});
+
+describe('duplicateClasses', () => {
+  it('copies classes with the relations between them, in their namespace', async () => {
+    const model = await read(
+      'classDiagram\n    namespace Zoo {\n        class Animal\n    }\n    class Class1\n    Animal <|-- Class1 : is\n    Animal --> Keeper\n    Animal ()-- Class1\n',
+    );
+    const { model: next, copies } = duplicateClasses(model, ['Animal', 'Class1', 'missing']);
+    expect([...copies]).toEqual([
+      ['Animal', 'Animal1'],
+      ['Class1', 'Class2'],
+    ]);
+    const copy = next.classes.find((item) => item.id === 'Animal1')!;
+    expect(copy.ns).toBe('Zoo');
+    expect(next.relations.slice(model.relations.length)).toEqual([
+      { ...model.relations[0]!, id: 'R:Animal1:Class2:0', from: 'Animal1', to: 'Class2' },
+    ]);
+  });
+
+  it('copies members so editing the copy leaves the original alone', async () => {
+    const model = await template();
+    const { model: next } = duplicateClasses(model, ['Animal']);
+    const copy = next.classes.find((item) => item.id === 'Animal1')!;
+    expect(copy.attrs).toEqual(animal(model).attrs);
+    expect(copy.attrs[0]).not.toBe(animal(model).attrs[0]);
+    expect(copy.annotations).toEqual(['abstract']);
+  });
+
+  it('names a copy of an all-digit id after Class', () => {
+    const model = addClass(emptyModel(), { id: '42' });
+    expect([...duplicateClasses(model, ['42']).copies.values()]).toEqual(['Class1']);
   });
 });
