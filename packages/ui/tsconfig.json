@@ -6,5 +6,5 @@
     // Lets the shadcn CLI and the vendored components import this package by its own name.
     "paths": { "@nautink/ui/*": ["./src/*"] }
   },
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": ["src", "tests", "stories", ".storybook/*", "vitest.config.ts"]
 }

@@ -1,6 +1,7 @@
 node_modules
 dist
 build
+storybook-static
 coverage
 .turbo
 pnpm-lock.yaml

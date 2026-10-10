@@ -25,11 +25,12 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 | `tsconfig.base.json` | Shared compiler options: ES2022, `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` |
 | `vitest.shared.config.ts` | The Vitest base every package config merges into: test layout, timeout, v8 coverage |
 | `turbo.json` / `pnpm-workspace.yaml` | The task graph and the workspace members (`apps/*`, `packages/*`) |
+| `packages/ui/.storybook/` / `packages/ui/stories/` | Storybook for `@nautink/ui`: every component and the design tokens, light and dark, with the a11y addon (`pnpm --filter @nautink/ui storybook`) |
 
-Commands: `pnpm check` (lint, typecheck of the tooling and every package, test, build, bundle budget), and
-individually `pnpm lint`, `lint:fix`, `lint:file`, `lint:fixtures`, `lint:agent-hook`, `check:agents`,
-`test:coverage-gate`, `test:changeset-gate`, `check:bundle-budget`, `test:bundle-budget-gate`, `typecheck`,
-`test`, `build`, `format`, `format:check`.
+Commands: `pnpm check` (lint, typecheck of the tooling and every package, test, build, the UI Storybook
+build, bundle budget), and individually `pnpm lint`, `lint:fix`, `lint:file`, `lint:fixtures`,
+`lint:agent-hook`, `check:agents`, `test:coverage-gate`, `test:changeset-gate`, `check:bundle-budget`,
+`test:bundle-budget-gate`, `typecheck`, `test`, `build`, `format`, `format:check`.
 
 ## Enforced automatically
 
@@ -62,7 +63,8 @@ individually `pnpm lint`, `lint:fix`, `lint:file`, `lint:fixtures`, `lint:agent-
 
 Relaxed in tests (`*.test.ts(x)`, `*.spec.ts(x)`, `tests/**`): function length, magic numbers,
 `typedef`, non-null assertions. Relaxed in config/tooling files: type-aware rules, default
-exports, `console`.
+exports, `console`. Storybook's config files and story files may default-export, as CSF requires;
+nothing else is relaxed for them.
 
 ## Review-only — the linter cannot see these
 

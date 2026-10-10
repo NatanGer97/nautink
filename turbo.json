@@ -17,6 +17,11 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    // @nautink/ui's Storybook as a static site: a few seconds, so it runs in `pnpm check`.
+    "build-storybook": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": []

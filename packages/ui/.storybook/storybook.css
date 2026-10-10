@@ -1,0 +1,4 @@
+/* The package's tokens and Tailwind, plus the stories' own class names, which live outside src. */
+@import '../src/styles/globals.css';
+
+@source '../stories';

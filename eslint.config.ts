@@ -71,6 +71,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
+      '**/storybook-static/**',
       '**/*.d.ts',
       // Deliberately-broken fixtures that prove the gates fire; see tools/lint-fixtures/README.md.
       'tools/lint-fixtures/**',
@@ -313,6 +314,13 @@ export default tseslint.config(
         ...NAMING_CONVENTION,
       ],
     },
+  },
+
+  // -------------------------------------------------------------- storybook
+  // Storybook's config files and CSF story files: the format requires a default export.
+  {
+    files: ['packages/ui/.storybook/*.{ts,tsx}', 'packages/ui/stories/**/*.stories.tsx'],
+    rules: { 'import-x/no-default-export': 'off' },
   },
 
   // ------------------------------------------------------------------ tests

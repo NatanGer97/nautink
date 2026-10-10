@@ -12,7 +12,7 @@
     "dev": "turbo run dev --filter=@nautink/web --filter=@nautink/server",
     "dev:web": "pnpm --filter @nautink/web dev",
     "dev:server": "pnpm --filter @nautink/server dev",
-    "check": "turbo run lint typecheck:tooling typecheck test build check:bundle-budget",
+    "check": "turbo run lint typecheck:tooling typecheck test build build-storybook check:bundle-budget",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
