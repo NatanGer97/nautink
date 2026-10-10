@@ -79,12 +79,28 @@ describe('parse', () => {
     const model = await read(STATE_FIXTURES.descriptions!);
     expect(model.states.map((item) => [item.id, item.name, item.desc])).toEqual([
       ['Waiting', 'Waiting for input', []],
-      ['Idle', 'The idle state', ['second line']],
+      ['Idle', '', ['The idle state', 'second line']],
       ['Same', 'Same', ['with a description']],
       ['Plain', '', []],
     ]);
     const pseudo = await read(STATE_FIXTURES.pseudoStates!);
     expect(pseudo.states.slice(0, 3).map((item) => item.type)).toEqual(['fork', 'join', 'choice']);
+  });
+
+  it('keeps `Id : text` a description and `state "Name" as Id` a display name (Mermaid)', async () => {
+    const plain = await read('stateDiagram-v2\n  Idle : Waiting for work\n  Idle --> Busy');
+    expect(plain.states[0]).toMatchObject({ id: 'Idle', name: '', desc: ['Waiting for work'] });
+    expect(serialize(plain)).toBe(
+      'stateDiagram-v2\n    Idle : Waiting for work\n    Idle --> Busy\n',
+    );
+    const late = await read(
+      'stateDiagram-v2\n  Idle : first\n  state "Long #quot;one#quot;" as Idle',
+    );
+    expect(late.states[0]).toMatchObject({ name: 'Long "one"', desc: ['first'] });
+    const self = await read('stateDiagram-v2\n  state "Idle" as Idle\n  state "Other" as Idle');
+    expect(self.states[0]).toMatchObject({ name: 'Idle', desc: ['Other'] });
+    const lone = await read('stateDiagram-v2\n  state "Idle" as Idle');
+    expect(lone.states[0]).toMatchObject({ name: '', desc: [] });
   });
 
   it('reads concurrent regions and nested directions', async () => {
@@ -188,7 +204,7 @@ describe('parse', () => {
         parsed.model.states.map((item) => [item.id, item.type, item.name, item.classes]),
     ).toEqual([
       ['A', 'state', '', []],
-      ['B', 'state', 'one,two', ['hot']],
+      ['B', 'state', '', ['hot']],
       ['C', 'state', '', []],
     ]);
     const empty = await parse(
@@ -262,7 +278,6 @@ describe('serialize', () => {
     };
     expect(serialize(model)).toBe(`stateDiagram-v2
     state "Long #quot;name#quot;" as A
-    state "B" as B
     B : x y
     state "C" as C
     C : d

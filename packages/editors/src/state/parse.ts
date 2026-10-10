@@ -84,6 +84,29 @@ export function splitRegions(doc: readonly DbStatement[]): DbStatement[][] | nul
 
 type StatementHandler = (statement: DbStatement, scope: string | null) => void;
 
+const ALIAS_RE: RegExp = /^\s*state\s+"([^"]*)"\s+as\s+([^\s{]+)/;
+
+/**
+ * State id → its display name from `state "Name" as Id`. Mermaid's tree stores that name and every
+ * `Id : text` description alike, so only the source tells a display name from a description.
+ */
+export function stateAliases(body: string): Map<string, string> {
+  const aliases: Map<string, string> = new Map<string, string>();
+  for (const line of body.split('\n')) {
+    const match: RegExpExecArray | null = ALIAS_RE.exec(line);
+    if (match?.[1] !== undefined && match[2] !== undefined && !aliases.has(match[2])) {
+      aliases.set(match[2], decodeDb(match[1]).trim());
+    }
+  }
+  return aliases;
+}
+
+/** `list` without its first `item`. */
+function withoutOne(list: readonly string[], item: string): string[] {
+  const index: number = list.indexOf(item);
+  return index < 0 ? [...list] : [...list.slice(0, index), ...list.slice(index + 1)];
+}
+
 /** Walks Mermaid's document tree into states, transitions, notes and styles. */
 export class StateWalker {
   readonly #result: WalkResult = {
@@ -95,6 +118,12 @@ export class StateWalker {
   };
   readonly #byId: Map<string, StateNode> = new Map<string, StateNode>();
   readonly #descriptions: Map<string, string[]> = new Map<string, string[]>();
+  readonly #aliases: ReadonlyMap<string, string>;
+
+  /** `aliases`: display names from `state "Name" as Id` (see `stateAliases`). */
+  constructor(aliases: ReadonlyMap<string, string> = new Map<string, string>()) {
+    this.#aliases = aliases;
+  }
 
   walk(doc: readonly DbStatement[], scope: string | null): this {
     for (const statement of doc) {
@@ -279,10 +308,23 @@ export class StateWalker {
 
   #named(state: StateNode): StateNode {
     const descriptions: string[] = this.#descriptions.get(state.id) ?? [];
-    const isPlain: boolean = state.type === 'state' && !state.isComposite;
-    const desc: string[] = isPlain ? descriptions.slice(1).filter(Boolean) : [];
-    const first: string = state.type === 'state' ? (descriptions[0] ?? '') : '';
-    const name: string = first === state.id && desc.length === 0 ? '' : first;
-    return { ...state, name, desc };
+    if (state.type !== 'state') {
+      return { ...state, name: '', desc: [] };
+    }
+    if (state.isComposite) {
+      const first: string = descriptions[0] ?? '';
+      return { ...state, name: first === state.id ? '' : first, desc: [] };
+    }
+    return { ...state, ...this.#leafText(state.id, descriptions) };
+  }
+
+  // A leaf: `Id : text` lines are its description; `state "Name" as Id` is its display name.
+  #leafText(id: string, descriptions: readonly string[]): Pick<StateNode, 'name' | 'desc'> {
+    const alias: string | undefined = this.#aliases.get(id);
+    const desc: string[] = (
+      alias === undefined ? [...descriptions] : withoutOne(descriptions, alias)
+    ).filter(Boolean);
+    const name: string = alias === undefined || (alias === id && desc.length === 0) ? '' : alias;
+    return { name, desc };
   }
 }

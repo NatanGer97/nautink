@@ -81,6 +81,27 @@ describe('StateEditor', () => {
     ]);
   });
 
+  it('shows `Id : text` as the state description on the canvas and in the inspector', async () => {
+    const { onChange } = renderEditor({ code: `${CODE}    Idle : Waiting for work\n` });
+    const user = userEvent.setup();
+    const idle = await screen.findByTestId('state-node-Idle');
+    expect(within(idle).getByText('Idle')).toBeTruthy();
+    expect(within(idle).getByText('Waiting for work')).toBeTruthy();
+    const inspector = await inspectorFor(['Idle']);
+    expect(within(inspector).getByLabelText<HTMLInputElement>('Display name').value).toBe('');
+    const description = within(inspector).getByLabelText<HTMLTextAreaElement>('Description');
+    expect(description.value).toBe('Waiting for work');
+    await user.type(description, ' now');
+    act(() => {
+      description.blur();
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.stringContaining('    Idle : Waiting for work now\n'),
+      expect.any(String),
+    );
+    expect(onChange.mock.lastCall?.[0]).not.toContain('state "');
+  });
+
   it('adds a state from the toolbar, renames it inline and deletes from the inspector', async () => {
     const { onChange } = renderEditor();
     const user = userEvent.setup();

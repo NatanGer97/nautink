@@ -2,7 +2,7 @@
 // serializing writes Mermaid source back, scope by scope.
 import { splitPreamble } from '@nautink/visual-core/preamble';
 
-import { StateWalker } from './parse.ts';
+import { StateWalker, stateAliases } from './parse.ts';
 import { nodeScope, pseudoOf, regionScopes, stateById } from './scopes.ts';
 import { hasMethods, parseWithMermaid } from '../shared/mermaid-parse.ts';
 import { textAt } from '../shared/values.ts';
@@ -115,7 +115,7 @@ function keepLines(body: string): string[] {
 
 function modelFromDb(db: StateDb, code: string): StateModel {
   const { preamble, body } = splitPreamble(code);
-  const walked: WalkResult = new StateWalker().walk(rootDoc(db), null).result();
+  const walked: WalkResult = new StateWalker(stateAliases(body)).walk(rootDoc(db), null).result();
   return assignNoteIds({
     ...emptyModel(),
     ...walked,
@@ -207,8 +207,6 @@ function declarationLines(state: StateNode): string[] {
   const alias: string[] = [];
   if (name && (name !== state.id || desc.length)) {
     alias.push(`state ${quoteName(name)} as ${state.id}`);
-  } else if (!name && desc.length) {
-    alias.push(`state ${quoteName(state.id)} as ${state.id}`);
   }
   return [...alias, ...desc.map((line: string) => `${state.id} : ${line}`)];
 }

@@ -54,6 +54,84 @@ export interface GoldenFile {
   layouts: LayoutCase[];
 }
 
+/** One intentional difference from v1: a case (and op step) and what the port gives instead. */
+export interface GoldenChange {
+  kind: 'roundTrip' | 'ops' | 'layouts';
+  name: string;
+  step?: number;
+  expected: unknown;
+}
+
+/** Intentional differences from v1 for one editor, with the reason they exist. */
+export interface GoldenDeviations {
+  editor: string;
+  reason: string;
+  changes: readonly GoldenChange[];
+}
+
+function deviate<Case extends { name: string }>(
+  cases: readonly Case[],
+  change: GoldenChange,
+  replace: (found: Case) => Case,
+): Case[] {
+  if (!cases.some((found: Case) => found.name === change.name)) {
+    throw new Error(`No ${change.kind} case named "${change.name}" to deviate from`);
+  }
+  return cases.map((found: Case) => (found.name === change.name ? replace(found) : found));
+}
+
+function sameAsV1(v1: unknown, change: GoldenChange): unknown {
+  if (JSON.stringify(v1) === JSON.stringify(change.expected)) {
+    throw new Error(`The deviation for ${change.kind} "${change.name}" matches v1; remove it`);
+  }
+  return change.expected;
+}
+
+function withStep(golden: OpCase, change: GoldenChange): OpCase {
+  const step: OpStep | undefined = golden.steps[change.step ?? -1];
+  if (step === undefined) {
+    throw new Error(`Op case "${change.name}" has no step ${String(change.step)}`);
+  }
+  const steps: OpStep[] = [...golden.steps];
+  steps[change.step ?? 0] = { ...step, expected: sameAsV1(step.expected, change) as string | null };
+  return { ...golden, steps };
+}
+
+function applyChange(file: GoldenFile, change: GoldenChange): GoldenFile {
+  if (change.kind === 'ops') {
+    return { ...file, ops: deviate(file.ops, change, (found) => withStep(found, change)) };
+  }
+  if (change.kind === 'roundTrip') {
+    const expected = (found: RoundTripCase): RoundTripResult =>
+      sameAsV1(found.expected, change) as RoundTripResult;
+    return {
+      ...file,
+      roundTrip: deviate(file.roundTrip, change, (found) => ({
+        ...found,
+        expected: expected(found),
+      })),
+    };
+  }
+  return {
+    ...file,
+    layouts: deviate(file.layouts, change, (found) => ({
+      ...found,
+      expected: sameAsV1(found.expected, change),
+    })),
+  };
+}
+
+/** `file` with the intentional deviations for its editor in place of v1's outputs. */
+export function applyDeviations(
+  file: GoldenFile,
+  deviations: readonly GoldenDeviations[],
+): GoldenFile {
+  return deviations
+    .filter((group: GoldenDeviations) => group.editor === file.editor)
+    .flatMap((group: GoldenDeviations) => group.changes)
+    .reduce(applyChange, file);
+}
+
 /** The parse/serialize pair and the op modules of one editor. */
 export interface GoldenEditor<Model> {
   parse: (code: string, load: DiagramLoader) => Promise<ParseResult<Model>>;

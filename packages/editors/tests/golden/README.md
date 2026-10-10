@@ -52,10 +52,25 @@ Each file's `mappings` field lists them. In short:
 
 Ops on unknown ids or members are left out: the port throws there on purpose, v1 did nothing.
 
+## Intentional deviations
+
+When the port means to differ from v1 (a v1 bug, or Mermaid semantics v1 got wrong), the recorded
+v1 output stays as it is. The difference goes in `deviations.ts` instead: one group per reason, with
+the editor, the reason, and each change (`kind`: `roundTrip` / `ops` / `layouts`, the case `name`,
+the op `step` for ops, and the port's `expected` output). A golden test passes its file through
+`applyDeviations(file, GOLDEN_DEVIATIONS)` (`golden-runner.ts`) before comparing. It throws when a
+change names a case or step that does not exist, or when its output equals v1's, so a stale entry
+fails the run.
+
+| Editor | Deviation |
+| --- | --- |
+| state | `Id : text` is a description (as in Mermaid), written back as `Id : text`; v1 made it the display name (`state "text" as Id`). Only `state "Name" as Id` sets a display name. Changes 2 round trips, 7 op steps and 2 layouts (a description sits under the id, so the box is sized differently) |
+
 ## Regenerating
 
 Do not edit these files by hand, and never change them to make the port pass. If the port and v1
-disagree, fix the port (or record the difference as an intentional deviation).
+disagree, fix the port (or record the difference in `deviations.ts`, above). A regenerated file
+keeps v1's outputs, so the deviations still apply on top of it.
 
 The generator is not committed because it imports v1's JavaScript (and the repo allows no `.js`).
 To recreate it, write a Vitest test file (plain `.mjs`) outside the repo that:
