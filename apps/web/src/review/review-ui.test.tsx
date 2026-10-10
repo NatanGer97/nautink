@@ -175,6 +175,37 @@ describe('reviewing a change in the app', () => {
     expect(fakeMonacoState.diffEditors[0]?.isDisposed).toBe(true);
   });
 
+  it("opens an accepted or rejected reply's diff in the code drawer from its card", async () => {
+    const user = await renderAndSend(AFTER);
+    await user.click(within(await proposalBar()).getByRole('button', { name: 'Reject' }));
+    const rejected = within(chatPanel()).getByText('Rejected · diagram unchanged').parentElement!;
+    await user.click(within(rejected).getByRole('button', { name: 'Diff' }));
+    expect(useUiStore.getState().isCodeDrawerOpen).toBe(true);
+    const drawer = screen.getByRole('region', { name: 'Code' });
+    expect(
+      await within(drawer).findByRole('region', { name: 'Code changes from this reply' }),
+    ).toBeTruthy();
+    await waitFor(() => {
+      expect(fakeMonacoState.diffEditors.at(-1)?.models?.original.getValue()).toBe(
+        'flowchart TD\n',
+      );
+    });
+    expect(fakeMonacoState.diffEditors.at(-1)?.models?.modified.getValue()).toBe(AFTER);
+    await user.click(within(drawer).getByRole('button', { name: 'Back to code' }));
+    expect(
+      within(drawer).queryByRole('region', { name: 'Code changes from this reply' }),
+    ).toBeNull();
+    await user.click(within(chatPanel()).getByRole('button', { name: 'Show again' }));
+    await user.click(within(await proposalBar()).getByRole('button', { name: 'Accept' }));
+    await waitFor(() => {
+      expect(code()).toBe(AFTER);
+    });
+    await user.click(within(chatPanel()).getByRole('button', { name: 'Diff' }));
+    expect(
+      await within(drawer).findByRole('region', { name: 'Code changes from this reply' }),
+    ).toBeTruthy();
+  });
+
   it('keeps the code read-only and shows the diff while a visual proposal is open', async () => {
     await renderAndSend(AFTER);
     await proposalBar();

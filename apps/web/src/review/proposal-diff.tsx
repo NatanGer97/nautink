@@ -31,6 +31,8 @@ type DiffLoad = { status: 'loading' } | { status: 'ready' } | { status: 'error';
 export interface ProposalDiffProps {
   before: string;
   after: string;
+  /** Names the diff region for screen readers. */
+  label?: string;
 }
 
 interface DiffMount {
@@ -109,15 +111,18 @@ function DiffNotice({ load }: { load: DiffLoad }): ReactElement | null {
 }
 
 /** The proposal as a read-only code diff: removed lines red, added lines green (Monaco). */
-export function ProposalDiff(props: ProposalDiffProps): ReactElement {
+export function ProposalDiff({
+  label = 'Proposed code changes',
+  ...code
+}: ProposalDiffProps): ReactElement {
   const containerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
-  const load: DiffLoad = useDiffEditor(containerRef, props);
+  const load: DiffLoad = useDiffEditor(containerRef, code);
   return (
     <div className="relative min-h-0 flex-1">
       <div
         ref={containerRef}
         role="region"
-        aria-label="Proposed code changes"
+        aria-label={label}
         data-slot="proposal-diff"
         className="absolute inset-0"
       />

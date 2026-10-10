@@ -69,6 +69,13 @@ exactly as before. The bar (`review-bar.tsx`) floats over the canvas; a code-onl
 without a visual editor, code that does not parse, text-only changes) shows its bar and Monaco's diff
 in the code drawer. Enter accepts and Esc rejects unless the focus is on a field or control.
 
+**Diff** on a change card (`review/reply-diff.ts`) opens the code drawer on a read-only Monaco diff
+of the code before → after that reply (`showReplyDiff(diagramId, messageIndex)`; "Back to code"
+closes it). It reads the reply's kept proposal (accepted or rejected) or, review off, its undo step
+and the step before it, so it works in the session only: after a reload, a new chat or once the step
+has left the history, the chip is off with the reason in its tooltip. An open proposal takes the
+drawer first.
+
 ## Files
 
 | File | What |

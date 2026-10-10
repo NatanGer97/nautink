@@ -1,5 +1,6 @@
 import { useChatStore } from './chat-store.ts';
 import { ChipButton } from './chip-button.tsx';
+import { DIFF_GONE, showReplyDiff, useHasReplyDiff } from '../review/reply-diff.ts';
 import { showAgainBlocker, showProposalAgain } from '../review/review-actions.ts';
 import { useReviewStore } from '../review/review-store.ts';
 import { canAmend } from '../workspace/edit-history.ts';
@@ -20,7 +21,12 @@ export interface ChangeCardProps {
   review?: ChatMessageReview | undefined;
 }
 
-const DIFF_PENDING: string = 'Comparing versions of a reply is not available yet.';
+/** A reply in a diagram's chat. */
+interface ReplyRef {
+  diagramId: string;
+  messageIndex: number;
+}
+
 const UNDO_GONE: string =
   'Only the latest change can be undone here. Use History to go back further.';
 const CARD_CLASS: string =
@@ -38,14 +44,32 @@ function useUndoableEntry(diagramId: string, messageIndex: number): boolean {
   });
 }
 
-/** Diff (not available yet) and Undo, while this reply's step is the latest. */
-function ChangeActions({ isUndoable }: { isUndoable: boolean }): ReactElement {
+/** "Diff": the reply's code before → after in the code drawer, while this session still has it. */
+function DiffChip({ diagramId, messageIndex }: ReplyRef): ReactElement {
+  const hasDiff: boolean = useHasReplyDiff(diagramId, messageIndex);
+  const tip: { hint: string } | { disabledReason: string } = hasDiff
+    ? { hint: 'Show what this reply changed in the code' }
+    : { disabledReason: DIFF_GONE };
+  return (
+    <ChipButton
+      {...tip}
+      onClick={() => {
+        showReplyDiff(diagramId, messageIndex);
+      }}
+    >
+      Diff
+    </ChipButton>
+  );
+}
+
+/** Diff, and Undo while this reply's step is the latest. */
+function ChangeActions({ isUndoable, ...reply }: ReplyRef & { isUndoable: boolean }): ReactElement {
   const undoTip: { hint: string } | { disabledReason: string } = isUndoable
     ? { hint: 'Undo this change (⌘Z)' }
     : { disabledReason: UNDO_GONE };
   return (
     <span className="flex gap-1">
-      <ChipButton disabledReason={DIFF_PENDING}>Diff</ChipButton>
+      <DiffChip {...reply} />
       <ChipButton
         {...undoTip}
         onClick={() => {
@@ -81,14 +105,17 @@ function RejectedCard({ diagramId, messageIndex }: ChangeCardProps): ReactElemen
   return (
     <div className={CARD_CLASS}>
       <span className="text-muted-foreground">Rejected · diagram unchanged</span>
-      <ChipButton
-        {...tip}
-        onClick={() => {
-          showProposalAgain(diagramId, messageIndex);
-        }}
-      >
-        Show again
-      </ChipButton>
+      <span className="flex gap-1">
+        <DiffChip diagramId={diagramId} messageIndex={messageIndex} />
+        <ChipButton
+          {...tip}
+          onClick={() => {
+            showProposalAgain(diagramId, messageIndex);
+          }}
+        >
+          Show again
+        </ChipButton>
+      </span>
     </div>
   );
 }
@@ -154,7 +181,9 @@ export function ChangeCard(props: ChangeCardProps): ReactElement {
   return (
     <div className={CARD_CLASS}>
       <span className="font-medium">{isStreaming ? 'Writing diagram…' : cardTitle(review)}</span>
-      {isStreaming ? null : <ChangeActions isUndoable={isUndoable} />}
+      {isStreaming ? null : (
+        <ChangeActions diagramId={diagramId} messageIndex={messageIndex} isUndoable={isUndoable} />
+      )}
     </div>
   );
 }
