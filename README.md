@@ -189,6 +189,10 @@ changes are made) and the [Code of Conduct](CODE_OF_CONDUCT.md). Coding agents r
 
 ## License
 
-[MIT](LICENSE). Third-party packages, icon sets and fonts keep their own licenses; see
+[MIT](LICENSE). The MIT license covers the code only: the Nautink name and logo (the files in
+[`docs/brand/`](docs/brand/) and the app icons made from them) are not licensed under it. Forks are
+welcome, but please give them their own name and logo.
+
+Third-party packages, icon sets and fonts keep their own licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Nautink is not affiliated with the Mermaid project
 or with Anthropic.

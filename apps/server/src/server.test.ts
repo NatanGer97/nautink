@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
@@ -34,18 +35,20 @@ async function occupyPort(): Promise<number> {
 describe('startServer', () => {
   it('listens on 127.0.0.1 and logs the URL and repo dir', async () => {
     const home = await makeTempDir('start-home');
+    const repo = path.join(home, 'app');
+    await mkdir(repo);
     const logger = createMemoryLogger();
-    const env = { API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE, REPO_DIR: home };
+    const env = { API_PORT: '0', CLAUDE_BIN: FAKE_CLAUDE, REPO_DIR: repo };
     const server: Server = await startServer({ env, homeDir: home, logger });
     servers.push(server);
     const { address, port } = server.address() as AddressInfo;
     expect(address).toBe('127.0.0.1');
     expect(logger.lines).toEqual([
       `info: Nautink server on http://127.0.0.1:${String(port)}`,
-      `info: Repo-aware mode: ${home}`,
+      `info: Repo-aware mode: ${repo}`,
     ]);
     const info = await (await fetch(`http://127.0.0.1:${String(port)}/api/info`)).json();
-    expect(info).toEqual({ repoDir: home });
+    expect(info).toEqual({ repoDir: repo });
   });
 
   it('throws on invalid config', async () => {

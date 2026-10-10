@@ -11,7 +11,10 @@ export interface PositionSnapshot {
 export interface PositionBookOptions {
   store: EditorPositionStore;
   key: PositionKey;
-  /** False while an older version is on view: placing its items must not overwrite the saved spots. */
+  /**
+   * False while the canvas shows something that is not the diagram (an older version, Claude's
+   * live build or proposal): placing its items must not overwrite the saved spots.
+   */
   canSave: boolean;
   onError: (message: string) => void;
   saveDelayMs?: number;
@@ -35,10 +38,13 @@ export class PositionBook {
   #snapshot: PositionSnapshot = { positions: {}, isLoaded: false };
   #timer: ReturnType<typeof setTimeout> | undefined;
   #canSave: boolean;
+  /** While saving is paused: the diagram's own positions, put back when saving resumes. */
+  #kept: PositionMap | undefined;
 
   constructor(options: PositionBookOptions) {
     this.#options = options;
     this.#canSave = options.canSave;
+    this.#kept = options.canSave ? undefined : {};
   }
 
   getSnapshot = (): PositionSnapshot => this.#snapshot;
@@ -55,6 +61,9 @@ export class PositionBook {
   async load(): Promise<void> {
     try {
       const saved: PositionMap = await this.#options.store.load(this.#options.key);
+      if (this.#kept !== undefined) {
+        this.#kept = { ...saved, ...this.#kept };
+      }
       this.#publish({ positions: { ...saved, ...this.#snapshot.positions }, isLoaded: true });
     } catch (err) {
       this.#options.onError(`Could not load the canvas layout: ${errorText(err)}`);
@@ -88,7 +97,22 @@ export class PositionBook {
     this.#scheduleSave();
   };
 
+  /**
+   * Pauses or resumes saving. A pause keeps the diagram's positions (writing a pending save first);
+   * resuming puts them back, so whatever was placed for a version or a proposal is dropped and
+   * never saved. The editor then places the diagram's items again from those spots.
+   */
   setCanSave(canSave: boolean): void {
+    if (canSave === this.#canSave) {
+      return;
+    }
+    if (canSave) {
+      this.#publish({ ...this.#snapshot, positions: this.#kept ?? this.get() });
+      this.#kept = undefined;
+    } else {
+      void this.flush();
+      this.#kept = this.get();
+    }
     this.#canSave = canSave;
   }
 

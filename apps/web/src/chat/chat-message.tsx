@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 
 import { agentName } from './agent-name.ts';
 import { ChangeCard } from './change-card.tsx';
+import { ChatMarkdown } from './chat-markdown-view.tsx';
 import { STOPPED_MESSAGE } from './chat-reply.ts';
 import { activityStep } from './claude-activity.ts';
 import { hasMermaidFence, stripMermaid } from './extract-mermaid.ts';
@@ -101,9 +102,7 @@ export function AssistantMessage({
       {message.tools !== undefined && message.tools.length > 0 ? (
         <ToolSteps tools={message.tools} isStreaming={isStreaming} />
       ) : null}
-      {prose === '' ? null : (
-        <p className="leading-relaxed break-words whitespace-pre-wrap">{prose}</p>
-      )}
+      {prose === '' ? null : <ChatMarkdown text={prose} />}
       {isStreaming && (message.tools ?? []).length === 0 ? (
         <p className="flex items-center gap-2 text-muted-foreground">
           <WorkingDots />

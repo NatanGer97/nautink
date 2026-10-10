@@ -18,3 +18,8 @@ The app uses its own copies:
 
 Colors: navy `#002450`, teal `#0097a4`. The navy disappears on the dark theme's panels, so always use
 the `-dark` variant there.
+
+## Use
+
+The Nautink name and logo are not covered by the repository's MIT license. Use them to refer to
+Nautink itself; a fork or a product of your own needs its own name and logo.

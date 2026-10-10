@@ -1,5 +1,6 @@
 import { agentName } from './agent-name.ts';
 import { findTurnDiagram } from './turn-edit.ts';
+import { markProposalPending } from '../review/review-actions.ts';
 import { nextProposalId, changeCount, useReviewStore } from '../review/review-store.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
@@ -106,6 +107,7 @@ export async function proposeTurn(
   }
   const proposal: Proposal = newProposal(turn, result);
   useReviewStore.getState().openProposal(proposal);
+  markProposalPending(proposal);
   const review: ProposalReview = await turn.deps.review(proposal.before, proposal.after);
   useReviewStore.getState().setReview(turn.diagramId, { proposalId: proposal.id, review });
   revealCodeReview(proposal, review);

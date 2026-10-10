@@ -17,7 +17,8 @@ export interface ChatMessageMeta {
 
 /** What the user did with a reply's proposed change (new in v2, PRD §4.2). */
 export interface ChatMessageReview {
-  outcome: 'accepted' | 'rejected';
+  /** `pending` while the proposal waits; one still pending after a reload was never reviewed. */
+  outcome: 'accepted' | 'rejected' | 'pending';
   /** How many changes the proposal had. */
   changes: number;
 }
@@ -95,7 +96,7 @@ const chatMessageMetaSchema: z.ZodType<ChatMessageMeta> = z.looseObject({
 });
 
 const chatMessageReviewSchema: z.ZodType<ChatMessageReview> = z.object({
-  outcome: z.enum(['accepted', 'rejected']),
+  outcome: z.enum(['accepted', 'rejected', 'pending']),
   changes: z.number().int().nonnegative(),
 });
 

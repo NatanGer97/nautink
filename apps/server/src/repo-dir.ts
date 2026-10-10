@@ -16,7 +16,8 @@ export function expandHome(input: string, homeDir: string): string {
   return input.startsWith('~/') ? path.join(homeDir, input.slice('~/'.length)) : input;
 }
 
-function isStrictlyInside(child: string, parent: string): boolean {
+/** True when `child` is inside `parent`, and not `parent` itself. */
+export function isStrictlyInside(child: string, parent: string): boolean {
   const relative: string = path.relative(parent, child);
   return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative);
 }

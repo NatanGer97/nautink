@@ -18,6 +18,16 @@
   font-family: var(--font-sans);
 }
 
+/* Fades in after the first fit; hiding is instant, so nodes never flash at the wrong place. */
+.nautink-flow[data-fitted] .react-flow__viewport {
+  transition: opacity 120ms ease-out;
+}
+
+/* Until the first fit (use-canvas-fit.ts), so the diagram never shows unfitted and then jumps. */
+.nautink-flow:not([data-fitted]) .react-flow__viewport {
+  opacity: 0;
+}
+
 .nautink-flow .react-flow__edge-textbg {
   fill: var(--background);
 }

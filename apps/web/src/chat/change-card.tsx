@@ -1,7 +1,14 @@
+import { agentName } from './agent-name.ts';
 import { useChatStore } from './chat-store.ts';
 import { ChipButton } from './chip-button.tsx';
+import { extractMermaid } from './extract-mermaid.ts';
 import { DIFF_GONE, showReplyDiff, useHasReplyDiff } from '../review/reply-diff.ts';
-import { showAgainBlocker, showProposalAgain } from '../review/review-actions.ts';
+import {
+  reviewAgainBlocker,
+  reviewReplyAgain,
+  showAgainBlocker,
+  showProposalAgain,
+} from '../review/review-actions.ts';
 import { useReviewStore } from '../review/review-store.ts';
 import { canAmend } from '../workspace/edit-history.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
@@ -120,6 +127,47 @@ function RejectedCard({ diagramId, messageIndex }: ChangeCardProps): ReactElemen
   );
 }
 
+/** Why "Review again" is off for a reply whose review a reload cut off, or `null`. */
+function useReviewAgainBlocker(diagramId: string, messageIndex: number): string | null {
+  const diagram: WorkspaceState['diagrams'][number] | undefined = useWorkspaceStore((state) =>
+    state.diagrams.find((item) => item.id === diagramId),
+  );
+  const isOpen: boolean = useReviewStore((state) => diagramId in state.open);
+  const isReplying: boolean = useChatStore((state) => state.busyDiagramId === diagramId);
+  const replyCode: string | null = extractMermaid(diagram?.messages[messageIndex]?.text ?? '');
+  return reviewAgainBlocker({ replyCode, code: diagram?.code, isBusy: isOpen || isReplying });
+}
+
+/** A proposal still waiting when the page reloaded: nothing was applied; "Review again" rebuilds it. */
+function InterruptedCard({ diagramId, messageIndex }: ChangeCardProps): ReactElement {
+  const blocker: string | null = useReviewAgainBlocker(diagramId, messageIndex);
+  const name: string = useWorkspaceStore((state) =>
+    agentName(state.diagrams.find((item) => item.id === diagramId)?.messages[messageIndex]?.agent),
+  );
+  const tip: { hint: string } | { disabledReason: string } =
+    blocker === null
+      ? { hint: `Show ${name}'s change on the canvas to accept or reject` }
+      : { disabledReason: blocker };
+  return (
+    <div className={CARD_CLASS}>
+      <span className="flex flex-col gap-0.5">
+        <span className="font-medium">Not applied</span>
+        <span className="text-xs text-muted-foreground">
+          The page reloaded before you reviewed this change
+        </span>
+      </span>
+      <ChipButton
+        {...tip}
+        onClick={() => {
+          void reviewReplyAgain(diagramId, messageIndex);
+        }}
+      >
+        Review again
+      </ChipButton>
+    </div>
+  );
+}
+
 /** "Waiting for your review" while the reply's proposal is open (M2). */
 function PendingCard({ isCodeReview }: { isCodeReview: boolean }): ReactElement {
   return (
@@ -166,6 +214,14 @@ function useIsLiveReply(diagramId: string, messageIndex: number): boolean {
   );
 }
 
+/** The finished card for a closed review: Rejected, or cut off by a reload; else `null`. */
+function closedReviewCard(props: ChangeCardProps): ReactElement | null {
+  if (props.review?.outcome === 'rejected') {
+    return <RejectedCard {...props} />;
+  }
+  return props.review?.outcome === 'pending' ? <InterruptedCard {...props} /> : null;
+}
+
 /** The card under a reply that changed the diagram (M1, M2): what happened, and what you can do. */
 export function ChangeCard(props: ChangeCardProps): ReactElement {
   const { diagramId, messageIndex, review } = props;
@@ -175,8 +231,9 @@ export function ChangeCard(props: ChangeCardProps): ReactElement {
   if (pending !== null) {
     return <PendingCard isCodeReview={pending.isCodeReview} />;
   }
-  if (review?.outcome === 'rejected' && !isStreaming) {
-    return <RejectedCard {...props} />;
+  const closed: ReactElement | null = isStreaming ? null : closedReviewCard(props);
+  if (closed !== null) {
+    return closed;
   }
   return (
     <div className={CARD_CLASS}>

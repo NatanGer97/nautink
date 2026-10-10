@@ -48,7 +48,7 @@ Every row must ship in v2.0. "Change" notes where behavior intentionally differs
 | v1 feature | v1 reference | v2 location | Change |
 |---|---|---|---|
 | Chat with streaming replies, stop, new chat | `src/Chat.jsx`, `src/App.jsx` (`send`), `src/api.js` | Chat panel, left of canvas (M1, M2) | Reply text may stream into the canvas as a live build (§4.3) |
-| Claude via local CLI, session resume, lean flags | `server/index.js` (`claudeArgs`, `--resume`, `--setting-sources project`, `--strict-mcp-config`) | Same server bridge, ported to TypeScript (§7.4) | Codex CLI as a second agent, picked in Settings (ADR-002) |
+| Claude via local CLI, session resume, lean flags | `server/index.js` (`claudeArgs`, `--resume`, `--setting-sources project`, `--strict-mcp-config`) | Same server bridge, ported to TypeScript (§7.4); loads no settings (`--setting-sources ""`), so a chosen codebase's hooks and `CLAUDE.md` never apply | Codex CLI as a second agent, picked in Settings (ADR-002) |
 | System prompt (shapes, icon packs, UML guidance) | `server/index.js` `SYSTEM_PROMPT` | Same, versioned in `server/prompt.ts` | Add selection and review context (§4) |
 | Auto-fix retry loop (2 retries on parse error) | `src/App.jsx` (`MAX_AUTO_FIX`, `validate`) | Same | Retries merge into one undo step (as v1) |
 | "Ask Claude to fix" on parse error | `src/App.jsx` pane header button | Status bar error + inline action in code drawer | None |

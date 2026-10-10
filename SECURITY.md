@@ -47,16 +47,18 @@ user making it run on your behalf. These defenses are in place:
 - **Validated input.** Every request body is validated with Zod and limited to 2 MB.
 - **No shell.** `claude` is spawned directly with an argument list, never through a shell. The run
   is killed when the browser disconnects.
-- **Lean, read-only Claude.** Each run loads project settings only (no user settings), with no MCP
-  servers and no slash commands. With no codebase selected, Claude gets **no tools** and runs in an
-  empty temporary folder, so it cannot read your files and no project's settings or hooks apply.
+- **Lean, read-only Claude.** Each run loads **no settings at all** (`--setting-sources ""`): no
+  user or project settings, so no hooks run, and no `CLAUDE.md` is loaded as instructions. There are
+  no MCP servers and no slash commands. With no codebase selected, Claude gets **no tools** and runs
+  in an empty temporary folder, so it cannot read your files.
 - **Repo-aware mode is opt-in and read-only.** When you choose a codebase folder (in Settings, or with
   the `REPO_DIR` variable at startup), Claude may use only `Read`, `Grep` and `Glob`, and runs in
-  that folder. A folder chosen in the app must be inside your home folder, and your home folder itself
-  is refused because it holds keys and tokens (`REPO_DIR` is your own choice and is only checked to
-  exist). The folder is treated as the project, so its `CLAUDE.md` and `.claude/settings.json`,
-  hooks included, apply to the run. Choose only folders you trust, and only if you are fine with
-  their contents being sent to Claude.
+  that folder. The folder must be inside your home folder, and your home folder itself is refused
+  because it holds keys and tokens; `REPO_DIR` gets the same check. The folder's
+  `.claude/settings.json` (and so its hooks) and its `CLAUDE.md` are not loaded, so a folder cannot
+  run commands or give Claude instructions on its own. Claude can still read those files with its
+  tools, like any other file. Choose only folders whose contents you are fine with sending to
+  Claude.
 
 Things that are **out of scope**: anything another program running as your user can already do
 (it can run `claude` itself), and the behavior of the Claude Code CLI or the Anthropic API.
