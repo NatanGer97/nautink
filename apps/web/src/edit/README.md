@@ -159,6 +159,7 @@ useSelectionPrompt({
   isReadOnly: core.isReadOnly,
   group: canGroup ? () => groupNodes(context, selection.nodes) : null, // null hides Group
   selectedElements, // optional: (root) => Element[]; React Flow canvases leave it out
+  shapeElements, // optional: (root) => Element[], every shape; React Flow canvases leave it out
 });
 ```
 
@@ -166,9 +167,12 @@ useSelectionPrompt({
   elements: React Flow's `.react-flow__node.selected` and `.react-flow__edge.selected` by default,
   or `selectedElements(root)` (the sequence editor looks its items up by test id). So drags, pans,
   zooms and resizes need no reporting.
-- **Placement** (`prompt-placement.ts`, pure): under the selection, else above it, else inside its
-  visible bottom, never over an element marked `data-canvas-chrome` (toolbar, inspector, library,
-  zoom bar, prompt bar). Mark new floating chrome with that attribute. No room: it hides.
+- **Placement** (`prompt-placement.ts`, pure): centred under the selection, else above it, to its
+  right, to its left, then along those rows. It never covers an element marked
+  `data-canvas-chrome` (toolbar, inspector, library, zoom bar, prompt bar; mark new floating chrome
+  with that attribute) and keeps off the other shapes (`shapeElements`, React Flow's nodes by
+  default) unless nothing else fits. Shapes around the selection (a group frame) do not count. No
+  room: it hides.
 - **Hidden** while Claude replies (any diagram), while the editor is read-only, for another
   diagram's selection, and after Esc in its field until the selection changes.
 - **Group:** flowchart subgraph (`groupNodes`), class namespace (`groupInNamespace`, when a class is
