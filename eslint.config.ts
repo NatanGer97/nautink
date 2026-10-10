@@ -75,6 +75,9 @@ export default tseslint.config(
       '**/*.d.ts',
       // Deliberately-broken fixtures that prove the gates fire; see tools/lint-fixtures/README.md.
       'tools/lint-fixtures/**',
+      // Git worktrees are whole checkouts of their own; each one lints from its own root.
+      '.claude/worktrees/**',
+      '.worktrees/**',
     ],
   },
 

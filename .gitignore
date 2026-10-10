@@ -49,6 +49,7 @@ Thumbs.db
 
 # git worktrees
 .worktrees/
+.claude/worktrees/
 
 .serena/cache
 .serena/project.local.yml
