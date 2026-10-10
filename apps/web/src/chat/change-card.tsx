@@ -126,7 +126,8 @@ function cardTitle(review: ChatMessageReview | undefined): ReactElement | string
   const noun: string = review.changes === 1 ? 'change' : 'changes';
   return (
     <>
-      <span className="text-success">Applied</span> · {`${String(review.changes)} ${noun}`}
+      <span className="text-success">Applied</span>
+      {review.changes > 0 ? ` · ${String(review.changes)} ${noun}` : null}
     </>
   );
 }
