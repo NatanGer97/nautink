@@ -17,6 +17,7 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 | `scripts/check-agent-parity.ts` | Proves `CLAUDE.md` → `AGENTS.md`, skill stubs, and Codex prompts are in sync |
 | `scripts/check-coverage-gate.ts` | Proves an uncovered file still fails each gated package's coverage threshold |
 | `scripts/check-changeset.ts` | Fails a pull request that changes `apps/` or `packages/` source without a changeset |
+| `scripts/check-bundle-budget.ts` | Fails a web build whose entry, initial or lazy JavaScript is over its gzip budget (see [Bundle budgets](#bundle-budgets)) |
 | `.github/workflows/ci.yml` | Install, the full check graph, then the gate assertions, the changeset check, and `format:check` |
 | `.github/workflows/release.yml` | Turns landed changesets into a "Version Packages" pull request, then tags and releases |
 | `.husky/pre-commit` / `.husky/pre-push` | The two local git gates; installed by `prepare` on `pnpm install` |
@@ -25,9 +26,10 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 | `vitest.shared.config.ts` | The Vitest base every package config merges into: test layout, timeout, v8 coverage |
 | `turbo.json` / `pnpm-workspace.yaml` | The task graph and the workspace members (`apps/*`, `packages/*`) |
 
-Commands: `pnpm check` (lint, typecheck of the tooling and every package, test, build), and individually `pnpm lint`,
-`lint:fix`, `lint:file`, `lint:fixtures`, `lint:agent-hook`, `check:agents`, `test:coverage-gate`,
-`test:changeset-gate`, `typecheck`, `test`, `build`, `format`, `format:check`.
+Commands: `pnpm check` (lint, typecheck of the tooling and every package, test, build, bundle budget), and
+individually `pnpm lint`, `lint:fix`, `lint:file`, `lint:fixtures`, `lint:agent-hook`, `check:agents`,
+`test:coverage-gate`, `test:changeset-gate`, `check:bundle-budget`, `test:bundle-budget-gate`, `typecheck`,
+`test`, `build`, `format`, `format:check`.
 
 ## Enforced automatically
 
@@ -81,13 +83,37 @@ exports, `console`.
 |---|---|
 | An agent writes a file | Claude Code `PostToolUse` hook: format, `eslint --fix`, feed leftovers back to the agent |
 | `git commit` | Husky + lint-staged over staged files |
-| `git push` | `pnpm lint` + `lint:fixtures` + `check:agents` + `test:changeset-gate` + `test:coverage-gate` |
+| `git push` | `pnpm lint` + `lint:fixtures` + `check:agents` + `test:changeset-gate` + `test:bundle-budget-gate` + `test:coverage-gate` |
 | A pull request, and every push to `main` | The full check graph, the same gate assertions, the changeset check (pull requests only), then `format:check` |
 
 Warnings (`no-magic-numbers`, `no-inline-comments`, `no-warning-comments`) block the first two
 gates and not the last two: an agent or a commit has to deal with them there and then, while a
 push and CI let them through. That is deliberate — a warning is a prompt to think, not a reason
 to block the branch.
+
+## Bundle budgets
+
+PRD §9 keeps the first load small and loads Monaco, the visual editors and the icon packs lazily.
+`pnpm check` holds the web build to gzip budgets (Node's default gzip level) after `vite build`;
+`scripts/check-bundle-budget.ts` holds the numbers and `pnpm test:bundle-budget-gate` proves they
+still fire.
+
+| Budget | Gzip | Measured when set |
+|---|---|---|
+| Entry script (`index-*.js`) | 168 kB | 160.2 kB |
+| Initial JavaScript (entry + the chunks `index.html` preloads) | 249 kB | 236.7 kB |
+| `monaco-setup` (the code drawer) | 1045 kB | 994.7 kB |
+| `editor.worker` (Monaco's worker) | 97 kB | 92.4 kB |
+| `elk-*` (Mermaid's ELK layout) | 472 kB | 449.0 kB |
+| `editor-canvas` (React Flow and the shared canvas) | 61 kB | 57.9 kB |
+| `flow-editor` / `class-editor` / `er-editor` / `state-editor` / `sequence-editor` | 16 / 20 / 13.7 / 18.5 / 26 kB | 15.2 / 19.1 / 13.0 / 17.5 / 24.4 kB |
+| `compute-review` / `settings-fields` / `mini` (Motion, the live fade) | 3.3 / 4 / 3.4 kB | 3.1 / 3.8 / 3.2 kB |
+| Any other lazy chunk (Mermaid's diagram types, KaTeX, Cytoscape, …) | 150 kB | largest 136.3 kB |
+
+Each budget sits about 5% above its size when set. When the check fails, first make the new code
+lazy (`import()` / `React.lazy`) or smaller; raise a budget only on purpose, in the same change,
+and update this table. A named budget that matches no chunk also fails, so rename it when a chunk
+is renamed.
 
 ## Workspace packages
 

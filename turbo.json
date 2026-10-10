@@ -38,6 +38,12 @@
       "inputs": ["scripts/**", "tools/**", ".claude/hooks/**", "*.ts", "tsconfig*.json"],
       "outputs": []
     },
+    // The web app's gzip budgets (docs/conventions.md), read from the build it depends on.
+    "//#check:bundle-budget": {
+      "dependsOn": ["@nautink/web#build"],
+      "inputs": ["scripts/check-bundle-budget.ts"],
+      "outputs": []
+    },
     "//#lint": {
       "inputs": ["**/*.{ts,tsx,mts,cts,js,mjs,cjs,jsx}", "scripts/**", "tools/**"],
       "outputs": []

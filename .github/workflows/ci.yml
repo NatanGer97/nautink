@@ -69,6 +69,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm test:changeset-gate
 
+      - name: Assert the bundle budget still fails an oversized chunk
+        if: ${{ !cancelled() }}
+        run: pnpm test:bundle-budget-gate
+
       # Pull requests only: a push to `main` has no base to diff against. The "Version Packages"
       # pull request is exempt — it consumes changesets rather than adding one.
       - name: Require a changeset for a source change

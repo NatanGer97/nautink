@@ -91,7 +91,7 @@ describe('App shell', () => {
     const user = renderApp();
     await user.click(screen.getByRole('button', { name: 'Settings' }));
     const settings = await screen.findByRole('dialog', { name: 'Settings' });
-    await user.click(within(settings).getByRole('radio', { name: 'Dark' }));
+    await user.click(await within(settings).findByRole('radio', { name: 'Dark' }));
     expect(document.documentElement.classList.contains('dark')).toBe(true);
     expect(await within(settings).findByText('Not connected')).toBeTruthy();
     expect(within(settings).getByText(/Failed to fetch/)).toBeTruthy();

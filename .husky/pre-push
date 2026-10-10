@@ -2,4 +2,5 @@ pnpm lint
 pnpm lint:fixtures
 pnpm check:agents
 pnpm test:changeset-gate
+pnpm test:bundle-budget-gate
 pnpm test:coverage-gate

@@ -1,21 +1,18 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@nautink/ui/components/popover';
 import { IconButton } from '@nautink/ui/icon-button';
 import { X } from 'lucide-react';
+import { Suspense, lazy } from 'react';
 
-import { ConnectionRow } from './connection-row.tsx';
-import {
-  AppearanceField,
-  BackupField,
-  CodebaseField,
-  DefaultModelField,
-  ReviewChangesField,
-} from './settings-fields.tsx';
 import { useConnectionStatus } from './use-connection-status.ts';
 import { focusOverlayContainer } from '../shell/focus-overlay.ts';
 import { useUiStore } from '../state/ui-store.ts';
 
 import type { ConnectionCheck } from './use-connection-status.ts';
-import type { ReactElement, ReactNode } from 'react';
+import type { ComponentType, ReactElement, ReactNode } from 'react';
+
+const LazySettingsFields: ComponentType<{ connection: ConnectionCheck }> = lazy(async () => ({
+  default: (await import('./settings-fields.tsx')).SettingsFields,
+}));
 
 export interface SettingsPopoverProps {
   /** The rail's Settings button, which the popover opens from. */
@@ -52,12 +49,9 @@ export function SettingsPopover({ children }: SettingsPopoverProps): ReactElemen
             }}
           />
         </div>
-        <AppearanceField />
-        <DefaultModelField />
-        <ReviewChangesField />
-        <ConnectionRow status={connection.status} onRecheck={connection.recheck} />
-        <CodebaseField />
-        <BackupField />
+        <Suspense fallback={<p className="text-muted-foreground">Loading settings…</p>}>
+          <LazySettingsFields connection={connection} />
+        </Suspense>
       </PopoverContent>
     </Popover>
   );

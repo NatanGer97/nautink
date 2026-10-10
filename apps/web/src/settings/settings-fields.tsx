@@ -12,11 +12,13 @@ import { ToggleGroup, ToggleGroupItem } from '@nautink/ui/components/toggle-grou
 import { isThemePreference, THEME_LABELS, THEME_PREFERENCES } from '@nautink/ui/theme';
 
 import { CodebaseSetting } from './codebase-setting.tsx';
+import { ConnectionRow } from './connection-row.tsx';
 import { backUpAll, pickAndRestoreBackup } from '../import/import-files.ts';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
+import type { ConnectionCheck } from './use-connection-status.ts';
 import type { ModelId } from '@nautink/contracts/models';
 import type { ThemePreference } from '@nautink/ui/theme';
 import type { ReactElement } from 'react';
@@ -154,5 +156,22 @@ export function BackupField(): ReactElement {
         Restore backup
       </Button>
     </div>
+  );
+}
+
+/**
+ * Every row of the settings popover, in order. Loaded the first time Settings opens, so the Select
+ * and Switch it needs stay out of the main bundle (PRD §9).
+ */
+export function SettingsFields({ connection }: { connection: ConnectionCheck }): ReactElement {
+  return (
+    <>
+      <AppearanceField />
+      <DefaultModelField />
+      <ReviewChangesField />
+      <ConnectionRow status={connection.status} onRecheck={connection.recheck} />
+      <CodebaseField />
+      <BackupField />
+    </>
   );
 }

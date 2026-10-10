@@ -1,12 +1,27 @@
 // Live build (PRD §4.3, §6.4): while Claude's reply streams into a diagram, each shape that was
 // not on the canvas before fades in, in under 150 ms. Works on Mermaid's render and on the
-// visual editors alike, by watching the DOM for shapes with a new id.
-import { animate } from 'motion/mini';
+// visual editors alike, by watching the DOM for shapes with a new id. Motion loads when a reply
+// starts streaming, not with the app, so it stays out of the main bundle (PRD §9).
 import { useEffect } from 'react';
 
 import { idsOf } from '../preview/locate.ts';
 
+import type { animate } from 'motion/mini';
 import type { RefObject } from 'react';
+
+type Animate = typeof animate;
+
+let motionLoad: Promise<Animate> | null = null;
+
+async function importAnimate(): Promise<Animate> {
+  return (await import('motion/mini')).animate;
+}
+
+/** Motion's `animate`, imported once, on first use. */
+async function loadAnimate(): Promise<Animate> {
+  motionLoad ??= importAnimate();
+  return motionLoad;
+}
 
 /** PRD §6.4: 120–180 ms ease-out, and §4.3: under 150 ms. */
 export const FADE_SECONDS: number = 0.12;
@@ -39,15 +54,27 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/**
+ * Fades `elements` in (none: only loads Motion). The fade is decoration: if Motion's chunk fails
+ * to load, the shapes simply show without it, and the next fade tries the import again.
+ */
+async function fadeIn(elements: readonly Element[]): Promise<void> {
+  try {
+    const animateElement: Animate = await loadAnimate();
+    for (const element of elements) {
+      animateElement(element, { opacity: [0, 1] }, { duration: FADE_SECONDS, ease: 'easeOut' });
+    }
+  } catch {
+    motionLoad = null;
+  }
+}
+
 /** Fades in the shapes of `root` whose key is not in `seen`. Returns the keys shown now. */
 export function fadeInNewShapes(root: Element, seen: ReadonlySet<string>): Set<string> {
   const shapes: Map<string, Element> = shapeKeys(root);
-  if (!prefersReducedMotion()) {
-    for (const [key, element] of shapes) {
-      if (!seen.has(key)) {
-        animate(element, { opacity: [0, 1] }, { duration: FADE_SECONDS, ease: 'easeOut' });
-      }
-    }
+  const added: Element[] = [...shapes].filter(([key]) => !seen.has(key)).map(([, shape]) => shape);
+  if (added.length > 0 && !prefersReducedMotion()) {
+    void fadeIn(added);
   }
   return new Set<string>(shapes.keys());
 }
@@ -59,6 +86,8 @@ export function useLiveFade(rootRef: RefObject<HTMLElement | null>, isLive: bool
     if (root === null || !isLive) {
       return undefined;
     }
+    // Start loading Motion now, so it is there by the time the first new shape appears.
+    void fadeIn([]);
     let seen: Set<string> = new Set<string>(shapeKeys(root).keys());
     const observer: MutationObserver = new MutationObserver(() => {
       seen = fadeInNewShapes(root, seen);

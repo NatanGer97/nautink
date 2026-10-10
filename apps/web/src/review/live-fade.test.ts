@@ -21,15 +21,18 @@ describe('live fade', () => {
     return root;
   }
 
-  it('fades in only the shapes it has not seen, and none with reduced motion', () => {
+  it('fades in only the shapes it has not seen, and none with reduced motion', async () => {
     const root = stage('<div data-id="A"></div><div data-testid="sequence-item-i0"></div>');
     expect(shapeKey(root.firstElementChild!)).toBe('A');
     const seen = fadeInNewShapes(root, new Set(['A']));
     expect(seen).toEqual(new Set(['A', 'sequence-item-i0']));
-    expect(animateMock).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(animateMock).toHaveBeenCalledOnce();
+    });
     expect(animateMock.mock.calls[0]?.[2]).toMatchObject({ duration: FADE_SECONDS });
     setMediaQuery('(prefers-reduced-motion: reduce)', true);
     fadeInNewShapes(root, new Set());
+    await Promise.resolve();
     expect(animateMock).toHaveBeenCalledOnce();
     setMediaQuery('(prefers-reduced-motion: reduce)', false);
     const svg = stage('<svg><g id="r-flowchart-B-0" class="node"></g><g class="node"></g></svg>');
