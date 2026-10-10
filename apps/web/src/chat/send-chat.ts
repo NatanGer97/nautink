@@ -59,6 +59,8 @@ function createTurn(
   return {
     diagramId: diagram.id,
     workspace: deps.workspace,
+    // Read once: switching agent mid-turn does not mix agents in one turn.
+    agent: deps.agent(),
     before: diagram.code,
     prompt,
     label: turnLabel(options.kind ?? 'user', options.title ?? prompt),

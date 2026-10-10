@@ -56,6 +56,7 @@ async function harness(responses: ((init?: RequestInit) => Response)[]): Promise
   const review = vi.fn<ChatDeps['review']>(async () => Promise.resolve(STRUCTURAL));
   const notifyError = vi.fn<ChatDeps['notifyError']>();
   const deps: ChatDeps = {
+    agent: () => 'claude',
     fetchImpl: async (...[, init]) => {
       const next = queue.shift();
       if (next === undefined) {
@@ -181,6 +182,14 @@ describe('accept, reject and show again', () => {
     h.workspace.store.getState().undo();
     expect(h.active().code).toBe(before);
     expect(useReviewStore.getState().open).toEqual({});
+  });
+
+  it('accept saves the version with the agent that proposed it', async () => {
+    const h = await harness([reply(fenced(VALID))]);
+    await sendChat('Draw A to B', {}, { ...h.deps, agent: () => 'codex', model: () => null });
+    await acceptProposal(h.active().id);
+    const versions = await listVersions(h.workspace.db(), h.active().id);
+    expect(versions.find((version) => version.kind === 'claude')?.agent).toBe('codex');
   });
 
   it('reject records nothing, and show again opens the same proposal', async () => {

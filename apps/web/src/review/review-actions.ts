@@ -5,6 +5,7 @@ import { saveTurnVersions } from '../chat/turn-versions.ts';
 
 import type { Proposal } from './review-store.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { NautinkDb } from '@nautink/storage/db';
 import type { ChatMessage, ChatMessageReview } from '@nautink/storage/records';
 
 /** Shown on "Show again" when the diagram changed after the reply. */
@@ -36,9 +37,10 @@ function markReplies(proposal: Proposal, review: ChatMessageReview | undefined):
 }
 
 async function saveVersions(proposal: Proposal): Promise<void> {
-  const { diagramId, before, after, prompt, deps } = proposal;
+  const { diagramId, before, after, prompt, agent, deps } = proposal;
   try {
-    await saveTurnVersions({ db: deps.workspace().requireDb(), diagramId, before, after, prompt });
+    const db: NautinkDb = deps.workspace().requireDb();
+    await saveTurnVersions({ db, diagramId, before, after, prompt, agent });
   } catch (err) {
     const message: string = err instanceof Error ? err.message : String(err);
     deps.notifyError(`Could not save a version. ${message}`);

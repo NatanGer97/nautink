@@ -9,6 +9,7 @@ import type { FetchLike } from './chat-client.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
 import type { ProposalReview } from '../review/review-store.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 
 const ERROR_TOAST_MS: number = 6000;
 
@@ -17,7 +18,9 @@ export interface ChatDeps {
   fetchImpl: FetchLike;
   validate: (code: string) => Promise<MermaidError | null>;
   workspace: () => WorkspaceState;
-  /** The model to ask for; `null` is Claude Code's default. */
+  /** The agent to ask (ADR-002). */
+  agent: () => AgentId;
+  /** The model to ask for; `null` is the agent CLI's default. */
   model: () => string | null;
   /** True when the chat panel shows the reply, so an error needs no extra notice. */
   isChatOpen: () => boolean;
@@ -35,6 +38,7 @@ export function defaultChatDeps(): ChatDeps {
     fetchImpl: async (input, init) => fetch(input, init),
     validate: validateMermaid,
     workspace: useWorkspaceStore.getState,
+    agent: () => useUiStore.getState().agent,
     model: () => useUiStore.getState().defaultModel,
     isChatOpen: () => useUiStore.getState().activePanel === 'chat',
     notifyError: (message: string): void => {

@@ -7,6 +7,7 @@ import type { ChatDeps } from './chat-deps.ts';
 import type { TurnCodeSink } from './turn-edit.ts';
 import type { Proposal, ProposalReview } from '../review/review-store.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 
 /**
  * A turn with review on (PRD §4.2, §4.3): the streamed code is a live preview on the canvas, never
@@ -50,6 +51,7 @@ export interface ProposalTurn {
   diagramId: string;
   before: string;
   prompt: string;
+  agent: AgentId;
   label: string;
   replyIndexes: readonly number[];
   deps: ChatDeps;
@@ -69,6 +71,7 @@ function newProposal(turn: ProposalTurn, result: AttemptResult & { code: string 
     before: turn.before,
     after: result.code,
     prompt: turn.prompt,
+    agent: turn.agent,
     label: turn.label,
     isValid: result.error === null,
     replyIndexes: [...turn.replyIndexes],

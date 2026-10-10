@@ -104,18 +104,19 @@ describe('settling and failing', () => {
 });
 
 describe('toAssistantMessage', () => {
-  it('stores the reply in the v1 message shape', () => {
-    expect(toAssistantMessage(startReply(null))).toEqual({
+  it('stores the reply in the v1 message shape, plus the agent that wrote it', () => {
+    expect(toAssistantMessage(startReply(null), 'claude')).toEqual({
       role: 'assistant',
       text: '',
       tools: [],
       streaming: true,
+      agent: 'claude',
     });
     const failed = failReply(startReply(null), new Error('nope'), false);
-    expect(toAssistantMessage(failed)).toMatchObject({ streaming: false, error: 'nope' });
+    expect(toAssistantMessage(failed, 'claude')).toMatchObject({ streaming: false, error: 'nope' });
     const done = replay([
       { type: 'done', sessionId: 's', text: 't', isError: false, durationMs: 5, costUsd: 0 },
     ]);
-    expect(toAssistantMessage(done).meta).toEqual({ durationMs: 5, costUsd: 0 });
+    expect(toAssistantMessage(done, 'codex').meta).toEqual({ durationMs: 5, costUsd: 0 });
   });
 });

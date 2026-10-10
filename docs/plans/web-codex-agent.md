@@ -41,7 +41,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: switching agent never leaves an invalid model selected
 
-- [ ] **T3 — Requests carry the agent; sessions stay with their agent**
+- [x] **T3 — Requests carry the agent; sessions stay with their agent**
   - context - a Claude session id must not be sent to Codex
   - Files: `apps/web/src/chat/chat-turn.ts`, `apps/web/src/chat/turn-messages.ts`, `apps/web/src/chat/chat-client.ts`, `apps/web/src/workspace/field-actions.ts`, `apps/web/src/workspace/workspace-state.ts`, tests
   - Red: request body has `agent`; a diagram whose `sessionAgent` is `claude` sends `sessionId: null` when the agent is `codex`; the new session id is stored with `sessionAgent: 'codex'`; the assistant message and the version created on accept store `agent`; `done.costUsd: null` keeps `meta.costUsd` null

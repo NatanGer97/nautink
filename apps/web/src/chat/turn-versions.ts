@@ -1,5 +1,6 @@
 import { addVersion, countVersions } from '@nautink/storage/versions';
 
+import type { AgentId } from '@nautink/contracts/agents';
 import type { NautinkDb } from '@nautink/storage/db';
 
 /** Fired on `window` after a version is added, so the history panel can reload. */
@@ -22,6 +23,8 @@ export interface TurnVersionInput {
   after: string;
   /** What the user asked. */
   prompt: string;
+  /** The agent that wrote `after`. */
+  agent: AgentId;
 }
 
 /**
@@ -29,12 +32,12 @@ export interface TurnVersionInput {
  * diagram, the starting code is kept as a named "Before Claude" version so it can be restored.
  */
 export async function saveTurnVersions(input: TurnVersionInput): Promise<void> {
-  const { db, diagramId, before, after, prompt } = input;
+  const { db, diagramId, before, after, prompt, agent } = input;
   const isFirstChange: boolean = (await countVersions(db, diagramId)) === 0;
   if (isFirstChange && before.trim() !== '') {
     await addVersion(db, { diagramId, code: before, kind: 'manual', label: BEFORE_CLAUDE_LABEL });
   }
-  await addVersion(db, { diagramId, code: after, kind: 'claude', prompt });
+  await addVersion(db, { diagramId, code: after, kind: 'claude', prompt, agent });
   const detail: VersionsChangedDetail = { diagramId };
   window.dispatchEvent(new CustomEvent(VERSIONS_CHANGED_EVENT, { detail }));
 }

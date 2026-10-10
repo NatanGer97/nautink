@@ -4,7 +4,7 @@ import { applyChatEvent, failReply, settleReply, startReply } from './chat-reply
 import { useChatStore } from './chat-store.ts';
 import { extractMermaid } from './extract-mermaid.ts';
 import { findTurnDiagram } from './turn-edit.ts';
-import { appendExchange, writeReply, writeSession } from './turn-messages.ts';
+import { appendExchange, sessionFor, writeReply, writeSession } from './turn-messages.ts';
 import { proposeTurn } from './turn-proposal.ts';
 import { saveTurnVersions } from './turn-versions.ts';
 
@@ -49,8 +49,8 @@ function buildRequest(turn: Turn, attempt: Attempt): ChatRequest {
   return {
     message: attempt.message,
     code: diagram?.code ?? turn.before,
-    sessionId: diagram?.sessionId ?? null,
-    agent: 'claude',
+    sessionId: sessionFor(diagram, turn.agent),
+    agent: turn.agent,
     model: turn.deps.model(),
     selection: turn.selection,
   };
@@ -190,13 +190,14 @@ async function saveTurn(turn: Turn, result: AttemptResult): Promise<string> {
   const after: string | null = savedCode(turn, result);
   try {
     if (after !== null) {
-      const { diagramId, before, prompt } = turn;
+      const { diagramId, before, prompt, agent } = turn;
       await saveTurnVersions({
         db: turn.workspace().requireDb(),
         diagramId,
         before,
         after,
         prompt,
+        agent,
       });
     }
   } catch (err) {
