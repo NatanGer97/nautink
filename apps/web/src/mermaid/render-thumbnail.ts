@@ -1,5 +1,6 @@
 import { initMermaid, loadMermaid } from './mermaid-instance.ts';
 import { enqueueMermaid } from './mermaid-queue.ts';
+import { mermaidRenderHost } from './render-host.ts';
 
 import type { Mermaid } from 'mermaid';
 
@@ -32,7 +33,7 @@ async function renderNow(code: string, isDark: boolean): Promise<Thumbnail> {
     const mermaid: Mermaid = await loadMermaid();
     await initMermaid(isDark);
     await mermaid.parse(code);
-    const { svg } = await mermaid.render(id, code);
+    const { svg } = await mermaid.render(id, code, mermaidRenderHost());
     return { kind: 'image', url: svgToDataUrl(svg) };
   } catch {
     // Mermaid leaves its scratch element behind when a render fails.

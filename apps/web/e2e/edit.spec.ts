@@ -39,6 +39,28 @@ test.describe('canvas views', () => {
     await expect(canvasNode(page, 'C')).toBeVisible();
   });
 
+  test('keeps the page still while an added shape re-renders the diagram', async ({ page }) => {
+    await openInEdit(page);
+    // Mermaid's scratch render once made the page taller for a moment, flashing a scrollbar.
+    await page.evaluate(() => {
+      const record = (): void => {
+        const tallest: number = Number(document.body.dataset.tallestPage ?? 0);
+        const height: number = document.documentElement.scrollHeight;
+        document.body.dataset.tallestPage = String(Math.max(tallest, height));
+      };
+      new MutationObserver(record).observe(document.body, { childList: true, subtree: true });
+    });
+    await page.getByRole('button', { name: 'Add shape' }).click();
+    await page.keyboard.press('Escape');
+    await expect.poll(async () => readCode(page)).toContain('n1');
+    await page.waitForTimeout(1000);
+    const tallest: string | undefined = await page.evaluate(
+      () => document.body.dataset.tallestPage,
+    );
+    const viewport: number = await page.evaluate(() => window.innerHeight);
+    expect(Number(tallest)).toBeLessThanOrEqual(viewport);
+  });
+
   test('turns Edit and Split off for a code-only type and explains why', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();

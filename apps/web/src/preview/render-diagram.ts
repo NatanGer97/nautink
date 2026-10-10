@@ -1,6 +1,7 @@
 import { mermaidIconLoaders } from '../icons/icon-packs.ts';
 import { initMermaid, loadMermaid } from '../mermaid/mermaid-instance.ts';
 import { enqueueMermaid } from '../mermaid/mermaid-queue.ts';
+import { mermaidRenderHost } from '../mermaid/render-host.ts';
 import { toMermaidError } from '../mermaid/validate.ts';
 
 import type { MermaidError } from '../mermaid/validate.ts';
@@ -40,7 +41,7 @@ async function renderJob(
   await initMermaid(isDark);
   const started: number = performance.now();
   await mermaid.parse(code);
-  const { svg } = await mermaid.render(id, code);
+  const { svg } = await mermaid.render(id, code, mermaidRenderHost());
   return { kind: 'rendered', svg, renderMs: Math.round(performance.now() - started) };
 }
 
