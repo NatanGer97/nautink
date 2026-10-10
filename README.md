@@ -181,6 +181,31 @@ feature and the new AI-native features are in, and accessibility, performance bu
 docs are being finished. There is no tagged release yet, and nothing is published to a package
 registry. Expect breaking changes until 1.0.
 
+## Coming soon
+
+Nautink is growing into a place to design a feature with your AI before it writes the code. Each item
+links to its issue; follow it there or say what you need.
+
+**First release**
+
+- [`npx nautink` on npm](https://github.com/NatanGer97/nautink/issues/4): a `0.1.0` preview, so you can
+  start Nautink with one command and no clone.
+- [A hosted demo](https://github.com/NatanGer97/nautink/issues/3): try the editors, templates and export
+  in the browser before you install anything.
+
+**From diagram to design**
+
+- [Diagrams as files in your repo](https://github.com/NatanGer97/nautink/issues/6): pick a folder such as
+  `docs/design/`, and Nautink reads and writes its Markdown and `.mmd` files, so designs are reviewed in
+  pull requests ([ADR-003](docs/adr/003-project-folder-storage.md)).
+- [Designs](https://github.com/NatanGer97/nautink/issues/7): several diagrams plus the problem, options,
+  decision and open questions, in one place the AI sees as a whole.
+- [Export a design as a plan](https://github.com/NatanGer97/nautink/issues/8) that Claude Code or Codex
+  can build from.
+- [Review an agent's diagram in Nautink](https://github.com/NatanGer97/nautink/issues/9): a local MCP
+  server lets your coding agent open its proposed diagram on the canvas for you to edit, accept or
+  reject.
+
 ## Contributing
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) (setup, the gates, and how
