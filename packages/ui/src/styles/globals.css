@@ -34,45 +34,49 @@
 :root {
   color-scheme: light;
 
-  --background: #f7f7f5;
+  --background: #f4f7f9;
   --panel: #ffffff;
-  --muted: #f2f1ee;
-  --subtle: #fbfbfa;
-  --border: #e6e4df;
-  --border-subtle: #f0eeea;
-  --border-strong: #d6d3cc;
-  --foreground: #1b1b19;
-  --muted-foreground: #5e5c57;
-  --faint: #6f6d67;
-  --accent-ink: #3451d1;
-  --accent-ink-strong: #2b44b0;
-  --accent-wash: #eef1fd;
-  --selection-ring: #e3e8fc;
-  --success: #1f7a52;
-  --success-bg: #e7f4ec;
+  --muted: #eaf0f4;
+  --subtle: #f9fbfc;
+  --border: #dde5eb;
+  --border-subtle: #eaf0f4;
+  --border-strong: #c9d4dd;
+  --foreground: #0e1f33;
+  --muted-foreground: #4a5a6d;
+  --faint: #5d6c7e;
+  --accent-ink: #00727f;
+  --accent-ink-strong: #005a65;
+  --accent-wash: #e2f3f5;
+  --selection-ring: #c4e7eb;
+  --success: #1f6630;
+  --success-bg: #e6f3e8;
   --destructive: #b4362f;
   --destructive-bg: #fbeae8;
-  --warning: #8a6a1c;
+  --warning: #7a5c14;
   --warning-bg: #fbf2dc;
   --node-fill: #ffffff;
-  --node-stroke: #cfccc4;
-  --edge: #9a978f;
-  --grid-dot: #dad7d0;
+  --node-stroke: #c2cfda;
+  --edge: #8696a6;
+  --grid-dot: #d3dde5;
   /* Text on the ink fill of primary buttons. */
   --ink-foreground: #ffffff;
+  /* The logo's navy: primary buttons and the brand ink. */
+  --brand-navy: #002450;
+  /* The logo's teal, for brand moments only; text uses --accent-ink, which passes 4.5:1. */
+  --brand-teal: #0097a4;
 
   /* §6.3 elevation: only floating things get a shadow. */
-  --elevation-segment: 0 1px 2px rgb(27 27 25 / 0.08);
-  --elevation-float: 0 4px 16px rgb(27 27 25 / 0.06);
-  --elevation-menu: 0 12px 32px rgb(27 27 25 / 0.14);
-  --elevation-dialog: 0 24px 64px rgb(27 27 25 / 0.24);
+  --elevation-segment: 0 1px 2px rgb(0 36 80 / 0.08);
+  --elevation-float: 0 4px 16px rgb(0 36 80 / 0.06);
+  --elevation-menu: 0 12px 32px rgb(0 36 80 / 0.14);
+  --elevation-dialog: 0 24px 64px rgb(0 36 80 / 0.24);
 
   /* shadcn/ui theme variables, mapped onto the tokens above. */
   --card: var(--panel);
   --card-foreground: var(--foreground);
   --popover: var(--panel);
   --popover-foreground: var(--foreground);
-  --primary: var(--foreground);
+  --primary: var(--brand-navy);
   --primary-foreground: var(--ink-foreground);
   --secondary: var(--muted);
   --secondary-foreground: var(--foreground);
@@ -87,31 +91,32 @@
 .dark {
   color-scheme: dark;
 
-  --background: #121211;
-  --panel: #1a1a19;
-  --muted: #232321;
-  --subtle: #1e1e1c;
-  --border: #2c2c2a;
-  --border-subtle: #232321;
-  --border-strong: #3a3a37;
-  --foreground: #ededeb;
-  --muted-foreground: #a8a6a0;
-  --faint: #8e8c86;
-  --accent-ink: #9aaeff;
-  --accent-ink-strong: #c2ceff;
-  --accent-wash: #1e2440;
-  --selection-ring: #2a3366;
-  --success: #4cc38a;
-  --success-bg: #15291f;
+  --background: #0a1320;
+  --panel: #0f1b2b;
+  --muted: #172638;
+  --subtle: #122032;
+  --border: #1f3045;
+  --border-subtle: #172638;
+  --border-strong: #2c4058;
+  --foreground: #e8eef6;
+  --muted-foreground: #a3b1c2;
+  --faint: #8796a9;
+  --accent-ink: #2fb6c4;
+  --accent-ink-strong: #9be7ee;
+  --accent-wash: #0d2b36;
+  --selection-ring: #144b57;
+  --success: #8edb94;
+  --success-bg: #142b1a;
   --destructive: #f07a72;
   --destructive-bg: #2e1716;
   --warning: #e5c46b;
-  --warning-bg: #2e2a1a;
-  --node-fill: #1e1e1c;
-  --node-stroke: #3f3e3a;
-  --edge: #77756f;
-  --grid-dot: #2a2a27;
-  --ink-foreground: #121211;
+  --warning-bg: #2b2716;
+  --node-fill: #122032;
+  --node-stroke: #2f4560;
+  --edge: #6f8296;
+  --grid-dot: #1b2b3e;
+  --ink-foreground: #0a1320;
+  --primary: var(--foreground);
 
   --elevation-segment: 0 1px 2px rgb(0 0 0 / 0.4);
   --elevation-float: 0 4px 16px rgb(0 0 0 / 0.3);
@@ -175,6 +180,8 @@
   --color-node-stroke: var(--node-stroke);
   --color-edge: var(--edge);
   --color-grid-dot: var(--grid-dot);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-teal: var(--brand-teal);
 
   /* §6.3 radius: controls 6, tracks 8, cards and menus 10, floating panels 12, dialogs 14 */
   --radius-xs: 4px;

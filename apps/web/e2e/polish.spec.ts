@@ -173,7 +173,7 @@ test('tones down code colors in dark mode so labels stay readable', async ({ pag
     return { background: style.backgroundColor, text: style.color };
   });
   expect(colors.background).not.toBe('rgb(255, 255, 255)');
-  expect(colors.text).toBe('rgb(237, 237, 235)');
+  expect(colors.text).toBe('rgb(232, 238, 246)');
 });
 
 test('shows `Id : text` as a state description, and keeps it a description', async ({ page }) => {

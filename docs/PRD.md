@@ -180,26 +180,33 @@ Source of truth: the mockup values below, expressed as CSS variables mapped to s
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--background` (ground) | `#F7F7F5` | `#121211` | App and canvas background |
-| `--card` / `--panel` | `#FFFFFF` | `#1A1A19` | Panels, bars, cards |
-| `--muted` (panel-2) | `#F2F1EE` | `#232321` | Hover, segmented track, user bubble |
-| `--subtle` | `#FBFBFA` | `#1E1E1C` | Card headers, inputs |
-| `--border` | `#E6E4DF` | `#2C2C2A` | Default hairline |
-| `--border-subtle` | `#F0EEEA` | `#232321` | Dividers inside panels |
-| `--input` / `--border-strong` | `#D6D3CC` | `#3A3A37` | Buttons, fields, composer |
-| `--foreground` | `#1B1B19` | `#EDEDEB` | Text, ink fill for primary buttons |
-| `--muted-foreground` | `#5E5C57` | `#A8A6A0` | Secondary text |
-| `--faint` | `#6F6D67` | `#8E8C86` | Meta, placeholders (darkened 2026-10-09 to pass 4.5:1 on every surface) |
-| `--accent-ink` (`--ring`) | `#3451D1` | `#9AAEFF` | Selection, focus, active |
-| `--accent-ink-strong` | `#2B44B0` | `#C2CEFF` | Accent text on accent backgrounds |
-| `--accent-wash` | `#EEF1FD` | `#1E2440` | Selected rail item, chips |
-| `--selection-ring` | `#E3E8FC` | `#2A3366` | 3 px halo around selected nodes |
-| `--success` / bg | `#1F7A52` / `#E7F4EC` | `#4CC38A` / `#15291F` | Added, valid |
+| `--background` (ground) | `#F4F7F9` | `#0A1320` | App and canvas background |
+| `--card` / `--panel` | `#FFFFFF` | `#0F1B2B` | Panels, bars, cards |
+| `--muted` (panel-2) | `#EAF0F4` | `#172638` | Hover, segmented track, user bubble |
+| `--subtle` | `#F9FBFC` | `#122032` | Card headers, inputs |
+| `--border` | `#DDE5EB` | `#1F3045` | Default hairline |
+| `--border-subtle` | `#EAF0F4` | `#172638` | Dividers inside panels |
+| `--input` / `--border-strong` | `#C9D4DD` | `#2C4058` | Buttons, fields, composer |
+| `--foreground` | `#0E1F33` | `#E8EEF6` | Text |
+| `--primary` (ink fill) | `#002450` (brand navy) | `#E8EEF6` | Primary buttons |
+| `--muted-foreground` | `#4A5A6D` | `#A3B1C2` | Secondary text |
+| `--faint` | `#5D6C7E` | `#8796A9` | Meta, placeholders (4.5:1 on every surface) |
+| `--accent-ink` (`--ring`) | `#00727F` | `#2FB6C4` | Selection, focus, active (the logo teal, deepened to pass 4.5:1) |
+| `--accent-ink-strong` | `#005A65` | `#9BE7EE` | Accent text on accent backgrounds |
+| `--accent-wash` | `#E2F3F5` | `#0D2B36` | Selected rail item, chips |
+| `--selection-ring` | `#C4E7EB` | `#144B57` | 3 px halo around selected nodes |
+| `--success` / bg | `#1F6630` / `#E6F3E8` | `#8EDB94` / `#142B1A` | Added, valid |
 | `--destructive` / bg | `#B4362F` / `#FBEAE8` | `#F07A72` / `#2E1716` | Removed, errors, delete |
-| `--warning` / bg | `#8A6A1C` / `#FBF2DC` | `#E5C46B` / `#2E2A1A` | Before-restore, notices |
-| `--node-fill` / `--node-stroke` | `#FFFFFF` / `#CFCCC4` | `#1E1E1C` / `#3F3E3A` | Canvas nodes |
-| `--edge` | `#9A978F` | `#77756F` | Canvas links |
-| `--grid-dot` | `#DAD7D0` | `#2A2A27` | 20 px dot grid |
+| `--warning` / bg | `#7A5C14` / `#FBF2DC` | `#E5C46B` / `#2B2716` | Before-restore, notices |
+| `--node-fill` / `--node-stroke` | `#FFFFFF` / `#C2CFDA` | `#122032` / `#2F4560` | Canvas nodes |
+| `--edge` | `#8696A6` | `#6F8296` | Canvas links |
+| `--grid-dot` | `#D3DDE5` | `#1B2B3E` | 20 px dot grid |
+| `--brand-navy` / `--brand-teal` | `#002450` / `#0097A4` | same | The logo colors (docs/brand/); teal is never used for text |
+
+The palette follows the logo (rebrand 2026-10-10): cool slate neutrals in light mode, deep navy in
+dark mode, teal for selection and focus. Mermaid renders with its `base` theme in the same colors
+(teal-washed shapes, slate links, no drop shadow); exported HTML and mermaid.live links keep
+Mermaid's stock themes so they look the same anywhere.
 
 Rules: never use the accent for primary buttons (those use the ink fill). Contrast for text is at least 4.5:1. Diff colors must differ in lightness, not hue alone.
 

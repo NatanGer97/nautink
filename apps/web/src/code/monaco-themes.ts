@@ -20,30 +20,30 @@ interface EditorPalette {
 
 const LIGHT: EditorPalette = {
   panel: '#FFFFFF',
-  foreground: '#1B1B19',
-  muted: '#5E5C57',
-  faint: '#6F6D67',
-  gutter: '#B4B1AA',
-  accent: '#3451D1',
-  accentWash: '#EEF1FD',
-  success: '#1F7A52',
-  warning: '#8A6A1C',
+  foreground: '#0E1F33',
+  muted: '#4A5A6D',
+  faint: '#5D6C7E',
+  gutter: '#A9B6C3',
+  accent: '#00727F',
+  accentWash: '#E2F3F5',
+  success: '#1F6630',
+  warning: '#7A5C14',
   destructive: '#B4362F',
-  border: '#F0EEEA',
+  border: '#EAF0F4',
 };
 
 const DARK: EditorPalette = {
-  panel: '#1A1A19',
-  foreground: '#EDEDEB',
-  muted: '#A8A6A0',
-  faint: '#8E8C86',
-  gutter: '#5E5C57',
-  accent: '#9AAEFF',
-  accentWash: '#1E2440',
-  success: '#4CC38A',
+  panel: '#0F1B2B',
+  foreground: '#E8EEF6',
+  muted: '#A3B1C2',
+  faint: '#8796A9',
+  gutter: '#4A5D74',
+  accent: '#2FB6C4',
+  accentWash: '#0D2B36',
+  success: '#8EDB94',
   warning: '#E5C46B',
   destructive: '#F07A72',
-  border: '#232321',
+  border: '#172638',
 };
 
 /** Monaco wants colors without the `#` in token rules. */
