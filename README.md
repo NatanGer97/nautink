@@ -39,8 +39,8 @@ through your own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) o
   undo a restore.
 - **Many diagrams.** Search titles and content, filter by type, pin, rename, duplicate, download and
   delete (with undo). Titles are picked from the code until you rename.
-- **Templates.** A gallery of 15 starters across process, software design, data, planning and charts,
-  each as an example or a blank.
+- **Templates.** A gallery of 14 diagram types across process, software design, data, planning and
+  charts, each with an example, plus a blank for each of the five visual editor types.
 - **Export.** Download SVG or PNG (scale, transparent background), copy the image, the SVG, the code,
   Markdown or an HTML embed, or open the diagram in mermaid.live.
 - **Import and backups.** Drop or pick `.mmd`, `.mermaid` or Markdown files (one diagram per Mermaid

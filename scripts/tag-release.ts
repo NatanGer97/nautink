@@ -4,7 +4,8 @@
  * GitHub Release whose notes are every workspace's changelog section for that version.
  *
  * Every workspace is in one Changesets `fixed` group (`.changeset/config.json`), so they all share a
- * version; a mismatch is an error. It does nothing when that version is already tagged, or when
+ * version; a mismatch is an error. Workspaces in the config's `ignore` list (the marketing page,
+ * ADR-003) are not part of the app, so they are left out. It does nothing when that version is already tagged, or when
  * nothing was ever released (`0.0.0`), so it is safe on every push to `main`.
  *
  *   node scripts/tag-release.ts   # needs git push access and GH_TOKEN for `gh release create`
@@ -41,6 +42,28 @@ export function releaseVersion(workspaces: WorkspaceVersion[]): string {
     );
   }
   return first.version;
+}
+
+/** The workspace names in a Changesets config's `ignore` list. Throws when it is not a list of names. */
+export function ignoredWorkspaces(configJson: string): string[] {
+  const { ignore } = JSON.parse(configJson) as { ignore?: unknown };
+  if (ignore === undefined) {
+    return [];
+  }
+  if (!Array.isArray(ignore) || ignore.some((name) => typeof name !== 'string')) {
+    throw new Error(
+      `"ignore" in .changeset/config.json must be a list of workspace names: ${JSON.stringify(ignore)}.`,
+    );
+  }
+  return ignore as string[];
+}
+
+/** The workspaces that make up the released app: every one Changesets does not ignore. */
+export function releasedWorkspaces<T extends { name: string }>(
+  workspaces: T[],
+  ignored: string[],
+): T[] {
+  return workspaces.filter((workspace) => !ignored.includes(workspace.name));
 }
 
 function escapeRegExp(text: string): string {
@@ -99,7 +122,10 @@ function isTagged(tag: string): boolean {
 }
 
 function main(): void {
-  const workspaces = workspaceDirs().map(readWorkspace);
+  const ignored = ignoredWorkspaces(
+    readFileSync(path.join(ROOT, '.changeset', 'config.json'), 'utf8'),
+  );
+  const workspaces = releasedWorkspaces(workspaceDirs().map(readWorkspace), ignored);
   const version = releaseVersion(workspaces);
   const tag = `v${version}`;
   if (version === UNRELEASED) {
