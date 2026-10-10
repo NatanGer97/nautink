@@ -1,5 +1,5 @@
-import { useReactFlow } from '@xyflow/react';
-import { useEffect, useEffectEvent } from 'react';
+import { useNodesInitialized, useReactFlow, useStore } from '@xyflow/react';
+import { useEffect, useEffectEvent, useState } from 'react';
 
 import { useWhenGrows } from '../../lib/use-when-grows.ts';
 import { useFitInsets } from '../../shell/use-fit-insets.ts';
@@ -52,25 +52,34 @@ export function useFitNow(): (duration?: number) => void {
 }
 
 /**
- * Fits whenever `fitRequest` grows (first open, a full layout, Auto layout), a frame later so the
- * new nodes are on the canvas. Opening or closing chat later does not move the view.
+ * Fits whenever `fitRequest` grows (first open, a full layout, Auto layout), once React Flow has
+ * measured every node: a fit before that has no sizes to fit and leaves the view where it was.
+ * The first fit is instant. Opening or closing chat later does not move the view. Returns true
+ * once the first fit ran, or while there is nothing to fit, so the canvas can stay hidden until
+ * the diagram is where it belongs.
  */
-export function useFitOnRequest(fitRequest: number): void {
+export function useFitOnRequest(fitRequest: number): boolean {
   const fitNow: (duration?: number) => void = useFitNow();
+  const isMeasured: boolean = useNodesInitialized();
+  const [fittedRequest, setFittedRequest] = useState<number>(0);
+  const isDue: boolean = fitRequest > fittedRequest && isMeasured;
   const fit: () => void = useEffectEvent((): void => {
-    fitNow();
+    fitNow(fittedRequest === 0 ? 0 : undefined);
+    setFittedRequest(fitRequest);
   });
-  useEffect(() => {
-    if (fitRequest === 0) {
-      return undefined;
-    }
-    const frame: number = requestAnimationFrame(() => {
-      fit();
-    });
-    return (): void => {
-      cancelAnimationFrame(frame);
-    };
-  }, [fitRequest]);
+  useEffect(() => (isDue ? onNextFrame(fit) : undefined), [isDue]);
+  const isEmpty: boolean = useStore((state) => state.nodes.length === 0);
+  return fitRequest === 0 || fittedRequest > 0 || isEmpty;
+}
+
+/** Runs `run` on the next frame; the returned function cancels it. */
+function onNextFrame(run: () => void): () => void {
+  const frame: number = requestAnimationFrame(() => {
+    run();
+  });
+  return (): void => {
+    cancelAnimationFrame(frame);
+  };
 }
 
 /**

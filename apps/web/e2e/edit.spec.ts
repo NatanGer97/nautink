@@ -61,6 +61,33 @@ test.describe('canvas views', () => {
     expect(Number(tallest)).toBeLessThanOrEqual(viewport);
   });
 
+  test('shows the diagram already fitted after a reload, with no jump', async ({ page }) => {
+    await openInEdit(page);
+    // Record the view on every frame of the reload: once the canvas shows, it must not move.
+    await page.addInitScript(() => {
+      const frames: string[] = [];
+      Object.assign(window, { fitFrames: frames });
+      const record = (): void => {
+        const viewport: HTMLElement | null = document.querySelector('.react-flow__viewport');
+        const hasNodes: boolean = document.querySelector('.react-flow__node') !== null;
+        if (viewport !== null && hasNodes && getComputedStyle(viewport).opacity !== '0') {
+          frames.push(viewport.style.transform);
+        }
+        requestAnimationFrame(record);
+      };
+      requestAnimationFrame(record);
+    });
+    await page.reload();
+    await expect(canvasNode(page, 'A')).toBeVisible();
+    await page.waitForTimeout(1500);
+    const frames: string[] = await page.evaluate(
+      () => (window as unknown as { fitFrames: string[] }).fitFrames,
+    );
+    expect(frames.length).toBeGreaterThan(0);
+    expect([...new Set(frames)]).toHaveLength(1);
+    expect(frames[0]).not.toBe('translate(0px, 0px) scale(1)');
+  });
+
   test('turns Edit and Split off for a code-only type and explains why', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('group', { name: 'Diagram preview' })).toBeVisible();

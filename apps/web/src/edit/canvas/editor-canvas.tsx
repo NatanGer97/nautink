@@ -1,7 +1,7 @@
 import '@xyflow/react/dist/style.css';
 import './react-flow-theme.css';
 import { ConnectionMode, ReactFlow } from '@xyflow/react';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { ReadOnlyBanner } from './canvas-notices.tsx';
 import { FlowZoomControls } from './flow-zoom-controls.tsx';
@@ -56,9 +56,18 @@ function useMarkedFlow<N extends Node, E extends Edge>(flow: FlowProps<N, E>): F
   return marks.size === 0 ? flow : { ...flow, ...marked };
 }
 
-function FitOnRequest({ fitRequest }: { fitRequest: number }): null {
-  useFitOnRequest(fitRequest);
+function FitOnRequest({
+  fitRequest,
+  onFitted,
+}: {
+  fitRequest: number;
+  onFitted: (hasFitted: boolean) => void;
+}): null {
+  const hasFitted: boolean = useFitOnRequest(fitRequest);
   useFitWhenTopBarAppears();
+  useEffect(() => {
+    onFitted(hasFitted);
+  }, [hasFitted, onFitted]);
   return null;
 }
 
@@ -77,8 +86,14 @@ export function EditorCanvas<N extends Node, E extends Edge>({
   children,
 }: EditorCanvasProps<N, E>): ReactElement {
   const markedFlow: FlowProps<N, E> = useMarkedFlow(flow);
+  // Hidden until the first fit, so the diagram never shows at the wrong place and then jumps.
+  const [isFitted, setIsFitted] = useState<boolean>(false);
   return (
-    <div ref={rootRef} className="nautink-flow @container absolute inset-0">
+    <div
+      ref={rootRef}
+      data-fitted={isFitted ? '' : undefined}
+      className="nautink-flow @container absolute inset-0"
+    >
       <ReactFlow<N, E>
         connectionMode={ConnectionMode.Loose}
         connectionRadius={CONNECTION_RADIUS_PX}
@@ -94,7 +109,7 @@ export function EditorCanvas<N extends Node, E extends Edge>({
         deleteKeyCode={isReadOnly ? null : DELETE_KEYS}
         proOptions={{ hideAttribution: true }}
       >
-        <FitOnRequest fitRequest={fitRequest} />
+        <FitOnRequest fitRequest={fitRequest} onFitted={setIsFitted} />
         <FlowZoomControls />
       </ReactFlow>
       {children}
