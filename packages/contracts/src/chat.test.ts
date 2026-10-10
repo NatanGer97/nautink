@@ -34,6 +34,21 @@ describe('chatRequestSchema', () => {
     );
   });
 
+  it('accepts a selection with kinds', () => {
+    const selection = {
+      ids: ['a', 'L_a_b_0'],
+      labels: ['Start', 'Start → b'],
+      kinds: ['node', 'link'],
+    };
+    const request = { ...VALID_REQUEST, selection };
+    expect(chatRequestSchema.parse(request)).toEqual(request);
+  });
+
+  it('rejects kinds that are not strings', () => {
+    const selection = { ids: ['a'], labels: ['Start'], kinds: [1] };
+    expect(() => chatRequestSchema.parse({ ...VALID_REQUEST, selection })).toThrow();
+  });
+
   it('rejects an unknown model and an empty selection', () => {
     expect(() => chatRequestSchema.parse({ ...VALID_REQUEST, model: 'gpt' })).toThrow();
     const emptySelection = { ...VALID_REQUEST, selection: { ids: [], labels: [] } };

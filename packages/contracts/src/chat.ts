@@ -4,10 +4,15 @@ import { modelIdSchema } from './models.ts';
 
 import type { ModelId } from './models.ts';
 
-/** Nodes the user selected on the canvas; Claude limits its change to them (PRD §4.1). */
+/**
+ * Items the user selected on the canvas; Claude limits its change to them (PRD §4.1). The three
+ * lists are parallel: `labels[i]` and `kinds[i]` describe `ids[i]`. `kinds` (`node`, `link`,
+ * `class` …) is optional, so clients that send only ids and labels keep working.
+ */
 export interface ChatSelection {
   ids: string[];
   labels: string[];
+  kinds?: string[];
 }
 
 /** Body of `POST /api/chat`. */
@@ -22,6 +27,7 @@ export interface ChatRequest {
 const selectionSchema: z.ZodType<ChatSelection> = z.object({
   ids: z.array(z.string().min(1)).min(1),
   labels: z.array(z.string()),
+  kinds: z.array(z.string()).exactOptional(),
 });
 
 export const chatRequestSchema: z.ZodType<ChatRequest> = z.object({
