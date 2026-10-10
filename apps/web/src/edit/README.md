@@ -34,7 +34,21 @@ Everything an editor needs is shared; an editor is **one folder plus one registr
    That is the only shared file you touch. Each editor (and React Flow) loads as its own chunk the
    first time it is shown; never import an editor folder from anywhere else.
 
-Do not import from another editor's folder. If you need something another editor has, move it to
+Do not import from another editor's folder.
+
+### Sequence: no React Flow
+
+The sequence editor (`sequence/`) follows v1 and draws one SVG laid out from the model
+(`computeLayout` in `@nautink/editors/sequence/layout`): the order of participants and rows is the
+layout, so there are **no saved positions**. It still uses `useEditorCore`, with `SEQUENCE_LAYOUT`
+(nothing to place) and `NO_POSITION_STORE` (reads and writes nothing), so a sequence diagram never
+gets a positions record. It does not render `EditorCanvas` or a `ReactFlowProvider`; instead
+`use-sequence-view.ts` pans, zooms and fits the stage with a CSS transform, with React Flow's limits
+(10–300 %, wheel zooms around the pointer, drag pans) and the shared fit (24 px padding, at most
+120 %, the prompt bar's room kept free, from `usePromptBarInset`). It reuses the shared toolbar,
+inspector, library, `ZoomControls`, `ReadOnlyBanner`, `CanvasHint` and `useWindowKeys`. Participants
+are published with their Mermaid id, so Split marks and selects them; rows and boxes have no
+Mermaid id and are published by item id with a descriptive label. If you need something another editor has, move it to
 the shared folders below in a separate commit and say so.
 
 ## The contract
