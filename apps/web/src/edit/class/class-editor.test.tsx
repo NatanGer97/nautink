@@ -206,7 +206,8 @@ describe('ClassEditor', () => {
   it('is read-only while Claude edits, and keeps the last canvas on a syntax error', async () => {
     const { rerender } = renderEditor({ readOnlyReason: CLAUDE_EDITING });
     await screen.findByTestId('class-node-Animal');
-    expect(screen.getByRole('status').textContent).toBe(CLAUDE_EDITING);
+    // Claude's working pill on the canvas says so; the editor shows no note of its own.
+    expect(screen.queryByRole('status')).toBeNull();
     expect(screen.getByRole('button', { name: 'Add class' }).getAttribute('aria-disabled')).toBe(
       'true',
     );

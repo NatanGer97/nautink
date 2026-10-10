@@ -187,7 +187,11 @@ test.describe('review Claude’s change', () => {
     await expect(page.locator('.react-flow__node.review-changed')).toHaveCount(1);
     await expect(page.locator('.react-flow__node.review-removed')).toHaveCount(1);
     await expect(page.locator('.react-flow__edge.review-removed')).toHaveCount(1);
-    await expect(page.getByText(/read-only/i).first()).toBeVisible();
+    // The canvas is read-only while the proposal waits (the bar replaces the old note).
+    await expect(page.getByRole('button', { name: 'Add shape' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await proposalBar(page).getByRole('button', { name: 'Reject' }).click();
     await expect(page.locator('.react-flow__node.review-removed')).toHaveCount(0);
     expect(await readCode(page)).toBe(before);

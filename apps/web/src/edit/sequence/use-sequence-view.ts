@@ -8,6 +8,7 @@ import {
   zoomAround,
   zoomCentered,
 } from './sequence-view.ts';
+import { useWhenGrows } from '../../lib/use-when-grows.ts';
 import { useFitInsets } from '../../shell/use-fit-insets.ts';
 
 import type { CanvasBounds } from './sequence-view.ts';
@@ -115,5 +116,7 @@ export function useSequenceView(bounds: CanvasBounds | null, fitRequest: number)
   );
   useWheelZoom(viewport, setView);
   useFitOnRequest(fitRequest, commands.fit);
+  // Refit once when Claude's pill or proposal bar appears at the top, so it covers nothing.
+  useWhenGrows(insets.top, commands.fit);
   return { attachViewport, view, setView, ...commands };
 }

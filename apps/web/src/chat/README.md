@@ -77,6 +77,22 @@ and the step before it, so it works in the session only: after a reload, a new c
 has left the history, the chip is off with the reason in its tooltip. An open proposal takes the
 drawer first.
 
+## Showing that Claude is working
+
+While a reply streams into the open diagram:
+
+- **Canvas pill** (`working-pill.tsx`): "Claude is editing · <step> · 4s" with Stop, in the same spot
+  as the proposal bar that may follow (`PLACEMENT_CLASSES`, `CANVAS_PLACEMENTS` in `review/`). The
+  step comes from `activityStep` (`claude-activity.ts`): the newest tool step, "Drawing the
+  diagram…", "Writing a reply…" or "Thinking…". Fits keep its room free (`useReviewBarRoom`), and the
+  visual editors refit once when it appears.
+- **Canvas** (`shell/canvas-area.tsx`): a thin teal progress bar along the top, and
+  `data-claude-working` on `<main>`, which makes the selected shapes glow (`styles.css`).
+- **Chat**: three teal dots and the same step under the reply while no tool steps show.
+
+The canvas's own read-only notes for these states are hidden (`edit/canvas/canvas-notices.tsx`),
+since the pill and the proposal bar say it. Reduced motion stops every animation.
+
 ## Files
 
 | File | What |

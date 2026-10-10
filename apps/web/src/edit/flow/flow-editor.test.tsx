@@ -176,7 +176,8 @@ describe('FlowEditor', () => {
   it('is read-only while Claude edits, and keeps the last canvas on a syntax error', async () => {
     const { rerender } = renderEditor({ readOnlyReason: CLAUDE_EDITING });
     await screen.findByTestId('flow-node-A');
-    expect(screen.getByRole('status').textContent).toBe(CLAUDE_EDITING);
+    // Claude's working pill on the canvas says so; the editor shows no note of its own.
+    expect(screen.queryByRole('status')).toBeNull();
     expect(screen.getByRole('button', { name: 'Add shape' }).getAttribute('aria-disabled')).toBe(
       'true',
     );

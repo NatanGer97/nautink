@@ -5,7 +5,7 @@ import { useContext, useMemo } from 'react';
 
 import { ReadOnlyBanner } from './canvas-notices.tsx';
 import { FlowZoomControls } from './flow-zoom-controls.tsx';
-import { useFitOnRequest } from './use-canvas-fit.ts';
+import { useFitOnRequest, useFitWhenTopBarAppears } from './use-canvas-fit.ts';
 import {
   EDGE_MARK_CLASSES,
   NODE_MARK_CLASSES,
@@ -58,6 +58,7 @@ function useMarkedFlow<N extends Node, E extends Edge>(flow: FlowProps<N, E>): F
 
 function FitOnRequest({ fitRequest }: { fitRequest: number }): null {
   useFitOnRequest(fitRequest);
+  useFitWhenTopBarAppears();
   return null;
 }
 

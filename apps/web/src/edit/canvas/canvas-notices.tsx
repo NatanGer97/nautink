@@ -1,13 +1,19 @@
-import { VIEWING_VERSION } from '../read-only-reason.ts';
+import { CLAUDE_PROPOSING, REVIEWING } from '../../review/use-review.ts';
+import { CLAUDE_EDITING, VIEWING_VERSION } from '../read-only-reason.ts';
 
 import type { ReactElement } from 'react';
 
-/**
- * Says why the canvas is read-only (Claude is editing, a syntax error). An older version on view
- * already has its own bar, so it gets no banner.
- */
+/** Reasons another bar already explains: the version bar, Claude's working pill, the proposal bar. */
+const EXPLAINED_ELSEWHERE: ReadonlySet<string> = new Set<string>([
+  VIEWING_VERSION,
+  CLAUDE_EDITING,
+  CLAUDE_PROPOSING,
+  REVIEWING,
+]);
+
+/** Says why the canvas is read-only (a syntax error), unless another bar already says so. */
 export function ReadOnlyBanner({ reason }: { reason: string | null }): ReactElement | null {
-  if (reason === null || reason === VIEWING_VERSION) {
+  if (reason === null || EXPLAINED_ELSEWHERE.has(reason)) {
     return null;
   }
   return (

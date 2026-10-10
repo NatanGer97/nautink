@@ -1,4 +1,5 @@
 import { useOpenProposal } from './use-review.ts';
+import { useClaudeActivity } from '../chat/claude-activity.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
@@ -7,10 +8,10 @@ import type { ReviewBarProps } from './review-bar.tsx';
 import type { Proposal } from './review-store.ts';
 import type { DiagramView } from '@nautink/storage/records';
 
-type CanvasPlacement = Exclude<ReviewBarProps['placement'], 'drawer'>;
+export type CanvasPlacement = Exclude<ReviewBarProps['placement'], 'drawer'>;
 
 /** Below the visual editor's toolbar and read-only note in Edit and Split. */
-const PLACEMENTS: Readonly<Record<DiagramView, CanvasPlacement>> = {
+export const CANVAS_PLACEMENTS: Readonly<Record<DiagramView, CanvasPlacement>> = {
   preview: 'canvas',
   edit: 'editor',
   split: 'split',
@@ -39,11 +40,27 @@ export function useCanvasReviewBar(): { proposal: Proposal; placement: CanvasPla
   if (proposal === undefined || isViewingVersion || isInDrawer) {
     return null;
   }
-  return { proposal, placement: PLACEMENTS[view ?? 'preview'] };
+  return { proposal, placement: CANVAS_PLACEMENTS[view ?? 'preview'] };
 }
 
-/** The top inset a fit should keep free: the proposal bar's room while it floats over the canvas. */
+/**
+ * The top inset a fit should keep free: the room of the bar floating at the top of the canvas,
+ * Claude's proposal bar or, while Claude works, the "Claude is editing" pill in the same place.
+ */
 export function useReviewBarRoom(): number {
   const placement: CanvasPlacement | undefined = useCanvasReviewBar()?.placement;
-  return placement === undefined ? 0 : REVIEW_BAR_ROOM_PX[placement];
+  const workingPlacement: CanvasPlacement | undefined = useWorkingPillPlacement();
+  const shown: CanvasPlacement | undefined = placement ?? workingPlacement;
+  return shown === undefined ? 0 : REVIEW_BAR_ROOM_PX[shown];
+}
+
+/** Where the "Claude is editing" pill floats, or undefined while it is hidden. */
+function useWorkingPillPlacement(): CanvasPlacement | undefined {
+  const diagramId: string | null = useWorkspaceStore((state) => state.activeId);
+  const view: DiagramView | undefined = useWorkspaceStore(
+    (state) => state.diagrams.find((item) => item.id === state.activeId)?.view,
+  );
+  const isWorking: boolean = useClaudeActivity(diagramId) !== null;
+  const isViewingVersion: boolean = useViewedVersion() !== null;
+  return isWorking && !isViewingVersion ? CANVAS_PLACEMENTS[view ?? 'preview'] : undefined;
 }

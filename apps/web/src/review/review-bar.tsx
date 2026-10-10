@@ -74,7 +74,8 @@ export interface ReviewBarProps {
 const FLOATING: string =
   'absolute left-1/2 z-10 max-w-[calc(100%-32px)] -translate-x-1/2 rounded-float border border-input bg-panel py-1.5 pr-1.5 pl-3.5 shadow-menu';
 
-const PLACEMENT_CLASSES: Readonly<Record<ReviewBarProps['placement'], string>> = {
+/** Shared with the "Claude is editing" pill, which sits where this bar will appear. */
+export const PLACEMENT_CLASSES: Readonly<Record<ReviewBarProps['placement'], string>> = {
   canvas: `${FLOATING} top-4`,
   editor: `${FLOATING} top-16`,
   split: `${FLOATING} top-26`,

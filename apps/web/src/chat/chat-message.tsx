@@ -3,7 +3,9 @@ import { Check } from 'lucide-react';
 
 import { ChangeCard } from './change-card.tsx';
 import { STOPPED_MESSAGE } from './chat-reply.ts';
+import { activityStep } from './claude-activity.ts';
 import { hasMermaidFence, stripMermaid } from './extract-mermaid.ts';
+import { WorkingDots } from './working-dots.tsx';
 
 import type { ChatMessage } from '@nautink/storage/records';
 import type { ReactElement, ReactNode } from 'react';
@@ -50,7 +52,10 @@ function ToolSteps({
         return (
           <li key={`${String(index)}:${tool}`} className="flex items-center gap-2">
             {isRunning ? (
-              <span aria-hidden="true" className="mx-[3px] size-2 rounded-full bg-faint" />
+              <span
+                aria-hidden="true"
+                className="mx-[3px] size-2 animate-pulse rounded-full bg-accent-ink"
+              />
             ) : (
               <Check aria-hidden="true" className="size-3.5 stroke-2 text-success" />
             )}
@@ -97,8 +102,11 @@ export function AssistantMessage({
       {prose === '' ? null : (
         <p className="leading-relaxed break-words whitespace-pre-wrap">{prose}</p>
       )}
-      {isStreaming && prose === '' && !hasDiagram ? (
-        <p className="text-muted-foreground">Thinking…</p>
+      {isStreaming && (message.tools ?? []).length === 0 ? (
+        <p className="flex items-center gap-2 text-muted-foreground">
+          <WorkingDots />
+          {activityStep(message)}
+        </p>
       ) : null}
       {hasDiagram ? (
         <ChangeCard

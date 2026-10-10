@@ -2,3 +2,42 @@
 @import '@nautink/ui/globals.css';
 
 @source './';
+
+/* Claude at work (chat/working-pill.tsx, shell/canvas-area.tsx). Reduced motion stops them all. */
+@keyframes nautink-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes nautink-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+@keyframes nautink-ai-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px var(--accent-ink));
+  }
+}
+
+/* The shapes Claude was asked about glow while it works on them: editor nodes and preview shapes. */
+main[data-claude-working] .react-flow__node.selected,
+main[data-claude-working] [data-canvas-selected] {
+  animation: nautink-ai-pulse 1.4s ease-in-out infinite;
+}

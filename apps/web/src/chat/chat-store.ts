@@ -9,6 +9,8 @@ export type ReplyEdits = Readonly<Record<number, number>>;
 export interface ChatData {
   /** The diagram whose reply is streaming, or `null` when Claude is idle. One reply at a time. */
   busyDiagramId: string | null;
+  /** When the streaming reply started (`Date.now()`), for the elapsed time; `null` when idle. */
+  startedAt: number | null;
   controller: AbortController | null;
   /** True once New chat cleared the messages of the streaming reply, so it writes nothing more. */
   isDiscarded: boolean;
@@ -36,6 +38,7 @@ export type ChatState = ChatData & ChatActions;
 
 const INITIAL_CHAT: ChatData = {
   busyDiagramId: null,
+  startedAt: null,
   controller: null,
   isDiscarded: false,
   replyEdits: {},
@@ -66,13 +69,14 @@ function runActions(set: SetChat): Pick<ChatActions, 'begin' | 'end' | 'announce
     begin: (diagramId, controller): void => {
       set({
         busyDiagramId: diagramId,
+        startedAt: Date.now(),
         controller,
         isDiscarded: false,
         announcement: 'Claude is replying.',
       });
     },
     end: (announcement): void => {
-      set({ busyDiagramId: null, controller: null, announcement });
+      set({ busyDiagramId: null, startedAt: null, controller: null, announcement });
     },
     announce: (announcement): void => {
       set({ announcement });

@@ -1,6 +1,7 @@
 import { useReactFlow } from '@xyflow/react';
 import { useEffect, useEffectEvent } from 'react';
 
+import { useWhenGrows } from '../../lib/use-when-grows.ts';
 import { useFitInsets } from '../../shell/use-fit-insets.ts';
 
 import type { FitInsets } from '../../lib/fit-insets.ts';
@@ -70,4 +71,16 @@ export function useFitOnRequest(fitRequest: number): void {
       cancelAnimationFrame(frame);
     };
   }, [fitRequest]);
+}
+
+/**
+ * Refits once when a bar appears at the top of the canvas (Claude's "editing" pill, then its
+ * proposal bar), so the bar never covers the diagram. The canvas is read-only then.
+ */
+export function useFitWhenTopBarAppears(): void {
+  const insets: FitInsets = useFitInsets();
+  const fitNow: (duration?: number) => void = useFitNow();
+  useWhenGrows(insets.top, () => {
+    fitNow();
+  });
 }
