@@ -19,7 +19,7 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 | `scripts/check-changeset.ts` | Fails a pull request that changes `apps/` or `packages/` source without a changeset |
 | `scripts/check-bundle-budget.ts` | Fails a web build whose entry, initial or lazy JavaScript is over its gzip budget (see [Bundle budgets](#bundle-budgets)) |
 | `.github/workflows/ci.yml` | Two jobs: `check` (install, the full check graph, then the gate assertions, the changeset check, and `format:check`) and `e2e` (the web app's Playwright suite in headless Chromium, report and traces uploaded on failure) |
-| `.github/workflows/release.yml` | Turns landed changesets into a "Version Packages" pull request, then tags and releases |
+| `.github/workflows/release.yml` | Turns landed changesets into a "Version Packages" pull request, then runs `scripts/tag-release.ts`: one `v<version>` tag and one GitHub Release for the whole app |
 | `.husky/pre-commit` / `.husky/pre-push` | The two local git gates; installed by `prepare` on `pnpm install` |
 | `.claude/hooks/lint-edited-file.ts` | The Claude Code `PostToolUse` hook, registered in `.claude/settings.json` |
 | `tsconfig.base.json` | Shared compiler options: ES2022, `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` |
@@ -30,7 +30,7 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 Commands: `pnpm check` (lint, typecheck of the tooling and every package, test, build, the UI Storybook
 build, bundle budget), and individually `pnpm lint`, `lint:fix`, `lint:file`, `lint:fixtures`,
 `lint:agent-hook`, `check:agents`, `test:coverage-gate`, `test:changeset-gate`, `check:bundle-budget`,
-`test:bundle-budget-gate`, `typecheck`, `test`, `build`, `format`, `format:check`.
+`test:bundle-budget-gate`, `test:release-tag`, `typecheck`, `test`, `build`, `format`, `format:check`.
 
 ## Enforced automatically
 

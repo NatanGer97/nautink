@@ -29,6 +29,8 @@
     "test:changeset-gate": "node --test scripts/check-changeset.test.ts",
     "check:bundle-budget": "node scripts/check-bundle-budget.ts",
     "test:bundle-budget-gate": "node --test scripts/check-bundle-budget.test.ts",
+    "release:tag": "node scripts/tag-release.ts",
+    "test:release-tag": "node --test scripts/tag-release.test.ts",
     "changeset": "changeset",
     "version": "changeset version",
     "format": "prettier --write .",

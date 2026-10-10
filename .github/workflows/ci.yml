@@ -73,6 +73,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm test:bundle-budget-gate
 
+      - name: Test the release script (one tag and one Release for the whole app)
+        if: ${{ !cancelled() }}
+        run: pnpm test:release-tag
+
       # Pull requests only: a push to `main` has no base to diff against. The "Version Packages"
       # pull request is exempt — it consumes changesets rather than adding one.
       - name: Require a changeset for a source change
