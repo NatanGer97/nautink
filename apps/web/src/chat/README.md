@@ -45,9 +45,29 @@ When the turn ends with a changed diagram that parses, `finishTurn` saves a `cla
 before the first one, a "Before Claude" version, as v1) and fires `nautink:versions-changed`
 (`detail: { diagramId }`) on `window`.
 
-The review wave (PRD §4.2) hooks in where code reaches the diagram: `TurnEdit.show` (live build)
-and `settleCode` / `finishTurn` in `chat-turn.ts` (the final code, the version). Holding the final
-code as a proposal instead of applying it is a change to those two places.
+## Review on (PRD §4.2, §4.3)
+
+"Review changes before applying" (`useUiStore` `shouldReviewChanges`, on by default; `deps.shouldReview`)
+is read when a turn starts. With it on, the turn's code goes to a `ProposalEdit` (`turn-proposal.ts`)
+instead of a `TurnEdit`: streamed chunks and auto-fix retries become the **live build**
+(`useReviewStore` `live`), which the canvas shows read-only while the diagram's code, undo history
+and versions stay untouched. Stop drops it. When the turn ends with changed code, `finishTurn`
+opens a **proposal** (`open`) and compares it in the background (`deps.review` → `review/load-review.ts`,
+a lazy chunk with `@nautink/editors/review/review-diagram`).
+
+| Need | Use (`../review/`) |
+|---|---|
+| The code the canvas shows (live build, proposal with ghosts, or the diagram) | `useShownCode(diagram)` |
+| The open proposal, its marks, why editing is off | `useOpenProposal(id)`, `useStructuralReview(id)`, `useReviewReadOnlyReason(id)` |
+| Accept / Reject / Show again | `acceptProposal(id)` (one `claude` undo step + versions, as above), `rejectProposal(id)` (records nothing), `showProposalAgain(id, messageIndex)` while `showAgainBlocker(…)` is `null` |
+
+The outcome is stored on the turn's replies (`ChatMessage.review`), so the change card says
+"Applied · N changes" or "Rejected · diagram unchanged" after a reload; "Show again" only works in
+the session (proposals are not saved) and only while the diagram still has the code from before the
+turn. Sending a new message about a diagram rejects its open proposal first. Review off behaves
+exactly as before. The bar (`review-bar.tsx`) floats over the canvas; a code-only review (types
+without a visual editor, code that does not parse, text-only changes) shows its bar and Monaco's diff
+in the code drawer. Enter accepts and Esc rejects unless the focus is on a field or control.
 
 ## Files
 
@@ -58,6 +78,7 @@ code as a proposal instead of applying it is a change to those two places.
 | `extract-mermaid.ts` | v1's `extractMermaid` (partial fences) and `stripMermaid` |
 | `auto-fix.ts` | Retry decisions, fix prompt, undo-step labels |
 | `chat-turn.ts`, `turn-edit.ts`, `turn-messages.ts`, `turn-versions.ts` | One turn: messages, the undo step, versions |
+| `turn-proposal.ts` | Review on: the live build, and the proposal a turn ends with |
 | `chat-store.ts` | Session-only state: the streaming reply, its abort, change-card links, live-region text |
 | `quick-actions.ts` | v1's quick-action prompts per diagram type, and the welcome examples |
 | `chat-selection.ts`, `selection-chip.tsx` | The selection a message carries, and its removable chip |

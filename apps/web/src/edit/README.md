@@ -186,6 +186,18 @@ history panel views an older version. The canvas must not change code then (`Edi
 dragging, connecting and deleting; disable your own tools with `core.isReadOnly`). Positions may still
 move while Claude streams; they are never saved while a version is viewed.
 
+### Claude's proposal (PRD §4.2)
+
+While a proposal is open, the host passes its code as `code` (the proposal with removed elements
+added back as ghosts), a `readOnlyReason`, and `canSavePositions: false`; it provides the marks
+(`added` / `changed` / `removed`, by model id) through `ReviewMarksContext`
+(`review/review-marks.ts`). The shared adapter needs nothing from a React Flow editor:
+`EditorCanvas` adds `NODE_MARK_CLASSES` / `EDGE_MARK_CLASSES` (each starting with a plain
+`review-<mark>` class) to every node and edge whose `id` is marked, so keep React Flow ids equal to
+the model's ids. An editor that draws its own SVG reads `useReviewMark(id)` and adds
+`SVG_MARK_CLASSES` plus `data-review`: the sequence editor does it in `sequence-rows.tsx` (`RowGroup`)
+and `sequence-headers.tsx` (`Header`), the only editor-folder touches.
+
 ## Tests
 
 - Pure logic (actions, selection reducers, element builders, key handling) as plain `*.test.ts`
