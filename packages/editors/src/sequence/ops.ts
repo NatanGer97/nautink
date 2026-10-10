@@ -434,6 +434,30 @@ export function newNote(
   return { t: 'note', id: newId(), placement, actors, text };
 }
 
+function restarted(item: AutonumberItem, start: number | undefined): AutonumberItem {
+  return {
+    t: 'autonumber',
+    id: item.id,
+    isVisible: item.isVisible,
+    ...(item.step === undefined ? {} : { step: item.step }),
+    ...(start === undefined ? {} : { start }),
+  };
+}
+
+/** Sets where an `autonumber` row restarts the count; undefined continues it. */
+export function setAutonumberStart(
+  model: SequenceModel,
+  id: string,
+  start: number | undefined,
+): SequenceModel {
+  return withItems(
+    model,
+    mapTree(model.items, (item: SequenceItem) =>
+      item.id === id && item.t === 'autonumber' ? restarted(item, start) : item,
+    ),
+  );
+}
+
 export function toggleAutonumber(model: SequenceModel): SequenceModel {
   return { ...model, autonumber: model.autonumber ? null : { isVisible: true } };
 }

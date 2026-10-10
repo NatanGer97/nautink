@@ -12,6 +12,7 @@ import {
   normalizeOrder,
   removeSection,
   reverseMessage,
+  setAutonumberStart,
   setBlockKind,
   setSectionLabel,
   toggleAutonumber,
@@ -149,6 +150,23 @@ describe('blocks', () => {
 });
 
 describe('autonumber', () => {
+  it('sets or clears where an autonumber row restarts', async () => {
+    const model = await read(
+      `${SEQUENCE_FIXTURES.minimal!}    autonumber 5 2\n    Bob->>Alice: Ho\n`,
+    );
+    const row = model.items[1]!;
+    expect(findItem(setAutonumberStart(model, row.id, 9), row.id)!.item).toEqual({
+      t: 'autonumber',
+      id: row.id,
+      isVisible: true,
+      start: 9,
+      step: 2,
+    });
+    const cleared = findItem(setAutonumberStart(model, row.id, undefined), row.id)!.item;
+    expect(cleared).toEqual({ t: 'autonumber', id: row.id, isVisible: true, step: 2 });
+    expect(setAutonumberStart(model, 'i0', 3).items[0]).toBe(model.items[0]);
+  });
+
   it('toggles the leading autonumber', () => {
     const on = toggleAutonumber(emptyModel());
     expect(on.autonumber).toEqual({ isVisible: true });
