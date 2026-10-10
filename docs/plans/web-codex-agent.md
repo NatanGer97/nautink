@@ -73,7 +73,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: `grep -rn "'[^']*Claude" apps/web/src --include=*.tsx --include=*.ts` finds only tests, comments and the agent label table
 
-- [ ] **T7 — E2E: chat with Codex**
+- [x] **T7 — E2E: chat with Codex**
   - context - Playwright stubs `/api/chat` with canned SSE (`e2e/chat.spec.ts`)
   - Files: `apps/web/e2e/agent.spec.ts` (new), `apps/web/e2e/helpers.ts`
   - Red: pick Codex in Settings, send a prompt; stub asserts body `agent: 'codex'`; reply bubble labelled `Codex`; review bar says `Codex proposes …`; after reload Codex is still selected
