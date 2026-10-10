@@ -6,8 +6,10 @@ import { Glyph } from './sequence-glyphs.tsx';
 import { Label } from './sequence-label.tsx';
 import { columnOffset, isEditing, isSelected } from './sequence-scene.ts';
 import { translate } from './svg-path.ts';
+import { SVG_MARK_CLASSES, useReviewMark } from '../review/review-marks.ts';
 
 import type { CanvasHandlers, CanvasScene } from './sequence-scene.ts';
+import type { ReviewMark } from '@nautink/editors/review/review-element';
 import type { Column } from '@nautink/editors/sequence/layout';
 import type { ReactElement } from 'react';
 
@@ -40,11 +42,13 @@ function Header({
   const height: number = HEAD_H[col.p.kind];
   const label: { x: number; y: number } = headerLabel(col, top);
   const labelClass: string | undefined = ICON_KINDS.has(col.p.kind) ? undefined : 'font-medium';
+  const mark: ReviewMark | null = useReviewMark(col.id);
   return (
     <g
       data-testid={testId}
+      data-review={mark ?? undefined}
       aria-label={col.p.label}
-      className={cn('cursor-grab', isOn && SELECTED)}
+      className={cn('cursor-grab', isOn && SELECTED, mark !== null && SVG_MARK_CLASSES[mark])}
       onPointerDown={(event) => {
         handlers.onHeadDown(event, col.id);
       }}

@@ -239,9 +239,19 @@ export class FakeEditor {
   }
 }
 
+/** A diff editor: the two models it shows, and whether it was disposed. */
+export interface FakeDiffEditor {
+  container: HTMLElement;
+  models: { original: FakeModel; modified: FakeModel } | null;
+  isDisposed: boolean;
+  setModel: (models: { original: FakeModel; modified: FakeModel }) => void;
+  dispose: () => void;
+}
+
 export const fakeMonacoState = {
   models: new Map<string, FakeModel>(),
   editors: [] as FakeEditor[],
+  diffEditors: [] as FakeDiffEditor[],
   markers: new Map<string, unknown[]>(),
   theme: '',
 };
@@ -250,6 +260,7 @@ export const fakeMonacoState = {
 export function resetFakeMonaco(): void {
   fakeMonacoState.models.clear();
   fakeMonacoState.editors.length = 0;
+  fakeMonacoState.diffEditors.length = 0;
   fakeMonacoState.markers.clear();
   fakeMonacoState.theme = '';
 }
@@ -277,8 +288,15 @@ export const fakeMonaco = {
     getModel: (uri: FakeUri): FakeModel | null =>
       fakeMonacoState.models.get(uri.toString()) ?? null,
     getModels: (): FakeModel[] => [...fakeMonacoState.models.values()],
-    createModel: (value: string, language: string, uri: FakeUri): FakeModel => {
+    createModel: (value: string, language: string, given?: FakeUri): FakeModel => {
       expectMermaid(language);
+      const uri =
+        given ??
+        uriFrom({
+          scheme: 'inmemory',
+          authority: 'model',
+          path: `/${String(fakeMonacoState.models.size)}`,
+        });
       const model = new FakeModel(value, uri);
       fakeMonacoState.models.set(uri.toString(), model);
       return model;
@@ -288,6 +306,21 @@ export const fakeMonaco = {
     },
     setTheme: (name: string): void => {
       fakeMonacoState.theme = name;
+    },
+    createDiffEditor: (container: HTMLElement): FakeDiffEditor => {
+      const diff: FakeDiffEditor = {
+        container,
+        models: null,
+        isDisposed: false,
+        setModel: (models) => {
+          diff.models = models;
+        },
+        dispose: () => {
+          diff.isDisposed = true;
+        },
+      };
+      fakeMonacoState.diffEditors.push(diff);
+      return diff;
     },
   },
 };

@@ -51,6 +51,9 @@ async function harness(responses: ((init?: RequestInit) => Response)[]): Promise
     model: () => 'sonnet',
     isChatOpen: () => false,
     notifyError,
+    // These tests cover the turn as it applies straight away; `review/` covers review on.
+    shouldReview: () => false,
+    review: async () => Promise.reject(new Error('Review is off in these tests.')),
   };
   return {
     workspace,

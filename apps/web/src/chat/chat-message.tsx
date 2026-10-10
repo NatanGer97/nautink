@@ -101,7 +101,12 @@ export function AssistantMessage({
         <p className="text-muted-foreground">Thinking…</p>
       ) : null}
       {hasDiagram ? (
-        <ChangeCard diagramId={diagramId} messageIndex={messageIndex} isStreaming={isStreaming} />
+        <ChangeCard
+          diagramId={diagramId}
+          messageIndex={messageIndex}
+          isStreaming={isStreaming}
+          review={message.review}
+        />
       ) : null}
       {message.error === undefined ? null : (
         <p

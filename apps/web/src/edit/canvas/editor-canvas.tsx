@@ -1,11 +1,19 @@
 import '@xyflow/react/dist/style.css';
 import './react-flow-theme.css';
 import { ConnectionMode, ReactFlow } from '@xyflow/react';
+import { useContext, useMemo } from 'react';
 
 import { ReadOnlyBanner } from './canvas-notices.tsx';
 import { FlowZoomControls } from './flow-zoom-controls.tsx';
 import { useFitOnRequest } from './use-canvas-fit.ts';
+import {
+  EDGE_MARK_CLASSES,
+  NODE_MARK_CLASSES,
+  ReviewMarksContext,
+  withReviewClasses,
+} from '../review/review-marks.ts';
 
+import type { ReviewMarks } from '../review/review-marks.ts';
 import type { Edge, Node, ReactFlowProps } from '@xyflow/react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
 
@@ -34,6 +42,20 @@ export interface EditorCanvasProps<N extends Node, E extends Edge> {
   children?: ReactNode;
 }
 
+/** The editor's nodes and edges with Claude's proposal marked on them (PRD §4.2). */
+function useMarkedFlow<N extends Node, E extends Edge>(flow: FlowProps<N, E>): FlowProps<N, E> {
+  const marks: ReviewMarks = useContext(ReviewMarksContext);
+  const { nodes, edges } = flow;
+  const marked: Partial<Pick<FlowProps<N, E>, 'nodes' | 'edges'>> = useMemo(
+    () => ({
+      ...(nodes ? { nodes: withReviewClasses(nodes, marks, NODE_MARK_CLASSES) } : {}),
+      ...(edges ? { edges: withReviewClasses(edges, marks, EDGE_MARK_CLASSES) } : {}),
+    }),
+    [nodes, edges, marks],
+  );
+  return marks.size === 0 ? flow : { ...flow, ...marked };
+}
+
 function FitOnRequest({ fitRequest }: { fitRequest: number }): null {
   useFitOnRequest(fitRequest);
   return null;
@@ -53,6 +75,7 @@ export function EditorCanvas<N extends Node, E extends Edge>({
   rootRef,
   children,
 }: EditorCanvasProps<N, E>): ReactElement {
+  const markedFlow: FlowProps<N, E> = useMarkedFlow(flow);
   return (
     <div ref={rootRef} className="nautink-flow @container absolute inset-0">
       <ReactFlow<N, E>
@@ -63,7 +86,7 @@ export function EditorCanvas<N extends Node, E extends Edge>({
         zoomOnDoubleClick={false}
         minZoom={MIN_ZOOM}
         maxZoom={MAX_ZOOM}
-        {...flow}
+        {...markedFlow}
         colorMode={isDark ? 'dark' : 'light'}
         nodesDraggable={!isReadOnly}
         nodesConnectable={!isReadOnly}

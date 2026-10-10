@@ -1,11 +1,13 @@
 import { toast } from 'sonner';
 
 import { validateMermaid } from '../mermaid/validate.ts';
+import { loadReview } from '../review/load-review.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { FetchLike } from './chat-client.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
+import type { ProposalReview } from '../review/review-store.ts';
 import type { WorkspaceState } from '../workspace/workspace-state.ts';
 import type { ModelId } from '@nautink/contracts/models';
 
@@ -21,6 +23,10 @@ export interface ChatDeps {
   /** True when the chat panel shows the reply, so an error needs no extra notice. */
   isChatOpen: () => boolean;
   notifyError: (message: string) => void;
+  /** True when a turn should end in a proposal to accept or reject (PRD §4.2). */
+  shouldReview: () => boolean;
+  /** Compares a proposal with the code before the turn. */
+  review: (before: string, after: string) => Promise<ProposalReview>;
 }
 
 /** The app's real parts: `fetch`, Mermaid, the workspace and UI stores, and toasts. */
@@ -35,5 +41,7 @@ export function defaultChatDeps(): ChatDeps {
     notifyError: (message: string): void => {
       toast.error(message, { duration: ERROR_TOAST_MS });
     },
+    shouldReview: () => useUiStore.getState().shouldReviewChanges,
+    review: loadReview,
   };
 }

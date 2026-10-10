@@ -43,6 +43,22 @@ export async function editCode(page: Page, code: string): Promise<void> {
   }, code);
 }
 
+interface UiStoreModule {
+  useUiStore: { getState: () => { setReviewChanges: (isOn: boolean) => void } };
+}
+
+/**
+ * Turns "Review changes before applying" on or off through the UI store (it is on by default), so a
+ * spec about something else can have Claude's replies apply straight away.
+ */
+export async function setReviewChanges(page: Page, isOn: boolean): Promise<void> {
+  await page.evaluate(async (isWanted: boolean) => {
+    const modulePath: string = '/src/state/ui-store.ts';
+    const ui: UiStoreModule = (await import(modulePath)) as UiStoreModule;
+    ui.useUiStore.getState().setReviewChanges(isWanted);
+  }, isOn);
+}
+
 /** Opens every page of the context straight into the workspace, past the first-run screen. */
 export async function skipFirstRun(context: BrowserContext): Promise<void> {
   await context.addInitScript((key: string) => {

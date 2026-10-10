@@ -7,9 +7,12 @@ import { toast } from 'sonner';
 import { useChatStore } from '../chat/chat-store.ts';
 import { CodeEditor } from '../code/code-editor.tsx';
 import { useViewedVersion } from '../history/viewed-version.ts';
+import { CodeReview } from '../review/code-review.tsx';
+import { useOpenProposal, useReviewReadOnlyReason } from '../review/use-review.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
+import type { Proposal } from '../review/review-store.ts';
 import type { Diagram, Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
@@ -39,15 +42,21 @@ function readOnlyReason(isClaudeEditing: boolean, viewed: Version | null): strin
 function DrawerBody({ diagram }: { diagram: Diagram | undefined }): ReactElement {
   const busyDiagramId: string | null = useChatStore((state) => state.busyDiagramId);
   const viewed: Version | null = useViewedVersion();
+  const proposal: Proposal | undefined = useOpenProposal(diagram?.id);
+  const reviewReason: string | null = useReviewReadOnlyReason(diagram?.id);
   if (diagram === undefined) {
     return <p className="px-3.5 py-2.5 text-muted-foreground">Opening your diagrams…</p>;
   }
+  if (proposal !== undefined && viewed === null) {
+    return <CodeReview proposal={proposal} />;
+  }
+  const reason: string | null = readOnlyReason(busyDiagramId === diagram.id, viewed);
   return (
     <CodeEditor
       diagramId={diagram.id}
       code={diagram.code}
       viewed={viewed === null ? null : { id: viewed.id, code: viewed.code }}
-      readOnlyReason={readOnlyReason(busyDiagramId === diagram.id, viewed)}
+      readOnlyReason={viewed === null ? (reviewReason ?? reason) : reason}
     />
   );
 }

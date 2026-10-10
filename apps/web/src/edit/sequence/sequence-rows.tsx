@@ -7,8 +7,10 @@ import { Label } from './sequence-label.tsx';
 import { markerProps } from './sequence-markers.tsx';
 import { dragOffset, isEditing, isSelected } from './sequence-scene.ts';
 import { translate } from './svg-path.ts';
+import { SVG_MARK_CLASSES, useReviewMark } from '../review/review-marks.ts';
 
 import type { CanvasHandlers, CanvasScene } from './sequence-scene.ts';
+import type { ReviewMark } from '@nautink/editors/review/review-element';
 import type { Row } from '@nautink/editors/sequence/layout';
 import type {
   ActivationItem,
@@ -60,10 +62,17 @@ function RowGroup({
   onDoubleClick?: () => void;
 }): ReactElement {
   const offset: number = dragOffset(scene, row.item.id);
+  const mark: ReviewMark | null = useReviewMark(row.item.id);
   return (
     <g
       data-testid={`sequence-item-${row.item.id}`}
-      className={cn('group cursor-pointer', offset !== 0 && 'opacity-55', className)}
+      data-review={mark ?? undefined}
+      className={cn(
+        'group cursor-pointer',
+        offset !== 0 && 'opacity-55',
+        className,
+        mark !== null && SVG_MARK_CLASSES[mark],
+      )}
       {...(offset === 0 ? {} : { transform: translate(0, offset) })}
       onPointerDown={(event) => {
         handlers.onItemDown(event, row.item.id);

@@ -6,12 +6,22 @@ export function findTurnDiagram(state: WorkspaceState, diagramId: string): Diagr
   return state.diagrams.find((diagram) => diagram.id === diagramId);
 }
 
+/** Where a turn puts the code it shows: straight into the diagram, or into a proposal. */
+export interface TurnCodeSink {
+  /** The undo step that holds the turn's code, or `null` when there is none (yet). */
+  readonly entryId: number | null;
+  /** Shows `code` as the turn's code. `label` names the undo step if one is recorded. */
+  show: (code: string, label: string) => void;
+  /** Puts back `code` after a stop. */
+  revert: (code: string) => void;
+}
+
 /**
  * One Claude turn as one undo step (PRD §3.1). The first code the turn shows records a step; later
  * code (streamed chunks, auto-fix retries) amends it. If the user changed the code in between, the
  * next code records a new step instead.
  */
-export class TurnEdit {
+export class TurnEdit implements TurnCodeSink {
   private readonly diagramId: string;
   private readonly workspace: () => WorkspaceState;
   private entry: number | null = null;

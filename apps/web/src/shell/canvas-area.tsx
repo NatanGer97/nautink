@@ -1,5 +1,6 @@
 import { useIsPromptBarShown } from './prompt-bar-inset.ts';
 import { PromptBar } from '../chat/prompt-bar.tsx';
+import { CanvasReview } from '../review/canvas-review.tsx';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -8,13 +9,13 @@ export interface CanvasAreaProps {
   children?: ReactNode;
 }
 
-/** The canvas region: the 20 px dot grid, the canvas slot, and the floating prompt bar. */
+/** The canvas region: the dot grid, the canvas slot, Claude's proposal bar and the prompt bar. */
 export function CanvasArea({ children }: CanvasAreaProps): ReactElement {
   const isPromptBarShown: boolean = useIsPromptBarShown();
   return (
     <main
       aria-label="Canvas"
-      className="relative h-full min-w-0 flex-1 overflow-hidden bg-background bg-[radial-gradient(var(--grid-dot)_1px,transparent_1px)] bg-size-[20px_20px]"
+      className="@container relative h-full min-w-0 flex-1 overflow-hidden bg-background bg-[radial-gradient(var(--grid-dot)_1px,transparent_1px)] bg-size-[20px_20px]"
     >
       <div data-slot="canvas-host" className="absolute inset-0">
         {children ?? (
@@ -25,6 +26,7 @@ export function CanvasArea({ children }: CanvasAreaProps): ReactElement {
           </div>
         )}
       </div>
+      {children === undefined ? null : <CanvasReview />}
       {isPromptBarShown ? <PromptBar /> : null}
     </main>
   );

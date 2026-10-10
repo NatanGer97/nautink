@@ -5,12 +5,13 @@ import { useChatStore } from './chat-store.ts';
 import { extractMermaid } from './extract-mermaid.ts';
 import { findTurnDiagram } from './turn-edit.ts';
 import { appendExchange, writeReply, writeSession } from './turn-messages.ts';
+import { proposeTurn } from './turn-proposal.ts';
 import { saveTurnVersions } from './turn-versions.ts';
 
 import type { AttemptResult, SendKind } from './auto-fix.ts';
 import type { ChatDeps } from './chat-deps.ts';
 import type { ChatReply } from './chat-reply.ts';
-import type { TurnEdit } from './turn-edit.ts';
+import type { TurnCodeSink } from './turn-edit.ts';
 import type { MessageTarget } from './turn-messages.ts';
 import type { ChatEvent, ChatRequest, ChatSelection } from '@nautink/contracts/chat';
 
@@ -28,8 +29,14 @@ export interface Turn extends MessageTarget {
   before: string;
   /** What the user asked, saved with the version. */
   prompt: string;
+  /** Names the turn's undo step. */
+  label: string;
   selection: ChatSelection | null;
-  edit: TurnEdit;
+  /** The diagram itself (review off), or a proposal held for review (review on, PRD §4.2). */
+  edit: TurnCodeSink;
+  isReviewing: boolean;
+  /** The assistant messages of the turn, filled in as attempts run. */
+  replyIndexes: number[];
   signal: AbortSignal;
   deps: ChatDeps;
 }
@@ -122,6 +129,9 @@ function reportAttempt(
 async function runAttempt(turn: Turn, attempt: Attempt, retries: number): Promise<AttemptResult> {
   const codeBefore: string = findTurnDiagram(turn.workspace(), turn.diagramId)?.code ?? turn.before;
   const messageIndex: number = appendExchange(turn, { text: attempt.message, kind: attempt.kind });
+  if (messageIndex >= 0) {
+    turn.replyIndexes.push(messageIndex);
+  }
   const reply: ChatReply = await streamReply(turn, attempt);
   const code: string | null = settleCode(turn, attempt, { reply, codeBefore });
   reportAttempt(turn, { reply, code, messageIndex });
@@ -164,8 +174,18 @@ function savedCode(turn: Turn, result: AttemptResult): string | null {
   return isValid && result.code !== turn.before ? result.code : null;
 }
 
-/** Saves a version when the turn ends with a changed, valid diagram. Returns the announcement. */
+/**
+ * Ends the turn: with review on, a changed diagram becomes a proposal; otherwise a changed, valid
+ * diagram is saved as a version. Returns the announcement.
+ */
 export async function finishTurn(turn: Turn, result: AttemptResult): Promise<string> {
+  if (turn.isReviewing) {
+    return (await proposeTurn(turn, result)) ?? turnAnnouncement(result);
+  }
+  return saveTurn(turn, result);
+}
+
+async function saveTurn(turn: Turn, result: AttemptResult): Promise<string> {
   const after: string | null = savedCode(turn, result);
   try {
     if (after !== null) {

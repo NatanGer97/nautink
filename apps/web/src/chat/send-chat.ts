@@ -3,11 +3,15 @@ import { defaultChatDeps } from './chat-deps.ts';
 import { useChatStore } from './chat-store.ts';
 import { finishTurn, runTurn } from './chat-turn.ts';
 import { TurnEdit } from './turn-edit.ts';
+import { ProposalEdit } from './turn-proposal.ts';
+import { rejectProposal } from '../review/review-actions.ts';
+import { useReviewStore } from '../review/review-store.ts';
 import { selectActiveDiagram } from '../workspace/use-workspace.ts';
 
 import type { SendKind } from './auto-fix.ts';
 import type { ChatDeps } from './chat-deps.ts';
 import type { Turn } from './chat-turn.ts';
+import type { TurnCodeSink } from './turn-edit.ts';
 import type { ChatSelection } from '@nautink/contracts/chat';
 import type { Diagram } from '@nautink/storage/records';
 
@@ -32,6 +36,19 @@ export function canSendChat(text: string, deps: ChatDeps = defaultChatDeps()): b
   return sendTarget(text, deps) !== undefined;
 }
 
+/** Where the turn's code goes: the diagram, or a proposal when review is on (PRD §4.2). */
+function codeSink(
+  diagramId: string,
+  deps: ChatDeps,
+): Pick<Turn, 'edit' | 'isReviewing' | 'replyIndexes'> {
+  const isReviewing: boolean = deps.shouldReview();
+  const replyIndexes: number[] = [];
+  const edit: TurnCodeSink = isReviewing
+    ? new ProposalEdit({ diagramId, workspace: deps.workspace }, replyIndexes)
+    : new TurnEdit(diagramId, deps.workspace);
+  return { edit, isReviewing, replyIndexes };
+}
+
 function createTurn(
   diagram: Diagram,
   input: { prompt: string; options: SendOptions; deps: ChatDeps },
@@ -44,8 +61,9 @@ function createTurn(
     workspace: deps.workspace,
     before: diagram.code,
     prompt,
+    label: turnLabel(options.kind ?? 'user', options.title ?? prompt),
     selection: options.selection ?? null,
-    edit: new TurnEdit(diagram.id, deps.workspace),
+    ...codeSink(diagram.id, deps),
     signal: controller.signal,
     deps,
   };
@@ -53,12 +71,11 @@ function createTurn(
 
 async function runToEnd(turn: Turn, options: SendOptions): Promise<void> {
   const kind: SendKind = options.kind ?? 'user';
-  const label: string = turnLabel(kind, options.title ?? turn.prompt);
   let announcement: string = 'Claude could not reply.';
   try {
     announcement = await finishTurn(
       turn,
-      await runTurn(turn, { message: turn.prompt, kind, label }),
+      await runTurn(turn, { message: turn.prompt, kind, label: turn.label }),
     );
   } finally {
     useChatStore.getState().end(announcement);
@@ -67,7 +84,8 @@ async function runToEnd(turn: Turn, options: SendOptions): Promise<void> {
 
 /**
  * Sends `text` about the open diagram and streams the reply into it, retrying on its own while the
- * diagram does not parse. Resolves `false` without sending when `canSendChat` is false.
+ * diagram does not parse. Resolves `false` without sending when `canSendChat` is false. A proposal
+ * still open on the diagram is rejected first: the new message asks about the unchanged code.
  */
 export async function sendChat(
   text: string,
@@ -78,6 +96,7 @@ export async function sendChat(
   if (diagram === undefined) {
     return false;
   }
+  rejectProposal(diagram.id);
   await runToEnd(createTurn(diagram, { prompt: text.trim(), options, deps }), options);
   return true;
 }
@@ -104,4 +123,5 @@ export function startNewChat(diagramId: string, deps: ChatDeps = defaultChatDeps
   deps.workspace().updateMessages(diagramId, () => []);
   deps.workspace().setSessionId(diagramId, null);
   chat.forgetReplyEdits(diagramId);
+  useReviewStore.getState().forget(diagramId);
 }

@@ -27,6 +27,8 @@ beforeAll(async () => {
 let fetchMock: Mock<(input: string, init?: RequestInit) => Promise<Response>>;
 
 beforeEach(() => {
+  // These tests cover the turn as it applies straight away; `review/` covers review on.
+  useUiStore.getState().setReviewChanges(false);
   replies = [];
   fetchMock = vi.fn(async (input: string, init?: RequestInit) => {
     const next = input === '/api/chat' ? replies.shift() : undefined;

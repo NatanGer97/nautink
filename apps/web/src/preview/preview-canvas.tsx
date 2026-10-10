@@ -14,6 +14,8 @@ import { ZoomControls } from './zoom-controls.tsx';
 import { revealLineInCode } from '../code/code-reveal.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
+import { REVIEW_STAGE_CLASS, usePreviewReviewMarks } from '../review/preview-marks.ts';
+import { useIsReviewing, useShownCode, useStructuralReview } from '../review/use-review.ts';
 import { usePromptBarInset } from '../shell/prompt-bar-inset.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
@@ -22,6 +24,7 @@ import type { PreviewStatus } from './preview-status.ts';
 import type { PanZoom, PointerHandlers } from './use-pan-zoom.ts';
 import type { ViewController } from './view-controller.ts';
 import type { ViewTransform } from './view-math.ts';
+import type { PreviewReview } from '../review/preview-marks.ts';
 import type { Diagram, Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 
@@ -35,6 +38,8 @@ export interface PreviewCanvasProps {
 interface PreviewSurfaceProps extends PreviewCanvasProps {
   diagramId: string;
   code: string;
+  /** Claude's proposal to mark on the render (PRD §4.2), or null. */
+  review?: PreviewReview | null;
 }
 
 /** Shown while the diagram has no code: an invitation to start one. */
@@ -77,6 +82,7 @@ const STAGE_CLASS: string = [
   // Important: Mermaid styles its shapes with id selectors, which a class cannot outweigh.
   '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:stroke-accent-ink!',
   '[&_[data-canvas-selected]_:is(rect,polygon,circle,ellipse,path)]:[stroke-width:2.5px]!',
+  REVIEW_STAGE_CLASS,
 ].join(' ');
 
 /** The pan surface and the rendered SVG, placed by the current view. */
@@ -124,6 +130,7 @@ function PreviewSurface({
   code,
   onShapeClick,
   selectedIds = [],
+  review = null,
 }: PreviewSurfaceProps): ReactElement {
   const isDark: boolean = useIsDarkTheme();
   useDiagramRender({ diagramId, code, isDark });
@@ -141,6 +148,7 @@ function PreviewSurface({
       }),
   });
   useShapeHighlight(stageRef, svg, selectedIds);
+  usePreviewReviewMarks(stageRef, svg, review);
   usePreviewCommands(controller);
   useFocusModeEscape();
   const error: PreviewStatus['error'] = isCurrent ? status.error : null;
@@ -161,7 +169,28 @@ function PreviewSurface({
 }
 
 function ignoreClick(): void {
-  // An older version is on view: its lines are not in the code drawer's model.
+  // An older version or Claude's proposal is on view: its lines are not in the code drawer's model.
+}
+
+/** The open diagram, or the proposal Claude made to it (PRD §4.2, §4.3), read-only while reviewed. */
+function DiagramSurface({
+  diagram,
+  onShapeClick,
+  selectedIds,
+}: PreviewCanvasProps & { diagram: Diagram }): ReactElement {
+  const code: string = useShownCode(diagram);
+  const review: PreviewReview | null = useStructuralReview(diagram.id);
+  const isReviewing: boolean = useIsReviewing(diagram.id);
+  const click: ((target: Element) => void) | undefined = isReviewing ? ignoreClick : onShapeClick;
+  return (
+    <PreviewSurface
+      diagramId={diagram.id}
+      code={code}
+      review={review}
+      {...(click ? { onShapeClick: click } : {})}
+      {...(selectedIds ? { selectedIds } : {})}
+    />
+  );
 }
 
 /**
@@ -191,9 +220,8 @@ export function PreviewCanvas({ onShapeClick, selectedIds }: PreviewCanvasProps)
     );
   }
   return (
-    <PreviewSurface
-      diagramId={diagram.id}
-      code={diagram.code}
+    <DiagramSurface
+      diagram={diagram}
       {...(onShapeClick ? { onShapeClick } : {})}
       {...(selectedIds ? { selectedIds } : {})}
     />

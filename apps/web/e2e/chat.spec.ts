@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { skipFirstRun, readCode } from './helpers.ts';
+import { skipFirstRun, readCode, setReviewChanges } from './helpers.ts';
 
 import type { Page, Route } from '@playwright/test';
 
@@ -63,6 +63,8 @@ test.describe('chat', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await expect.poll(async () => readCode(page)).toBe('flowchart TD');
+    // These tests cover replies that apply straight away; `review.spec.ts` covers review on.
+    await setReviewChanges(page, false);
     // Playwright reuses whatever dev server holds E2E_PORT. Fail clearly when it serves a build
     // without the chat (another checkout's server), instead of timing out on an unsent message.
     await expect(
