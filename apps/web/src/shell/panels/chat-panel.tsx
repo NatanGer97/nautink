@@ -35,14 +35,14 @@ export function ChatPanel(): ReactElement {
       ) : (
         <MessageList
           diagram={diagram}
-          latestReplyFooter={<QuickActionChips code={diagram.code} />}
+          latestReplyFooter={<QuickActionChips diagramId={diagram.id} code={diagram.code} />}
         />
       )}
       <ChatComposer
         diagram={diagram}
         above={
           diagram !== undefined && isComposerChipsShown(diagram) ? (
-            <QuickActionChips code={diagram.code} />
+            <QuickActionChips diagramId={diagram.id} code={diagram.code} />
           ) : null
         }
       />

@@ -1,5 +1,6 @@
 import { cn } from '@nautink/ui/lib/utils';
 
+import { chatSelectionFor } from './chat-selection.ts';
 import { useChatStore } from './chat-store.ts';
 import { ChipButton } from './chip-button.tsx';
 import { quickActionsFor } from './quick-actions.ts';
@@ -9,13 +10,22 @@ import type { QuickAction } from './quick-actions.ts';
 import type { ReactElement } from 'react';
 
 export interface QuickActionChipsProps {
-  /** The diagram the chips act on; its type picks the extra chips. */
+  /** The diagram the chips act on: its selection goes along while the chip shows. */
+  diagramId: string;
+  /** Its code; the type picks the extra chips. */
   code: string;
   className?: string;
 }
 
-/** v1's quick actions for this diagram's type, as chips that send their prompt (M1). */
-export function QuickActionChips({ code, className }: QuickActionChipsProps): ReactElement | null {
+/**
+ * v1's quick actions for this diagram's type, as chips that send their prompt (M1), with the canvas
+ * selection while the selection chip shows, as the composer does (PRD §4.1).
+ */
+export function QuickActionChips({
+  diagramId,
+  code,
+  className,
+}: QuickActionChipsProps): ReactElement | null {
   const isBusy: boolean = useChatStore((state) => state.busyDiagramId !== null);
   const actions: readonly QuickAction[] = quickActionsFor(code);
   if (actions.length === 0) {
@@ -32,7 +42,12 @@ export function QuickActionChips({ code, className }: QuickActionChipsProps): Re
           key={action.label}
           hint={action.prompt}
           {...(isBusy ? { disabledReason: 'Claude is replying.' } : {})}
-          onClick={() => void sendChat(action.prompt, { title: action.label })}
+          onClick={() =>
+            void sendChat(action.prompt, {
+              title: action.label,
+              selection: chatSelectionFor(diagramId),
+            })
+          }
         >
           {action.label}
         </ChipButton>

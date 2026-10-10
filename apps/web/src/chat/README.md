@@ -26,8 +26,9 @@ the floating prompt bar, the welcome examples, "Ask Claude to fix" and ⌘K.
    ("2 nodes selected", "3 items selected" for mixed kinds) shows them in the composer and the
    floating prompt bar. × calls `removeSelectionChip()`: the chip stays hidden until the selection
    changes (a new list in the store, even the same ids after a clear).
-3. `submitDraft` sends `chatSelectionFor(diagramId)`: the ids, labels and kinds while the chip shows,
-   null otherwise. Quick actions, welcome examples and "Ask Claude to fix" never send a selection.
+3. `submitDraft` and the quick-action chips send `chatSelectionFor(diagramId)`: the ids, labels and
+   kinds while the chip shows, null otherwise. Welcome examples and "Ask Claude to fix" never send a
+   selection.
 4. The floating "Ask Claude about these N…" prompt (`edit/selection-prompt/`) always sends the
    selection it floats under, with `toChatSelection(items)`.
 5. The server (`apps/server/src/prompt.ts`, `describeSelection`) adds the selection block: each item

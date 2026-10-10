@@ -99,6 +99,35 @@ describe('selection chip', () => {
     expect(screen.getByTestId('selection-chip').textContent).toBe('1 node selected');
   });
 
+  it('goes along with a quick action while it shows, and not once removed', async () => {
+    const { user, id } = await renderApp();
+    act(() => {
+      useWorkspaceStore.getState().applyEdit('flowchart TD\n  a --> b', {
+        label: 'Pasted code',
+        source: 'code',
+      });
+    });
+    select(id, 1);
+    const chips = screen.getByRole('group', { name: 'Quick actions' });
+    await user.click(within(chips).getByRole('button', { name: 'Explain' }));
+    await screen.findByText('Claude replied.', {}, { timeout: 10_000 });
+    expect(chatRequests().at(-1)?.selection).toEqual({
+      ids: ['a'],
+      labels: ['Start'],
+      kinds: ['node'],
+    });
+    await user.click(screen.getByRole('button', { name: 'Remove “1 node selected”' }));
+    await user.click(
+      within(screen.getAllByRole('group', { name: 'Quick actions' })[0]!).getByRole('button', {
+        name: 'Explain',
+      }),
+    );
+    await waitFor(() => {
+      expect(chatRequests()).toHaveLength(2);
+    });
+    expect(chatRequests().at(-1)?.selection).toBeNull();
+  });
+
   it('shows in the floating prompt bar while the chat is closed', async () => {
     const { id } = await renderApp();
     act(() => {
