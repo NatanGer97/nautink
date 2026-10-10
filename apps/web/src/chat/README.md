@@ -15,8 +15,24 @@ the floating prompt bar, the welcome examples, "Ask Claude to fix" and ⌘K.
 | Stop / new chat | `stopChat()`, `startNewChat(diagramId)` (or `requestNewChat()`, which confirms first) |
 | Know whether Claude is busy | `useChatStore((s) => s.busyDiagramId)` — one reply at a time, app-wide |
 
-`options.selection` (`ChatSelection`) goes straight into the request: the selection wave (PRD §4.1)
-only has to pass it.
+`options.selection` (`ChatSelection`) goes straight into the request.
+
+## Selection → prompt (PRD §4.1)
+
+1. The visual editor publishes its selection to `useCanvasSelectionStore`
+   (`edit/selection/canvas-selection.ts`): Mermaid id, label and kind per item. Preview publishes
+   nothing, so the chip shows in Edit and Split only.
+2. `chat-selection.ts` turns the open diagram's selection into the chip's items. `SelectionChip`
+   ("2 nodes selected", "3 items selected" for mixed kinds) shows them in the composer and the
+   floating prompt bar. × calls `removeSelectionChip()`: the chip stays hidden until the selection
+   changes (a new list in the store, even the same ids after a clear).
+3. `submitDraft` sends `chatSelectionFor(diagramId)`: the ids, labels and kinds while the chip shows,
+   null otherwise. Quick actions, welcome examples and "Ask Claude to fix" never send a selection.
+4. The floating "Ask Claude about these N…" prompt (`edit/selection-prompt/`) always sends the
+   selection it floats under, with `toChatSelection(items)`.
+5. The server (`apps/server/src/prompt.ts`, `describeSelection`) adds the selection block: each item
+   as `kind id: "label"`, and the rule to change only those items and their direct links and keep
+   every other line byte-identical.
 
 ## One turn
 
@@ -44,4 +60,5 @@ code as a proposal instead of applying it is a change to those two places.
 | `chat-turn.ts`, `turn-edit.ts`, `turn-messages.ts`, `turn-versions.ts` | One turn: messages, the undo step, versions |
 | `chat-store.ts` | Session-only state: the streaming reply, its abort, change-card links, live-region text |
 | `quick-actions.ts` | v1's quick-action prompts per diagram type, and the welcome examples |
+| `chat-selection.ts`, `selection-chip.tsx` | The selection a message carries, and its removable chip |
 | `*.tsx` | The panel's parts, the prompt bar, the live region; `use-chat-feature.ts` registers ⌘K and the fix listener |

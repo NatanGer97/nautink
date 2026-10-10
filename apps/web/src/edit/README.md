@@ -147,6 +147,34 @@ An editor **must**:
 
 `flow/use-flow-editor.ts` (`useSelectionSync`) is the reference.
 
+### The floating selection prompt (`selection-prompt/`)
+
+"Ask Claude about these N…" under the selection, with Group (PRD §4.1, M1). The host renders it
+(`SelectionPrompt` in `edit-canvas.tsx`, so Split's editor half has it too); an editor only calls
+one hook in its canvas component:
+
+```ts
+useSelectionPrompt({
+  rootRef, // the editor's root element
+  isReadOnly: core.isReadOnly,
+  group: canGroup ? () => groupNodes(context, selection.nodes) : null, // null hides Group
+  selectedElements, // optional: (root) => Element[]; React Flow canvases leave it out
+});
+```
+
+- **Bounds:** every frame while it shows, the prompt unions the screen rectangles of the selected
+  elements: React Flow's `.react-flow__node.selected` and `.react-flow__edge.selected` by default,
+  or `selectedElements(root)` (the sequence editor looks its items up by test id). So drags, pans,
+  zooms and resizes need no reporting.
+- **Placement** (`prompt-placement.ts`, pure): under the selection, else above it, else inside its
+  visible bottom, never over an element marked `data-canvas-chrome` (toolbar, inspector, library,
+  zoom bar, prompt bar). Mark new floating chrome with that attribute. No room: it hides.
+- **Hidden** while Claude replies (any diagram), while the editor is read-only, for another
+  diagram's selection, and after Esc in its field until the selection changes.
+- **Group:** flowchart subgraph (`groupNodes`), class namespace (`groupInNamespace`, when a class is
+  selected), state composite (`wrap`, when a state is selected). ER (no "new group" action, as v1)
+  and sequence pass `null`.
+
 ### Read-only and Claude
 
 The host passes `readOnlyReason` while Claude streams into the diagram (`busyDiagramId`) or the
@@ -176,5 +204,6 @@ move while Claude streams; they are never saved while a version is viewed.
 | `positions/` | `PositionBook`, its hook and the IndexedDB adapter |
 | `use-editor-core.ts` | Sync + positions + read-only + fit, for every editor |
 | `selection/`, `split-mirror.ts` | The selection store and Split's mirroring |
+| `selection-prompt/` | The floating "Ask Claude about these N…" prompt, its placement and the editor hook |
 | `canvas/`, `library/`, `icons/` | Shared chrome |
 | `flow/` | The flowchart editor |
