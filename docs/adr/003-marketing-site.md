@@ -18,8 +18,11 @@ Every workspace is in one Changesets `fixed` group, so any changeset bumps the w
 - **One copy of every image.** The page uses the README screenshots in `docs/screenshots/` and the logo
   in `docs/brand/` directly. Geist is self-hosted from the `geist` package, like the app, so the page
   loads nothing from a third-party server.
-- **Built to host anywhere.** `vite build` writes `dist/` with relative URLs, so it works at a domain
-  root or under a path. Hosting is a separate decision.
+- **Hosted on GitHub Pages.** `.github/workflows/site.yml` builds the page and deploys it to
+  https://natanger97.github.io/nautink/ on every push to `main` that touches it (or its images in
+  `docs/`), and on demand. `vite build` writes relative URLs, so the same `dist/` also works at a
+  domain root if the page moves to its own domain later. Pages needs the repository to be public,
+  which the page assumes anyway: its GitHub links and clone command point at the repository.
 - **Not part of the released app.** `@nautink/site` is in `ignore` in `.changeset/config.json`, so
   Changesets never versions it and it never appears in release notes. `scripts/tag-release.ts` leaves
   ignored workspaces out of the shared-version check, and `scripts/check-changeset.ts` needs no

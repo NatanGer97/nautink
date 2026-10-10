@@ -1,0 +1,64 @@
+name: Site
+
+# Builds the marketing page (`apps/site`, ADR-003) and publishes it to GitHub Pages, at
+# https://natanger97.github.io/nautink/. The page links images from `docs/`, so a new screenshot or
+# logo redeploys it too. The build uses relative URLs, so it works under the `/nautink/` path.
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/site/**
+      - docs/screenshots/**
+      - docs/brand/**
+      - pnpm-lock.yaml
+      - .github/workflows/site.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time, and never cancel one halfway: Pages would be left on the old version.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Same setup as CI: the action reads `packageManager` from package.json.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @nautink/site build
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
