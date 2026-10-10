@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 
+import { useAgentName } from './agent-name.ts';
 import { buildChatCommands } from './chat-commands.ts';
 import { useChatStore } from './chat-store.ts';
 import { askClaudeToFix } from './send-chat.ts';
@@ -76,6 +77,7 @@ function useChatCommands(): void {
   const isBusy: boolean = useChatStore((state) => state.busyDiagramId !== null);
   const model: string | null = useUiStore((state) => state.defaultModel);
   const models: readonly ModelOption[] = useModelOptions(useUiStore((state) => state.agent));
+  const name: string = useAgentName();
   const fixError: MermaidError | null = usePaletteParseError();
   const commands: AppCommand[] = useMemo(
     () =>
@@ -84,9 +86,10 @@ function useChatCommands(): void {
         fixError,
         model,
         models,
+        agentName: name,
         setModel: useUiStore.getState().setDefaultModel,
       }),
-    [isBusy, fixError, model, models],
+    [isBusy, fixError, model, models, name],
   );
   useRegisterCommands(commands);
 }

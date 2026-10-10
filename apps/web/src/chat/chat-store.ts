@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { currentAgentName } from './agent-name.ts';
+
 import type { StoreApi, UseBoundStore } from 'zustand';
 
 /** Assistant message index → the edit step its diagram is in, for one diagram. */
@@ -72,7 +74,7 @@ function runActions(set: SetChat): Pick<ChatActions, 'begin' | 'end' | 'announce
         startedAt: Date.now(),
         controller,
         isDiscarded: false,
-        announcement: 'Claude is replying.',
+        announcement: `${currentAgentName()} is replying.`,
       });
     },
     end: (announcement): void => {

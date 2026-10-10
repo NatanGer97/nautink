@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { resetChatState, useChatStore } from './chat-store.ts';
 import { askClaudeToFix, canSendChat, sendChat, startNewChat, stopChat } from './send-chat.ts';
-import { VERSIONS_CHANGED_EVENT } from './turn-versions.ts';
+import { VERSIONS_CHANGED_EVENT, beforeAgentLabel } from './turn-versions.ts';
 import { controlledStream, eventsResponse, replyEvents } from '../../tests/chat-stream.ts';
 import { loadedWorkspace } from '../../tests/workspace-fixtures.ts';
 import { selectActiveDiagram, selectActiveStack } from '../workspace/use-workspace.ts';
@@ -102,6 +102,11 @@ describe('sendChat with an agent', () => {
     });
     const versions = await listVersions(h.workspace.store.getState().requireDb(), h.active().id);
     expect(versions.find((version) => version.kind === 'claude')?.agent).toBe('codex');
+  });
+
+  it('names the snapshot before the first change after the agent', () => {
+    expect(beforeAgentLabel('codex')).toBe('Before Codex');
+    expect(beforeAgentLabel('claude')).toBe('Before Claude');
   });
 
   it("starts a new session instead of sending another agent's session id", async () => {

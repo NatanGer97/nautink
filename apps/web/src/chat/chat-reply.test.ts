@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyChatEvent,
-  CUT_OFF_MESSAGE,
   failReply,
   settleReply,
   startReply,
@@ -81,14 +80,14 @@ describe('applyChatEvent', () => {
 
 describe('settling and failing', () => {
   it('marks a reply cut off when the stream ends early, and leaves finished ones alone', () => {
-    expect(settleReply(startReply(null))).toMatchObject({
+    expect(settleReply(startReply(null), 'Codex')).toMatchObject({
       status: 'error',
-      error: CUT_OFF_MESSAGE,
+      error: 'The reply ended before Codex finished. Try again.',
     });
     const done = replay([
       { type: 'done', sessionId: 's', text: 't', isError: false, durationMs: 1, costUsd: 0 },
     ]);
-    expect(settleReply(done)).toBe(done);
+    expect(settleReply(done, 'Claude')).toBe(done);
   });
 
   it('says Stopped. for a stop and the message for any other failure', () => {

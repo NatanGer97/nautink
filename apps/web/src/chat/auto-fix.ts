@@ -20,15 +20,15 @@ export function fixPrompt(message: string): string {
   return `The diagram fails to parse:\n${message}\nFix it.`;
 }
 
-/** The edit step's label for a turn, as v1 words it. `prompt` may be a chip's label. */
-export function turnLabel(kind: SendKind, prompt: string): string {
+/** The edit step's label for a turn, as v1 words it, by agent name. `prompt` may be a chip's label. */
+export function turnLabel(kind: SendKind, prompt: string, name: string): string {
   if (kind === 'fix') {
-    return 'Claude: Fix syntax error';
+    return `${name}: Fix syntax error`;
   }
   if (kind === 'auto') {
-    return 'Claude: Auto-fix syntax error';
+    return `${name}: Auto-fix syntax error`;
   }
-  return `Claude: ${clip(prompt, LABEL_PROMPT_LENGTH)}`;
+  return `${name}: ${clip(prompt, LABEL_PROMPT_LENGTH)}`;
 }
 
 /** What one attempt of a turn produced. */

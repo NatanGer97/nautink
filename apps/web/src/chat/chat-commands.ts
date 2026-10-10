@@ -11,6 +11,8 @@ export interface ChatCommandState {
   /** The open diagram's parse error, checked when the palette opens; `null` when it parses. */
   fixError: MermaidError | null;
   model: string | null;
+  /** The chosen agent's name: "Stop Codex". */
+  agentName: string;
   /** The current agent's models, besides its default. */
   models: readonly ModelOption[];
   setModel: (model: string | null) => void;
@@ -21,7 +23,7 @@ function fixCommand(state: ChatCommandState): AppCommand {
   return {
     id: 'chat.fix',
     group: 'Chat',
-    title: 'Ask Claude to fix the syntax error',
+    title: `Ask ${state.agentName} to fix the syntax error`,
     keywords: ['parse', 'error', 'repair'],
     isDisabled: fixError === null || state.isBusy,
     run: (): void => {
@@ -38,7 +40,7 @@ function conversationCommands(state: ChatCommandState): AppCommand[] {
     {
       id: 'chat.stop',
       group: 'Chat',
-      title: 'Stop Claude',
+      title: `Stop ${state.agentName}`,
       isDisabled: !state.isBusy,
       run: stopChat,
     },

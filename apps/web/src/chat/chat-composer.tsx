@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 
+import { useAgentName } from './agent-name.ts';
 import { useChatStore } from './chat-store.ts';
 import { SelectionChip } from './selection-chip.tsx';
 import { SendButton } from './send-button.tsx';
@@ -18,11 +19,11 @@ export interface ChatComposerProps {
   above?: ReactNode;
 }
 
-function placeholder(busyId: string | null, diagramId: string | undefined): string {
+function placeholder(busyId: string | null, diagramId: string | undefined, name: string): string {
   if (busyId === null) {
     return 'Describe a change…';
   }
-  return busyId === diagramId ? 'Claude is replying…' : 'Claude is replying in another diagram…';
+  return busyId === diagramId ? `${name} is replying…` : `${name} is replying in another diagram…`;
 }
 
 /** Takes focus each time ⌘/ asks for it. */
@@ -39,6 +40,7 @@ function useComposerFocus(textareaRef: RefObject<HTMLTextAreaElement | null>): v
 export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElement {
   const textareaRef: RefObject<HTMLTextAreaElement | null> = useRef<HTMLTextAreaElement>(null);
   const busyId: string | null = useChatStore((state) => state.busyDiagramId);
+  const name: string = useAgentName();
   useComposerFocus(textareaRef);
   const draft: string = diagram?.draft ?? '';
   const send = (): void => {
@@ -58,14 +60,14 @@ export function ChatComposer({ diagram, above }: ChatComposerProps): ReactElemen
       <div className="flex flex-col gap-2 rounded-card border border-input bg-panel p-2 pl-2.5 focus-within:border-ring">
         <SelectionChip diagramId={diagram?.id} className="self-start" />
         <label htmlFor="chat-composer" className="sr-only">
-          Message Claude
+          Message {name}
         </label>
         <textarea
           id="chat-composer"
           ref={textareaRef}
           rows={2}
           value={draft}
-          placeholder={placeholder(busyId, diagram?.id)}
+          placeholder={placeholder(busyId, diagram?.id, name)}
           className="resize-none border-0 bg-transparent leading-normal outline-none placeholder:text-faint"
           onChange={(event) => {
             if (diagram !== undefined) {

@@ -1,5 +1,7 @@
 import { addVersion, countVersions } from '@nautink/storage/versions';
 
+import { agentName } from './agent-name.ts';
+
 import type { AgentId } from '@nautink/contracts/agents';
 import type { NautinkDb } from '@nautink/storage/db';
 
@@ -11,8 +13,10 @@ export interface VersionsChangedDetail {
   diagramId: string;
 }
 
-/** The label of the snapshot taken before Claude's first change to a diagram (v1). */
-export const BEFORE_CLAUDE_LABEL: string = 'Before Claude';
+/** The label of the snapshot taken before an agent's first change to a diagram (v1): "Before Codex". */
+export function beforeAgentLabel(agent: AgentId): string {
+  return `Before ${agentName(agent)}`;
+}
 
 export interface TurnVersionInput {
   db: NautinkDb;
@@ -35,7 +39,8 @@ export async function saveTurnVersions(input: TurnVersionInput): Promise<void> {
   const { db, diagramId, before, after, prompt, agent } = input;
   const isFirstChange: boolean = (await countVersions(db, diagramId)) === 0;
   if (isFirstChange && before.trim() !== '') {
-    await addVersion(db, { diagramId, code: before, kind: 'manual', label: BEFORE_CLAUDE_LABEL });
+    const label: string = beforeAgentLabel(agent);
+    await addVersion(db, { diagramId, code: before, kind: 'manual', label });
   }
   await addVersion(db, { diagramId, code: after, kind: 'claude', prompt, agent });
   const detail: VersionsChangedDetail = { diagramId };

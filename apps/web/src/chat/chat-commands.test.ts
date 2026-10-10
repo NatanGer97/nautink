@@ -10,6 +10,7 @@ describe('buildChatCommands', () => {
       fixError: null,
       model: 'gpt-6-astra',
       models: [{ id: 'gpt-6-astra', label: 'GPT-6-Astra' }],
+      agentName: 'Codex',
       setModel,
     });
     const models = commands.filter((command) => command.group === 'Model');

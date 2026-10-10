@@ -57,7 +57,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/web test`
   - Acceptance: picking Codex changes the connection row and both model lists
 
-- [ ] **T5 — Agent name helper; chat strings**
+- [x] **T5 — Agent name helper; chat strings**
   - context - one helper, then replace strings area by area
   - Files: `apps/web/src/chat/agent-name.ts` (new, `useAgentName()`, `agentName(agent)`), `chat/chat-message.tsx`, `chat-turn.ts`, `chat-store.ts`, `chat-composer.tsx`, `send-chat.ts`, `prompt-bar.tsx`, `quick-action-chips.tsx`, `working-pill.tsx`, `turn-proposal.ts`, `chat-reply.ts`, `auto-fix.ts`, `chat-commands.ts`, `turn-versions.ts`, tests
   - Red: with agent `codex`: placeholder `Ask Codex to change this diagram…`, pill `Codex is editing`, announcements `Codex replied.`, command `Stop Codex`; an old assistant message without `agent` is labelled `Claude`, one with `agent:'codex'` is labelled `Codex` whatever the current agent

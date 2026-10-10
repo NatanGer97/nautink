@@ -11,6 +11,7 @@ import {
 import { IconButton } from '@nautink/ui/icon-button';
 import { Plus } from 'lucide-react';
 
+import { useAgentName } from './agent-name.ts';
 import { useChatStore } from './chat-store.ts';
 import { startNewChat } from './send-chat.ts';
 import { OUTLINE_BUTTON_CLASS } from '../shell/button-styles.ts';
@@ -38,6 +39,7 @@ export function requestNewChat(): void {
 export function NewChatButton(): ReactElement {
   const isOpen: boolean = useChatStore((state) => state.isNewChatConfirmOpen);
   const setOpen: (isOpen: boolean) => void = useChatStore((state) => state.setNewChatConfirmOpen);
+  const name: string = useAgentName();
   return (
     <>
       <IconButton label="New chat" icon={<Plus />} onClick={requestNewChat} />
@@ -46,7 +48,7 @@ export function NewChatButton(): ReactElement {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg">Start a new chat?</AlertDialogTitle>
             <AlertDialogDescription>
-              This clears the messages of this diagram and starts a new Claude session. The diagram
+              This clears the messages of this diagram and starts a new {name} session. The diagram
               and its versions stay as they are.
             </AlertDialogDescription>
           </AlertDialogHeader>

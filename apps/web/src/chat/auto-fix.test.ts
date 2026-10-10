@@ -35,9 +35,10 @@ describe('nextAutoFix', () => {
 describe('prompts and labels', () => {
   it('uses v1 wording', () => {
     expect(fixPrompt('Bad arrow')).toBe('The diagram fails to parse:\nBad arrow\nFix it.');
-    expect(turnLabel('fix', 'x')).toBe('Claude: Fix syntax error');
-    expect(turnLabel('auto', 'x')).toBe('Claude: Auto-fix syntax error');
-    expect(turnLabel('user', 'Add a retry\npath')).toBe('Claude: Add a retry path');
-    expect(turnLabel('user', 'a'.repeat(60))).toHaveLength('Claude: '.length + 48);
+    expect(turnLabel('fix', 'x', 'Claude')).toBe('Claude: Fix syntax error');
+    expect(turnLabel('auto', 'x', 'Claude')).toBe('Claude: Auto-fix syntax error');
+    expect(turnLabel('user', 'Add a retry\npath', 'Claude')).toBe('Claude: Add a retry path');
+    expect(turnLabel('user', 'a'.repeat(60), 'Claude')).toHaveLength('Claude: '.length + 48);
+    expect(turnLabel('fix', 'x', 'Codex')).toBe('Codex: Fix syntax error');
   });
 });

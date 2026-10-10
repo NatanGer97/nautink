@@ -2,6 +2,7 @@ import { Button } from '@nautink/ui/components/button';
 import { cn } from '@nautink/ui/lib/utils';
 import { LoaderCircle } from 'lucide-react';
 
+import { useAgentName } from './agent-name.ts';
 import { elapsedSeconds, useClaudeActivity } from './claude-activity.ts';
 import { stopChat } from './send-chat.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
@@ -42,13 +43,14 @@ function WorkingPill({
   placement: (typeof CANVAS_PLACEMENTS)[DiagramView];
 }): ReactElement {
   const seconds: number = elapsedSeconds(activity.startedAt, useNow(TICK_MS));
+  const name: string = useAgentName();
   return (
     <section
-      aria-label="Claude is working"
+      aria-label={`${name} is working`}
       className={cn('flex items-center gap-2.5 whitespace-nowrap', PLACEMENT_CLASSES[placement])}
     >
       <LoaderCircle aria-hidden="true" className="size-4 shrink-0 animate-spin text-accent-ink" />
-      <p className="shrink-0 font-medium">Claude is editing</p>
+      <p className="shrink-0 font-medium">{name} is editing</p>
       <p className="min-w-0 truncate text-muted-foreground">{activity.step}</p>
       <span className="shrink-0 font-mono text-xs text-faint tabular-nums">{`${String(seconds)}s`}</span>
       <Button

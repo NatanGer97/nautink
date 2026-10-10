@@ -1,3 +1,4 @@
+import { agentName } from './agent-name.ts';
 import { nextAutoFix, turnLabel } from './auto-fix.ts';
 import { streamChat } from './chat-client.ts';
 import { applyChatEvent, failReply, settleReply, startReply } from './chat-reply.ts';
@@ -86,7 +87,7 @@ async function streamReply(turn: Turn, attempt: Attempt): Promise<ChatReply> {
         handleEvent(turn, attempt, { reply, event });
       },
     });
-    reply = settleReply(reply);
+    reply = settleReply(reply, agentName(turn.agent));
   } catch (err) {
     reply = failReply(reply, err, turn.signal.aborted);
   }
@@ -123,7 +124,8 @@ function reportAttempt(
       .linkReplyEdit(turn.diagramId, { messageIndex: outcome.messageIndex, entryId });
   }
   if (outcome.reply.status === 'error' && !turn.deps.isChatOpen()) {
-    turn.deps.notifyError(`Claude could not reply. ${outcome.reply.error ?? ''}`.trim());
+    const name: string = agentName(turn.agent);
+    turn.deps.notifyError(`${name} could not reply. ${outcome.reply.error ?? ''}`.trim());
   }
 }
 
@@ -146,27 +148,28 @@ export async function runTurn(turn: Turn, first: Attempt): Promise<AttemptResult
   let result: AttemptResult = await runAttempt(turn, first, 0);
   let prompt: string | null = nextAutoFix(result);
   while (prompt !== null) {
-    const retry: Attempt = { message: prompt, kind: 'auto', label: turnLabel('auto', prompt) };
+    const label: string = turnLabel('auto', prompt, agentName(turn.agent));
+    const retry: Attempt = { message: prompt, kind: 'auto', label };
     result = await runAttempt(turn, retry, result.retries + 1);
     prompt = nextAutoFix(result);
   }
   return result;
 }
 
-/** What the live region says when a turn ends. */
-export function turnAnnouncement(result: AttemptResult): string {
+/** What the live region says when `name`'s turn ends. */
+export function turnAnnouncement(result: AttemptResult, name: string): string {
   if (result.status === 'stopped') {
-    return 'Claude stopped.';
+    return `${name} stopped.`;
   }
   if (result.status === 'error') {
-    return 'Claude could not reply.';
+    return `${name} could not reply.`;
   }
   if (result.code === null) {
-    return 'Claude replied.';
+    return `${name} replied.`;
   }
   return result.error === null
-    ? 'Claude updated the diagram.'
-    : 'Claude updated the diagram, but it still has a syntax error.';
+    ? `${name} updated the diagram.`
+    : `${name} updated the diagram, but it still has a syntax error.`;
 }
 
 /** The turn's new code when it ended with a changed diagram that parses, else `null`. */
@@ -181,7 +184,7 @@ function savedCode(turn: Turn, result: AttemptResult): string | null {
  */
 export async function finishTurn(turn: Turn, result: AttemptResult): Promise<string> {
   if (turn.isReviewing) {
-    return (await proposeTurn(turn, result)) ?? turnAnnouncement(result);
+    return (await proposeTurn(turn, result)) ?? turnAnnouncement(result, agentName(turn.agent));
   }
   return saveTurn(turn, result);
 }
@@ -204,5 +207,5 @@ async function saveTurn(turn: Turn, result: AttemptResult): Promise<string> {
     const message: string = err instanceof Error ? err.message : String(err);
     turn.deps.notifyError(`Could not save a version. ${message}`);
   }
-  return turnAnnouncement(result);
+  return turnAnnouncement(result, agentName(turn.agent));
 }

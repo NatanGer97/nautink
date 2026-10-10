@@ -1,3 +1,4 @@
+import { agentName } from './agent-name.ts';
 import { fixPrompt, turnLabel } from './auto-fix.ts';
 import { defaultChatDeps } from './chat-deps.ts';
 import { useChatStore } from './chat-store.ts';
@@ -12,6 +13,7 @@ import type { SendKind } from './auto-fix.ts';
 import type { ChatDeps } from './chat-deps.ts';
 import type { Turn } from './chat-turn.ts';
 import type { TurnCodeSink } from './turn-edit.ts';
+import type { AgentId } from '@nautink/contracts/agents';
 import type { ChatSelection } from '@nautink/contracts/chat';
 import type { Diagram } from '@nautink/storage/records';
 
@@ -49,6 +51,19 @@ function codeSink(
   return { edit, isReviewing, replyIndexes };
 }
 
+/** Who answers the turn and what its undo step is called. The agent is read once per turn. */
+function turnIdentity(
+  prompt: string,
+  options: SendOptions,
+  deps: ChatDeps,
+): Pick<Turn, 'agent' | 'label'> {
+  const agent: AgentId = deps.agent();
+  return {
+    agent,
+    label: turnLabel(options.kind ?? 'user', options.title ?? prompt, agentName(agent)),
+  };
+}
+
 function createTurn(
   diagram: Diagram,
   input: { prompt: string; options: SendOptions; deps: ChatDeps },
@@ -59,11 +74,9 @@ function createTurn(
   return {
     diagramId: diagram.id,
     workspace: deps.workspace,
-    // Read once: switching agent mid-turn does not mix agents in one turn.
-    agent: deps.agent(),
+    ...turnIdentity(prompt, options, deps),
     before: diagram.code,
     prompt,
-    label: turnLabel(options.kind ?? 'user', options.title ?? prompt),
     selection: options.selection ?? null,
     ...codeSink(diagram.id, deps),
     signal: controller.signal,
@@ -73,7 +86,7 @@ function createTurn(
 
 async function runToEnd(turn: Turn, options: SendOptions): Promise<void> {
   const kind: SendKind = options.kind ?? 'user';
-  let announcement: string = 'Claude could not reply.';
+  let announcement: string = `${agentName(turn.agent)} could not reply.`;
   try {
     announcement = await finishTurn(
       turn,
