@@ -2,6 +2,7 @@
   "name": "@nautink/contracts",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Zod schemas for the server API and its SSE events, shared by the web app and the server.",
   "exports": {

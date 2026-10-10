@@ -2,6 +2,7 @@
   "name": "@nautink/web",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "The Nautink web app: the app shell, panels and canvas host.",
   "scripts": {

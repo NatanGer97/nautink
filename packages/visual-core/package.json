@@ -2,6 +2,7 @@
   "name": "@nautink/visual-core",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "The visual editor contract, diagram type detection, commit labels and the positions adapter, shared by every editor.",
   "exports": {

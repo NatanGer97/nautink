@@ -2,6 +2,7 @@
   "name": "@nautink/ui",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Design tokens, Geist fonts and the shadcn/ui components the web app is built from.",
   "exports": {
