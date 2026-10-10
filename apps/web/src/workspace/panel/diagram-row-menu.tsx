@@ -77,15 +77,21 @@ export function DiagramRowMenu({
   const isRenamePendingRef: RefObject<boolean> = useRef<boolean>(false);
   return (
     <DropdownMenu open={isOpen} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger
-        tabIndex={-1}
-        aria-label={`Actions for ${title}`}
-        className="grid size-6 shrink-0 place-items-center rounded-control text-muted-foreground opacity-0 group-hover/row:opacity-100 group-data-[cursor=true]/row:opacity-100 hover:bg-panel hover:text-foreground aria-expanded:opacity-100 [&_svg]:size-4"
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        <MoreHorizontal aria-hidden="true" />
+      {/* A pointer shortcut only. A row is a listbox option, which must not hold a focusable
+          control (WCAG 4.1.2), so the button is hidden from assistive tech and the keyboard: the
+          list opens the same menu with Shift+F10 or the menu key. */}
+      <DropdownMenuTrigger asChild>
+        <span
+          role="button"
+          aria-hidden="true"
+          aria-label={`Actions for ${title}`}
+          className="grid size-6 shrink-0 place-items-center rounded-control text-muted-foreground opacity-0 group-hover/row:opacity-100 group-data-[cursor=true]/row:opacity-100 hover:bg-panel hover:text-foreground aria-expanded:opacity-100 [&_svg]:size-4"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <MoreHorizontal aria-hidden="true" />
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

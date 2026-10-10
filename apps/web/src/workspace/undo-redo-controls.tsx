@@ -85,7 +85,7 @@ function StepMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={isHeld || entries.length <= 1}>
-        <IconButton label="Undo history" icon={<ChevronDown />} className="w-5 [&_svg]:size-3" />
+        <IconButton label="Undo history" icon={<ChevronDown />} className="w-6 [&_svg]:size-3" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

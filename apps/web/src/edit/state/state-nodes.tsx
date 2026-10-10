@@ -147,6 +147,8 @@ function PseudoBox({ id, leaf, isSelected }: BoxProps<LeafData>): ReactElement {
   return (
     <div
       data-testid={`state-node-${id}`}
+      // A name needs a role to be read out; this box has no text of its own (WCAG 4.1.2).
+      role="group"
       aria-label={leafName(leaf)}
       title={leafName(leaf)}
       className={cn(

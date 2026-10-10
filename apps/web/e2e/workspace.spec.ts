@@ -60,7 +60,7 @@ test.describe('diagrams panel', () => {
     await panel.getByRole('button', { name: 'New diagram' }).click();
     await expect(options).toHaveCount(3);
     await panel
-      .getByRole('button', { name: /^Actions for Flowchart/ })
+      .getByRole('button', { name: /^Actions for Flowchart/, includeHidden: true })
       .first()
       .click();
     await page.getByRole('menuitem', { name: 'Rename' }).click();
@@ -70,7 +70,7 @@ test.describe('diagrams panel', () => {
     await panel.getByRole('searchbox', { name: 'Search diagrams' }).fill('checkout');
     await expect(options).toHaveCount(1);
     await panel.getByRole('searchbox', { name: 'Search diagrams' }).fill('');
-    await panel.getByRole('button', { name: 'Actions for Orders' }).click();
+    await panel.getByRole('button', { name: 'Actions for Orders', includeHidden: true }).click();
     await page.getByRole('menuitem', { name: 'Delete' }).click();
     await expect(options).toHaveCount(2);
     await page.locator('[data-sonner-toast]').getByRole('button', { name: 'Undo' }).click();

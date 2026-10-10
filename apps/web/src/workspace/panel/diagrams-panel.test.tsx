@@ -148,7 +148,7 @@ describe('DiagramsPanel', () => {
 
   it('deletes from the row menu and puts the diagram back with Undo', async () => {
     const user = await renderPanel();
-    await user.click(screen.getByRole('button', { name: 'Actions for Orders schema' }));
+    await user.click(screen.getByLabelText('Actions for Orders schema'));
     await user.click(await screen.findByRole('menuitem', { name: 'Delete' }));
     await waitFor(() => {
       expect(optionNames()).toHaveLength(2);
@@ -173,13 +173,13 @@ describe('DiagramsPanel', () => {
     expect(
       screen.getByRole('option', { name: /^Checkout flow, Flowchart, 1 h ago, pinned/ }),
     ).toBeTruthy();
-    await user.click(screen.getByRole('button', { name: 'Actions for Checkout flow' }));
+    await user.click(screen.getByLabelText('Actions for Checkout flow'));
     await user.click(await screen.findByRole('menuitem', { name: 'Download .mmd' }));
     expect(createObjectURL).toHaveBeenCalledTimes(1);
-    await user.click(screen.getByRole('button', { name: 'Actions for Checkout flow' }));
+    await user.click(screen.getByLabelText('Actions for Checkout flow'));
     await user.click(await screen.findByRole('menuitem', { name: 'Duplicate' }));
     expect(await screen.findByRole('option', { name: /^Checkout flow copy/ })).toBeTruthy();
-    await user.click(screen.getByRole('button', { name: 'Actions for Orders schema' }));
+    await user.click(screen.getByLabelText('Actions for Orders schema'));
     await user.click(await screen.findByRole('menuitem', { name: /Rename/ }));
     expect(screen.getByRole('textbox', { name: 'Diagram title' })).toBeTruthy();
     await user.keyboard('{Escape}');
