@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nautink — Mermaid diagrams with Claude, on your machine</title>
+    <title>Nautink — Mermaid diagrams with Claude or Codex, on your machine</title>
     <meta
       name="description"
-      content="Nautink is a free, open-source, local-first app for Mermaid diagrams. Edit by hand, in code, or by chatting with Claude, and review every change before it lands."
+      content="Nautink is a free, open-source, local-first app for Mermaid diagrams. Edit by hand, in code, or by chatting with Claude or Codex, and review every change before it lands."
     />
     <meta name="color-scheme" content="light dark" />
     <meta property="og:title" content="Nautink" />
     <meta
       property="og:description"
-      content="Mermaid diagrams you shape by hand, in code, or by chatting with Claude. Every change Claude proposes waits for your review."
+      content="Mermaid diagrams you shape by hand, in code, or by chatting with Claude or Codex. Every change the agent proposes waits for your review."
     />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/png" href="/favicon.png" media="(prefers-color-scheme: light)" />
@@ -66,11 +66,11 @@
             <span>Open source</span><span aria-hidden="true">·</span><span>Local-first</span
             ><span aria-hidden="true">·</span><span>MIT</span>
           </p>
-          <h1>Draw Mermaid diagrams by hand, in code, or&nbsp;with&nbsp;Claude.</h1>
+          <h1>Draw Mermaid diagrams by hand, in code, or with Claude&nbsp;or&nbsp;Codex.</h1>
           <p class="lede">
-            Nautink is one canvas for Mermaid. Ask Claude for a change and it shows up as a proposal
-            you accept or reject. Your diagrams stay in your browser, and the chat runs through your
-            own Claude Code.
+            Nautink is one canvas for Mermaid. Ask Claude or Codex for a change and it shows up as a
+            proposal you accept or reject. Your diagrams stay in your browser, and the chat runs
+            through your own Claude Code or Codex CLI.
           </p>
           <div class="cta-row">
             <a class="button button-primary" href="#start">Get started</a>
@@ -107,15 +107,16 @@
         <div class="container split">
           <div class="split-copy">
             <p class="kicker">Review before apply</p>
-            <h2 id="review-title">Claude proposes. You decide.</h2>
+            <h2 id="review-title">The agent proposes. You decide.</h2>
             <p>
-              Every change Claude makes lands on the canvas as a proposal. New parts are dashed in
-              green, removed parts are struck through, and nothing is saved until you say so.
+              Every change Claude or Codex makes lands on the canvas as a proposal. New parts are
+              dashed in green, removed parts are struck through, and nothing is saved until you say
+              so.
             </p>
             <ul class="checks">
               <li>Accept with <kbd>Enter</kbd>, reject with <kbd>Esc</kbd>.</li>
               <li>Accepting is one undo step and one saved version.</li>
-              <li>If Claude's code does not parse, Nautink asks it to fix it.</li>
+              <li>If the agent's code does not parse, Nautink asks it to fix it.</li>
             </ul>
           </div>
 
@@ -324,9 +325,9 @@
               hidden
             >
               <p>
-                <strong>Chat with Claude.</strong> Describe a diagram or a change and watch it build
-                on the canvas. Select a few nodes to ask about just those, and Claude leaves the
-                rest alone.
+                <strong>Chat with Claude or Codex.</strong> Pick the agent in Settings, then
+                describe a diagram or a change. Select a few nodes to ask about just those, and the
+                agent leaves the rest alone.
               </p>
               <figure class="window">
                 <img
@@ -346,7 +347,7 @@
               hidden
             >
               <p>
-                <strong>History and versions.</strong> Undo and redo cover every change. Each Claude
+                <strong>History and versions.</strong> Undo and redo cover every change. Each agent
                 edit saves a version: view, compare and restore up to 50 per diagram.
               </p>
               <figure class="window">
@@ -373,16 +374,21 @@
           <ul class="feature-grid">
             <li>
               <h3>Live build</h3>
-              <p>While Claude replies, new nodes fade in on the canvas as they arrive.</p>
+              <p>
+                While Claude replies, new nodes fade in on the canvas as they arrive. Codex replies
+                land in one step.
+              </p>
             </li>
             <li>
-              <h3>Pick your model</h3>
-              <p>Default, Opus, Sonnet or Haiku. Stop a reply, or use a quick action under it.</p>
+              <h3>Pick your agent and model</h3>
+              <p>
+                Claude with Opus, Sonnet or Haiku, or Codex with any model your Codex CLI offers.
+              </p>
             </li>
             <li>
               <h3>Codebase-aware chat</h3>
               <p>
-                Let Claude read a project folder, read-only, so it draws your real architecture.
+                Let the agent read a project folder, read-only, so it draws your real architecture.
               </p>
             </li>
             <li>
@@ -400,7 +406,7 @@
               </p>
             </li>
             <li>
-              <h3>15 templates</h3>
+              <h3>14 templates</h3>
               <p>Starters for process, software design, data, planning and charts.</p>
             </li>
             <li>
@@ -442,16 +448,17 @@
               <p class="stage-where">Your machine</p>
               <h3>Local server</h3>
               <p>
-                Listens on <code>127.0.0.1</code> only. Turns each message into one Claude Code run.
+                Listens on <code>127.0.0.1</code> only. Turns each message into one run of your
+                agent's CLI.
               </p>
             </li>
             <li class="hop" aria-hidden="true"><span>spawns</span><span>stream</span></li>
             <li class="stage">
               <p class="stage-where">Your login</p>
-              <h3>Claude Code CLI</h3>
+              <h3>Claude Code or Codex CLI</h3>
               <p>
-                Runs <code>claude -p</code> with no tools, unless you pick a folder for read-only
-                access.
+                <code>claude -p</code> gets no tools unless you pick a folder to read.
+                <code>codex exec</code> always runs in a read-only sandbox.
               </p>
             </li>
           </ol>
@@ -466,15 +473,15 @@
             <h2 id="privacy-title">No account. No cloud. No telemetry.</h2>
             <p>
               Your diagrams never leave your browser, except when you send a chat message. Then your
-              own Claude Code sends the diagram and your message to Anthropic, exactly as if you
-              used Claude Code yourself.
+              own agent CLI sends the diagram and your message to its provider: Claude Code to
+              Anthropic, Codex to OpenAI, exactly as if you used that CLI yourself.
             </p>
           </div>
           <ul class="privacy-list">
             <li><strong>No sign-up.</strong> Clone it, run it, use it.</li>
             <li><strong>No analytics.</strong> The app tracks nothing.</li>
             <li><strong>No third-party calls.</strong> Fonts and icons are bundled.</li>
-            <li><strong>Works without Claude.</strong> Everything but the chat runs offline.</li>
+            <li><strong>Works without an agent.</strong> Everything but the chat runs offline.</li>
           </ul>
         </div>
       </section>
@@ -485,8 +492,8 @@
           <h2 id="start-title">Up and running in a minute.</h2>
           <p>
             You need Node 22, pnpm 9, and
-            <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> logged in for
-            the chat.
+            <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> or
+            <a href="https://github.com/openai/codex">Codex CLI</a> logged in for the chat.
           </p>
           <div class="terminal">
             <div class="terminal-bar">
