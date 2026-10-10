@@ -32,7 +32,7 @@ export function buildClaudeArgs(options: ClaudeArgsOptions): string[] {
     '--verbose',
     '--include-partial-messages',
     '--system-prompt',
-    buildSystemPrompt(options.isRepoAware),
+    buildSystemPrompt(options.isRepoAware, 'claude'),
     ...LEAN_FLAGS,
     ...toolFlags(options.isRepoAware),
     ...(options.model === null ? [] : ['--model', options.model]),

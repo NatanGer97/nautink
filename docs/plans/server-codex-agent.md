@@ -60,7 +60,7 @@ _Untracked — no issue. Progress lives in this file's checkboxes. `/new-issue d
   - Verify: `pnpm --filter @nautink/server test`
   - Acceptance: every case above covered
 
-- [ ] **T5 — Codex arguments and agent-aware system prompt**
+- [x] **T5 — Codex arguments and agent-aware system prompt**
   - context - headless, read-only, lean Codex run; prompt names the right read tool
   - Files: `apps/server/src/codex-args.ts` (new), `apps/server/src/codex-args.test.ts`, `apps/server/src/prompt.ts`, `apps/server/src/prompt.test.ts`
   - Red: new run → `['exec','--json','--skip-git-repo-check','--ignore-user-config','--ignore-rules','-c','sandbox_mode="read-only"','-c','developer_instructions=<JSON-quoted prompt>', …model, '-']`; resume → `['exec','resume', …same flags…, sessionId, '-']`; `-m` only when a model is set; `buildSystemPrompt(true,'codex')` has a rule about read-only shell commands (`rg`, `cat`, `ls`) and not Read/Grep/Glob; `buildSystemPrompt(false,'codex')` tells it not to run commands; Claude prompt text unchanged
