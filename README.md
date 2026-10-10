@@ -6,17 +6,19 @@
 </h1>
 
 A local-first, open-source app for building [Mermaid](https://mermaid.js.org) diagrams. You shape one
-canvas by hand, in code, or by chatting with Claude, and every change Claude proposes is shown on the
-canvas for you to accept or reject. Your diagrams stay in your browser; the chat runs through your
-own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI on your machine.
+canvas by hand, in code, or by chatting with a coding agent, and every change the agent proposes is
+shown on the canvas for you to accept or reject. Your diagrams stay in your browser; the chat runs
+through your own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or
+[Codex](https://github.com/openai/codex) CLI on your machine.
 
 ![The Nautink workspace: a checkout flowchart drawn by Claude, with the chat beside it](docs/screenshots/workspace.webp)
 
 ## Features
 
-- **Chat with Claude.** Describe a diagram or a change; the reply streams straight into the canvas.
-  Pick the model (default, Opus, Sonnet or Haiku), stop a reply, start a new chat, or use the quick
-  actions under each reply. If Claude's code does not parse, Nautink asks it to fix it (up to two
+- **Chat with Claude or Codex.** Pick the agent in Settings. Describe a diagram or a change; the reply
+  goes straight into the canvas. Pick the model (the default, or the agent's own models: Opus, Sonnet
+  or Haiku for Claude, the installed Codex CLI's models for Codex), stop a reply, start a new chat, or
+  use the quick actions under each reply. If Claude's code does not parse, Nautink asks it to fix it (up to two
   retries), and a parse error in your own code has an "Ask Claude to fix" button.
 - **Review before apply.** Claude's change appears on the canvas as a proposal: added parts dashed in
   green, changed parts outlined, removed parts struck through. Accept with Enter, reject with Esc.

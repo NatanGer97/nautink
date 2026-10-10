@@ -81,7 +81,7 @@ A user picks Codex in Settings, chats, and sees Codex replies, statuses and revi
   - Verify: `pnpm --filter @nautink/web exec playwright test e2e/agent.spec.ts`
   - Acceptance: spec green; existing e2e suite green
 
-- [ ] **T8 — Changesets and README**
+- [x] **T8 — Changesets and README**
   - context - user-facing feature
   - Files: `.changeset/web-codex-agent.md`, `README.md` (features: choose Claude or Codex)
   - Red: n/a — `pnpm format:check`
