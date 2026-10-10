@@ -11,9 +11,11 @@ import { STAGE_ATTRIBUTE, usePanZoom } from './use-pan-zoom.ts';
 import { viewTransformCss } from './view-math.ts';
 import { ViewedVersionBar } from './viewed-version-bar.tsx';
 import { ZoomControls } from './zoom-controls.tsx';
+import { useChatStore } from '../chat/chat-store.ts';
 import { revealLineInCode } from '../code/code-reveal.ts';
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
+import { useLiveFade } from '../review/live-fade.ts';
 import { REVIEW_STAGE_CLASS, usePreviewReviewMarks } from '../review/preview-marks.ts';
 import { useIsReviewing, useShownCode, useStructuralReview } from '../review/use-review.ts';
 import { usePromptBarInset } from '../shell/prompt-bar-inset.ts';
@@ -40,6 +42,8 @@ interface PreviewSurfaceProps extends PreviewCanvasProps {
   code: string;
   /** Claude's proposal to mark on the render (PRD §4.2), or null. */
   review?: PreviewReview | null;
+  /** Claude's reply streams into the diagram: new shapes fade in (PRD §4.3). */
+  isLive?: boolean;
 }
 
 /** Shown while the diagram has no code: an invitation to start one. */
@@ -131,6 +135,7 @@ function PreviewSurface({
   onShapeClick,
   selectedIds = [],
   review = null,
+  isLive = false,
 }: PreviewSurfaceProps): ReactElement {
   const isDark: boolean = useIsDarkTheme();
   useDiagramRender({ diagramId, code, isDark });
@@ -149,6 +154,7 @@ function PreviewSurface({
   });
   useShapeHighlight(stageRef, svg, selectedIds);
   usePreviewReviewMarks(stageRef, svg, review);
+  useLiveFade(stageRef, isLive);
   usePreviewCommands(controller);
   useFocusModeEscape();
   const error: PreviewStatus['error'] = isCurrent ? status.error : null;
@@ -181,12 +187,14 @@ function DiagramSurface({
   const code: string = useShownCode(diagram);
   const review: PreviewReview | null = useStructuralReview(diagram.id);
   const isReviewing: boolean = useIsReviewing(diagram.id);
+  const isLive: boolean = useChatStore((state) => state.busyDiagramId === diagram.id);
   const click: ((target: Element) => void) | undefined = isReviewing ? ignoreClick : onShapeClick;
   return (
     <PreviewSurface
       diagramId={diagram.id}
       code={code}
       review={review}
+      isLive={isLive}
       {...(click ? { onShapeClick: click } : {})}
       {...(selectedIds ? { selectedIds } : {})}
     />

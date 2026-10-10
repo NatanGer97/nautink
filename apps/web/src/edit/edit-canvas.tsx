@@ -1,4 +1,4 @@
-import { Suspense, createElement, useCallback, useMemo } from 'react';
+import { Suspense, createElement, useCallback, useMemo, useRef } from 'react';
 
 import { viewAvailability } from './canvas-views.ts';
 import { CenteredNotice, EmptyDiagramNotice, NoEditorNotice } from './edit-notices.tsx';
@@ -11,6 +11,7 @@ import { useViewedVersion } from '../history/viewed-version.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
 import { useFocusModeEscape } from '../preview/focus-mode.ts';
 import { ViewedVersionBar } from '../preview/viewed-version-bar.tsx';
+import { useLiveFade } from '../review/live-fade.ts';
 import {
   useReviewReadOnlyReason,
   useShownCode,
@@ -23,7 +24,7 @@ import type { ReviewMarks } from './review/review-marks.ts';
 import type { StructuralReview } from '@nautink/editors/review/review-diagram';
 import type { Diagram, Version } from '@nautink/storage/records';
 import type { EditorId } from '@nautink/visual-core/editor-contract';
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 
 interface EditorHostProps {
   editor: LazyVisualEditor;
@@ -109,7 +110,11 @@ export interface EditCanvasProps {
 export function EditCanvas({ isSplit }: EditCanvasProps): ReactElement {
   const diagram: Diagram | undefined = useActiveDiagram();
   const viewed: Version | null = useViewedVersion();
+  const rootRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+  const busyDiagramId: string | null = useChatStore((state) => state.busyDiagramId);
+  const isLive: boolean = busyDiagramId !== null && busyDiagramId === diagram?.id;
   useFocusModeEscape();
+  useLiveFade(rootRef, isLive && viewed === null);
   if (diagram === undefined) {
     return (
       <div className="grid h-full place-items-center p-6 text-muted-foreground">
@@ -118,7 +123,7 @@ export function EditCanvas({ isSplit }: EditCanvasProps): ReactElement {
     );
   }
   return (
-    <div className="absolute inset-0">
+    <div ref={rootRef} className="absolute inset-0">
       <EditBody diagram={diagram} viewed={viewed} />
       <SelectionPrompt diagramId={diagram.id} />
       {viewed !== null && !isSplit ? (
