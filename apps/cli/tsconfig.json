@@ -1,0 +1,12 @@
+{
+  // The command's source runs under Node, like the server's; `scripts/build.ts` bundles it into
+  // `dist/cli.js` for the published package.
+  "extends": "../../tsconfig.library.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["src", "tests", "scripts", "vitest.config.ts"]
+}

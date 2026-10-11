@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { createServer } from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
@@ -57,6 +57,22 @@ export interface StartOptions {
   env: NodeJS.ProcessEnv;
   homeDir: string;
   logger: Logger;
+  /**
+   * The built web app to serve, whatever `NODE_ENV` says (the `nautink` command ships its own copy).
+   * Left out, the server serves `apps/web/dist` in production only.
+   */
+  webDistDir?: string;
+}
+
+/** The web app folder to serve: the given one, which must hold an `index.html`, or the repo's build. */
+function resolveWebDist(config: ServerConfig, webDistDir: string | undefined): string | null {
+  if (webDistDir === undefined) {
+    return findWebDist(REPO_ROOT, config.isProduction);
+  }
+  if (!existsSync(path.join(webDistDir, 'index.html'))) {
+    throw new Error(`The web app folder has no index.html: ${webDistDir}`);
+  }
+  return webDistDir;
 }
 
 function createAppFromConfig(config: ServerConfig, options: StartOptions): Express {
@@ -67,7 +83,7 @@ function createAppFromConfig(config: ServerConfig, options: StartOptions): Expre
     repoDir: config.repoDir,
     homeDir: options.homeDir,
     workDir: prepareNeutralWorkDir(),
-    webDistDir: findWebDist(REPO_ROOT, config.isProduction),
+    webDistDir: resolveWebDist(config, options.webDistDir),
     healthTimeoutMs: HEALTH_TIMEOUT_MS,
   });
 }

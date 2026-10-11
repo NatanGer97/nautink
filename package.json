@@ -1,5 +1,5 @@
 {
-  "name": "nautink",
+  "name": "nautink-monorepo",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -33,6 +33,7 @@
     "test:release-tag": "node --test scripts/tag-release.test.ts",
     "check:licenses": "node scripts/generate-third-party-notices.ts --check",
     "test:license-gate": "node --test scripts/generate-third-party-notices.test.ts",
+    "check:pack": "node scripts/check-pack.ts",
     "changeset": "changeset",
     "version": "changeset version",
     "format": "prettier --write .",
