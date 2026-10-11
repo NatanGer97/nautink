@@ -1,0 +1,117 @@
+# @nautink/web
+
+## 0.1.0
+
+### Minor Changes
+
+- f761b6f: Rebrand to the logo colors: cool slate neutrals in light mode, deep navy in dark mode, the logo navy for primary buttons and teal for selection and focus. The code editor and diagram renders use the same palette.
+- b0274ac: Add the web app shell: top bar, rail, resizable side panels, canvas area, code drawer and status bar, with a persisted UI store, system/light/dark theme without a flash, the settings popover with the Claude Code connection check, and the ⌘K command palette backed by a command registry.
+- d7c62e4: Switch the canvas between Preview, Edit and Split from the top bar or ⌘K; the choice is saved on each diagram. Split puts the visual editor beside the real render with a draggable divider. Code-only types (Gantt, pie, …) keep Edit and Split off with the reason, and say "No visual editor for <type> yet" in Edit.
+- e844654: Review Claude's change before it applies (PRD §4.2): with the setting on, a reply streams in as a live preview and ends as a proposal. The canvas marks what is added, changed and removed (Preview, Edit and Split, all five visual editors), the code drawer shows the diff, and a bar offers Reject and Accept ⏎ (Esc and Enter). Accept is one undo step and one `claude` version; Reject records nothing and the reply says "Rejected" with "Show again". Types without a visual editor are reviewed as a diff in the code drawer.
+- d81201d: Chat with Claude: replies stream into the diagram as one undo step, invalid diagrams are retried automatically, Claude's changes are saved as versions, and the chat panel gets the model chip, new chat, stop, tool steps, change cards, "Ask Claude to fix" and the floating prompt bar.
+- b7ef115: Add the UML class visual editor: classes, interfaces, abstract classes and enums with stereotypes and generics, attributes and methods (visibility, static, abstract) edited in the inspector or in place, reordered and removed, every relation kind with labels and multiplicities, lollipop interfaces, notes, namespaces (group, rename, ungroup, drag the frame), direction, auto layout, duplicate (⌘D), keyboard nudges and connecting by dragging a handle. Every edit is one labelled undo step, and the selection is shared with the rest of the app by class name.
+- 6ac1257: Show clearly when Claude is working: a "Claude is editing" pill on the canvas with the current step, elapsed time and Stop; a teal progress bar; the selected shapes glow; animated dots in the chat. The pill hands over to the proposal bar in the same spot, and the overlapping read-only notes are gone.
+- b11375a: Click a shape in the preview to select the line that defines it in the code drawer.
+- 4f9365e: Add the Monaco code drawer: lazy-loaded lean Monaco, Mermaid highlighting, light and dark themes, autocomplete per diagram type, the parse error marker with "Ask Claude to fix", one model per diagram, and typing that goes through the app's undo history.
+- e45666c: The code drawer is read-only, with a note, while Claude's reply streams into the open diagram.
+- bb1f4a4: Settings: choose the codebase Claude can read by typing or pasting a folder path (saved with `POST /api/repo`, errors shown inline) or clear it; the top bar shows a badge with the folder's name while one is set.
+- 9b17976: Choose Claude or Codex in Settings (ADR-002). The connection row, the model select, the model chip and the ⌘K model commands follow the chosen agent, and the UI names it ("Ask Codex to fix", "Codex proposes 3 changes"). Each diagram's session belongs to one agent, so switching agents starts a new session. Replies, agent versions and sessions remember which agent wrote them; older records count as Claude's.
+- 24621a0: Add the workspace store backed by `@nautink/storage`: diagrams load from IndexedDB (a blank flowchart on first run), the open diagram is remembered, changes autosave after 400 ms and on page hide, and the top bar and status bar show the open diagram's title, type, line count and save state. The canvas shows the code as plain text until the preview lands.
+- 43af402: Add the diagrams panel: a New diagram button, search over titles and code with the matching line, type filter chips, the list pinned first then most recent with type and relative time, a row menu to rename (also double-click or F2), duplicate, pin, download `.mmd` and delete with Undo, and full keyboard use. The main diagram actions are in the ⌘K palette, which can now run a command after it closes (`isDeferred`).
+- 37795ae: Add the unified edit history: per-diagram undo/redo stacks of labelled steps with a source, typing grouped until a one-second pause or an explicit close, a 200-step cap, jumps to any step, and amendable Claude turns.
+- 6a712cd: Add the shared visual editor chrome: React Flow themed with the design tokens, the floating toolbar and inspector card (M1), commit-on-blur fields, a tabbed library with an Icons tab (logos, Material Design, Font Awesome, Carbon, fetched on demand and sanitized), the zoom bar, canvas shortcuts and fits that keep the floating prompt bar's room free.
+- 683f309: Keep visual editor positions in IndexedDB per diagram and editor (as v1 kept them per editor kind), loaded when the editor opens and saved a moment after each change, never while an older version is on view. Items without a saved spot are laid out with dagre, and editors get an "Auto layout" action.
+- 4796b46: Add the visual editor host: the code is parsed into the editor model with Mermaid's own parser and edits go back through the undo history as labelled steps; outside changes (typing, undo, Claude, a restore) re-parse without moving existing items, a syntax error keeps the last canvas read-only, and the canvas is read-only while Claude edits or an older version is on view. The current selection lives in a small store, and Split mirrors it between the editor and the render.
+- 407d670: Add the ER visual editor: entity tables with typed attributes, PK/FK/UK key badges and comments; add, edit, reorder and remove attributes in the inspector; relationships with crow's-foot ends, identifying or non-identifying lines and labels (edited in place or in the inspector), reverse; aliases, groups, direction and auto layout; connect by dragging a handle (or drop on empty canvas for a related entity), inline renaming, delete and keyboard nudges. Every edit is one labelled undo step, and the selection is shared with Split and the rest of the app.
+- 9098cdf: Add the Export menu: download SVG or PNG (1–4×, transparent), copy the image, SVG, Mermaid code, Markdown or an HTML embed, and open in mermaid.live, with ⇧⌘E and ⇧⌘C and ⌘K commands.
+- e1fcfc1: Add the first-run screen (M8): while the workspace holds only the untouched blank diagram, a prompt box with a diagram-type picker and example chips starts the first diagram (the type's header as code, the text as the chat draft, chat open), with start cards for a blank canvas, templates, import and a codebase, and the hint "Coming from v1? Restore its backup."
+- 8aed8f4: Add the flowchart visual editor: all 53 shapes, icon and image nodes, links with labels, line styles and ends, groups, direction, multi-select, delete, duplicate (⌘D), keyboard nudges, connecting by dragging a handle (or dropping on empty canvas for a new node), inline renaming, a floating inspector, and a library with Shapes and Icons opened from the canvas toolbar. Every edit is one labelled undo step, and the selection is shared with the rest of the app.
+- f8b4a3a: Import and back up: drop `.mmd`, `.mermaid` or `.md` files (one diagram per mermaid block) anywhere on the window or pick them with "Open file…" (⌘K, Diagrams panel footer); a dropped backup is restored. Settings "Back up all" downloads every diagram, version and position as JSON, and "Restore backup" merges a Nautink or v1 backup.
+- 38e0497: Live build (PRD §4.3): while Claude's reply streams into a diagram, each new shape fades in (Motion, 120 ms) on the Mermaid render and on the visual editors; nothing moves when the system asks for reduced motion.
+- 903dd33: Add the shared Mermaid loader, the one-at-a-time Mermaid queue and `validateMermaid`.
+- ef6c975: Render the open diagram on the canvas with Mermaid: pan, zoom, fit, focus mode, icon packs, a parse error notice that keeps the last good render, and the preview status in the status bar.
+- 4ca6383: Add v1's quick-action chips (per diagram type) under the latest Claude reply and above the empty composer.
+- b2d41c0: Settings: "Review changes before applying", on by default and remembered per browser.
+- 558581b: Selection-aware prompts (PRD §4.1): the chat composer and the floating prompt bar show a chip for the canvas selection ("2 nodes selected"). Messages carry the selected ids, labels and kinds while it shows; × removes it so the message applies to the whole diagram, until the selection changes.
+- 062bda6: Floating selection prompt (PRD §4.1, M1): selecting items in Edit (and Split's editor half) shows "Ask Claude about these N…" under the selection, with Group where the editor can group (flowchart subgraph, class namespace, state composite). It keeps clear of the toolbar, inspector, library, zoom bar and prompt bar, and hides while Claude replies, while the canvas is read-only, and on Esc.
+- e63187e: Add the sequence diagram visual editor: participants of every kind and boxes, messages with every arrow, activations, notes, blocks with sections, autonumber, inline text editing, drag to reorder or draw messages, keyboard moves, and pan, zoom and fit.
+- 079db0b: Add the state diagram visual editor: states with display names and descriptions, start and end [*], choice, fork and join, composite states with concurrent regions (nest, move in and out, wrap, ungroup), notes, transitions with labels (self-loops and parallels drawn apart), direction, a floating inspector, a toolbar to click or drag every item onto the canvas, auto layout, connecting by dragging a handle (or dropping on empty canvas for a new state), inline renaming, delete and keyboard nudges. Every edit is one labelled undo step, and the selection is shared with the rest of the app with Mermaid ids, so Split mirrors it.
+- b42780f: The status bar shows the version count, and "Viewing an older version · read-only" while a version is on view.
+- 36d9895: Add the new-diagram gallery (M6): v1's 14 types and 19 starters by category, with search, a rendered picture of each example, "Use example" and, for the five visual editor types, "Blank". It opens from the rail's Templates button, the Diagrams panel and ⌘K.
+- 6b8b73f: Warn in both tabs when Nautink is open twice, since edits made in two tabs overwrite each other (a `BroadcastChannel` notice, PRD §11).
+- 68d2177: Wire unified undo/redo: the top bar ↶ ↷ buttons name the next step, a step menu lists every step and jumps to any of them, ⌘Z / ⌘⇧Z / ⌘Y work everywhere except text fields, and undo and redo are in the ⌘K palette.
+- c688f5c: Add version history: the History panel lists the open diagram's versions with thumbnails, views one read-only, compares it with the current code, restores it as one undoable step (keeping the code before as a "Before restore" version), renames and deletes it with Undo; ⌘S saves a version with an optional name.
+- ab7e55b: A version viewed in the history panel shows on the canvas and in the code drawer, read-only, with a floating bar to compare it with the current code or restore it; the panel keeps the list and the version's name.
+
+### Patch Changes
+
+- 8e2971e: The e2e suite always starts its own dev server, unless E2E_REUSE_SERVER=1.
+- 15f6c60: Darken the `--faint` token so faint text passes 4.5:1 contrast in light and dark, and make the Claude connection e2e test independent of whether the API server is running.
+- 23a1c74: Declare the MIT license in every package.
+- b1e3cb9: A reply whose proposal was still waiting when the page reloaded now says "Not applied" (it used to say "Diagram updated") and offers Review again, which rebuilds the proposal from the reply. Replies store a `pending` review outcome while their proposal waits.
+- 939d30e: Check every main state with axe (WCAG 2.1 AA and 2.2 AA's target size) in light and dark, and walk the workspace with the keyboard. Fixes what it found: the diagram row's ⋯ button no longer sits focusable inside a listbox option (the list opens the same menu with Shift+F10), start and end states in the state editor have a role for their name, and the undo history button is 24 px wide.
+- 2cc9f25: Use the Nautink logo in the top bar (with a light version for dark mode) and as the browser tab icon.
+- 105aee5: Fit keeps the floating prompt bar's room free, so tall diagrams are no longer hidden under it; exporting while an older version is on view exports that version; shapes selected in Split's editor half are outlined in the render.
+- e4f7885: Chat e2e: wait until the message is really sent, and fail with a clear message when the port serves another checkout's dev server.
+- e5dab84: Format Claude's chat replies: bold, italic, inline code, code blocks, lists, headings and links, drawn as elements and never as raw HTML.
+- e81833c: In dark mode, colors from the code (sequence `rect rgb(…)` blocks, class `style` and `classDef`) are drawn faint over the dark panel with the app's text color, so labels stay readable; light mode is unchanged.
+- 448428b: Scan every source file for dependencies when the dev server starts, so opening the code drawer or a visual editor for the first time no longer reloads the page.
+- 0ffb44e: The e2e suite runs 2 workers and also writes the HTML report on CI, where a new job runs it on every pull request and push to main.
+- 04f82e9: End-to-end tests type into the code editor instead of setting code through the store, and start past the first-run screen.
+- 483272b: Run end-to-end tests with 3 workers, so the shared dev server keeps up and tests no longer time out at random.
+- c7d8318: Visual editors fit the diagram once React Flow has measured its nodes, and stay hidden until then, so the diagram no longer shows small in a corner and then jumps after a reload.
+- 7d40c4e: The chat panel's message box now sends on Enter, like the floating prompt bar; Shift+Enter adds a new line and ⌘↵ still sends.
+- 6aae5d0: A fit (Preview and the visual editors) now keeps the room of Claude's proposal bar free at the top while a proposal is open, so the bar no longer covers the diagram's top node.
+- e1cebc9: Load Motion (the live-build fade) when a reply starts streaming and the settings rows the first time Settings opens, so neither sits in the main bundle: the entry script drops from 170 kB to 162 kB gzip.
+- b34c5ca: Remember whether the visual editor's library is open across reloads, as v1 did.
+- e8a35e0: The web build ships `third-party-licenses.txt` with Nautink's license, the icon and font credits, and the license text of every bundled package. Settings links to it as "Open-source licenses".
+- 94780cd: One database accessor (`requireDb`) for chat and history, and the chat e2e skips the first-run screen.
+- 5bf238d: Selecting two or more items now shows a useful inspector in every editor: one shape for all selected flowchart nodes plus Group, Duplicate and Delete; Delete for several ER or state items (links included); and, in sequence diagrams, Shift/⌘-click on headers to select several participants, then put them in a box or delete them.
+- e186816: The editors' inspector now stops above the zoom bar and scrolls, so it no longer covers the zoom bar in a narrow Split (or with a tall inspector).
+- f0676d0: Quick-action chips now send the canvas selection while the selection chip shows, like the composer and the prompt bar.
+- d5bbc10: Add a separate Playwright run that captures the README screenshots against a mocked API.
+- 950c32a: ⌘K "Rename diagram" now edits the title in place in the top bar; on narrow windows, where the title is hidden, it still renames in the Diagrams panel.
+- 0ad7a5a: Stop the page from shaking when a diagram re-renders: Mermaid now draws in a hidden fixed container instead of at the end of the page, so no scrollbar flashes when you add a shape.
+- a83610a: "Diff" on a change card now opens the code drawer on a read-only diff of what that reply changed (accepted, rejected or unreviewed replies), while this session still has the code; after a reload the chip says why it is off.
+- 739a030: Positions placed while Claude's proposal (or an older version) is on the canvas are dropped when the diagram shows again, so nodes from an unreviewed proposal no longer end up saved in the layout.
+- 5bd1f18: The state editor shows `Id : text` as the state's description, on the canvas and in the inspector, instead of as its display name.
+- 0acc068: Give Testing Library queries 5 s, so tests no longer fail at random on a busy machine.
+- 7caf0e7: Undo while Claude's proposal is open (⌘Z, the top bar or ⌘K) now rejects the proposal instead of changing the code under it; redo and the step menu wait until the review ends.
+- Updated dependencies [ab08618]
+- Updated dependencies [f07f71c]
+- Updated dependencies [5bf238d]
+- Updated dependencies [ee707f5]
+- Updated dependencies [bcabe20]
+- Updated dependencies [18386be]
+- Updated dependencies [0f18538]
+- Updated dependencies [c0e1842]
+- Updated dependencies [3df3545]
+- Updated dependencies [54d65e8]
+- Updated dependencies [45e912e]
+- Updated dependencies [cd2b36a]
+- Updated dependencies [71ff3d3]
+- Updated dependencies [451f399]
+- Updated dependencies [5bd1f18]
+- Updated dependencies [d4276b4]
+- Updated dependencies [15f6c60]
+- Updated dependencies [23a1c74]
+- Updated dependencies [f761b6f]
+- Updated dependencies [b1e3cb9]
+- Updated dependencies [9b17976]
+- Updated dependencies [e02b55e]
+- Updated dependencies [9235eb5]
+- Updated dependencies [12529f1]
+- Updated dependencies [16fd23c]
+- Updated dependencies [360e66e]
+- Updated dependencies [ffb6cc1]
+- Updated dependencies [26dd3ca]
+- Updated dependencies [5c94ab1]
+- Updated dependencies [bb16231]
+- Updated dependencies [405168c]
+- Updated dependencies [d44d6a6]
+- Updated dependencies [9b17976]
+  - @nautink/contracts@0.1.0
+  - @nautink/editors@0.1.0
+  - @nautink/visual-core@0.1.0
+  - @nautink/ui@0.1.0
+  - @nautink/storage@0.1.0
