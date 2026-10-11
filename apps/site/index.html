@@ -73,7 +73,18 @@
             through your own Claude Code or Codex CLI.
           </p>
           <div class="cta-row">
-            <a class="button button-primary" href="#start">Get started</a>
+            <div class="install-pill">
+              <code id="hero-install"><span aria-hidden="true">$ </span>npx nautink</code>
+              <button
+                type="button"
+                class="button button-small copy-button"
+                data-copy="hero-install-command"
+                aria-label="Copy npx nautink"
+              >
+                Copy
+              </button>
+              <span id="hero-install-command" hidden>npx nautink</span>
+            </div>
             <a class="button button-ghost" href="https://github.com/NatanGer97/nautink">
               Star on GitHub
             </a>
@@ -83,7 +94,7 @@
           <figure class="window hero-shot">
             <div class="window-bar" aria-hidden="true">
               <span></span><span></span><span></span>
-              <p>localhost:5190</p>
+              <p>127.0.0.1:8791</p>
             </div>
             <picture>
               <source
@@ -389,6 +400,7 @@
               <h3>Codebase-aware chat</h3>
               <p>
                 Let the agent read a project folder, read-only, so it draws your real architecture.
+                Pick it in Settings or start with <code>--repo</code>.
               </p>
             </li>
             <li>
@@ -478,7 +490,7 @@
             </p>
           </div>
           <ul class="privacy-list">
-            <li><strong>No sign-up.</strong> Clone it, run it, use it.</li>
+            <li><strong>No sign-up.</strong> One command and you are drawing.</li>
             <li><strong>No analytics.</strong> The app tracks nothing.</li>
             <li><strong>No third-party calls.</strong> Fonts and icons are bundled.</li>
             <li><strong>Works without an agent.</strong> Everything but the chat runs offline.</li>
@@ -489,9 +501,9 @@
       <!-- Quick start -->
       <section class="section section-start" id="start" aria-labelledby="start-title">
         <div class="container start">
-          <h2 id="start-title">Up and running in a minute.</h2>
+          <h2 id="start-title">One command. No clone, no setup.</h2>
           <p>
-            You need Node 22, pnpm 9, and
+            You need Node 22, and
             <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> or
             <a href="https://github.com/openai/codex">Codex CLI</a> logged in for the chat.
           </p>
@@ -506,12 +518,19 @@
                 Copy
               </button>
             </div>
-            <pre><code id="install-commands">git clone https://github.com/NatanGer97/nautink.git
-cd nautink
-pnpm install
-pnpm dev</code></pre>
+            <pre><code id="install-commands">npx nautink</code></pre>
           </div>
-          <p class="start-note">Then open <code>http://localhost:5190</code>.</p>
+          <p class="start-note">
+            It starts Nautink on <code>http://127.0.0.1:8791</code>, on your machine only, and opens
+            your browser. Stop it with Ctrl+C. <code>npx nautink --help</code> lists the options.
+          </p>
+          <p class="start-note">
+            Want to work on Nautink itself?
+            <a
+              href="https://github.com/NatanGer97/nautink/blob/main/CONTRIBUTING.md#running-the-app"
+              >Run it from source</a
+            >.
+          </p>
         </div>
       </section>
     </main>
