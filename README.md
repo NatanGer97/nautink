@@ -197,7 +197,7 @@ links to its issue; follow it there or say what you need.
 
 - [Diagrams as files in your repo](https://github.com/NatanGer97/nautink/issues/6): pick a folder such as
   `docs/design/`, and Nautink reads and writes its Markdown and `.mmd` files, so designs are reviewed in
-  pull requests ([ADR-003](docs/adr/003-project-folder-storage.md)).
+  pull requests ([ADR-004](docs/adr/004-project-folder-storage.md)).
 - [Designs](https://github.com/NatanGer97/nautink/issues/7): several diagrams plus the problem, options,
   decision and open questions, in one place the AI sees as a whole.
 - [Export a design as a plan](https://github.com/NatanGer97/nautink/issues/8) that Claude Code or Codex

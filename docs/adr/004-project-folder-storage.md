@@ -1,4 +1,4 @@
-# ADR-003: Designs saved as files in a project folder
+# ADR-004: Designs saved as files in a project folder
 - **Status:** Accepted
 - **Date:** 2026-10-10
 
