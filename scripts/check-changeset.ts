@@ -2,12 +2,16 @@
 /**
  * Fails a pull request that changes a workspace's source without adding a changeset, so each
  * workspace's version and `CHANGELOG.md` keep a note of what changed. Documentation, Markdown
- * and repo configuration are exempt — they change no workspace's behaviour.
+ * and repo configuration are exempt — they change no workspace's behaviour — and so is the
+ * marketing page, which is not part of the released app.
  */
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
 const SOURCE_PREFIXES = ['apps/', 'packages/'];
+// Workspaces outside the released app, matching `ignore` in `.changeset/config.json`: Changesets never
+// versions them, so a changeset for them would have nothing to do (ADR-003).
+const UNRELEASED_PREFIXES = ['apps/site/'];
 const CHANGESET_DIRECTORY = '.changeset/';
 const CHANGESET_NON_ENTRIES = new Set(['.changeset/README.md', '.changeset/config.json']);
 const LISTED_SOURCE_LIMIT = 10;
@@ -15,7 +19,10 @@ const LISTED_SOURCE_LIMIT = 10;
 export const HOW_TO_ADD_ONE = 'pnpm changeset';
 
 function isSourceFile(file: string): boolean {
-  return SOURCE_PREFIXES.some((prefix) => file.startsWith(prefix));
+  return (
+    SOURCE_PREFIXES.some((prefix) => file.startsWith(prefix)) &&
+    !UNRELEASED_PREFIXES.some((prefix) => file.startsWith(prefix))
+  );
 }
 
 function isChangesetEntry(file: string): boolean {

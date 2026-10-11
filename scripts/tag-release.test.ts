@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { changelogSection, releaseNotes, releaseVersion } from './tag-release.ts';
+import {
+  changelogSection,
+  ignoredWorkspaces,
+  releaseNotes,
+  releaseVersion,
+  releasedWorkspaces,
+} from './tag-release.ts';
 
 // The release script tags the whole app once (`v0.1.0`), so every workspace must share one version
 // and the release notes come from each workspace's changelog section for it.
@@ -80,4 +86,29 @@ test('release notes with no changed workspace say so', () => {
     releaseNotes('0.3.0', [{ name: '@nautink/web', changelog: WEB_CHANGELOG }]),
     'No changes.',
   );
+});
+
+test('the workspaces Changesets ignores are read from its config', () => {
+  assert.deepEqual(
+    ignoredWorkspaces('{ "fixed": [["@nautink/*"]], "ignore": ["@nautink/site"] }'),
+    ['@nautink/site'],
+  );
+  assert.deepEqual(ignoredWorkspaces('{ "fixed": [] }'), []);
+});
+
+test('an ignore list that is not a list of names is an explicit error', () => {
+  assert.throws(() => ignoredWorkspaces('{ "ignore": "@nautink/site" }'), /"ignore"/);
+  assert.throws(() => ignoredWorkspaces('{ "ignore": [1] }'), /"ignore"/);
+});
+
+test('an ignored workspace is not released, so its version does not have to match', () => {
+  const released = releasedWorkspaces(
+    [
+      { name: '@nautink/web', version: '0.1.0' },
+      { name: '@nautink/site', version: '0.0.0' },
+    ],
+    ['@nautink/site'],
+  );
+  assert.deepEqual(released, [{ name: '@nautink/web', version: '0.1.0' }]);
+  assert.equal(releaseVersion(released), '0.1.0');
 });

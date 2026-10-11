@@ -23,7 +23,7 @@ All `src/…` and `server/…` paths below are v1 paths in `~/dev/mermaid-chat`.
 ### Non-goals (v2.0)
 - Hosting for other users or accounts. v2 stays a local app driving the user's own Claude Code CLI, like v1, or their own Codex CLI (ADR-002).
 - Real-time multi-user collaboration.
-- A marketing site. React Bits and similar effect libraries are for that later site only (§6.8).
+- A marketing site, beyond the one static page in `apps/site` (ADR-003). React Bits and similar effect libraries stay out of both the app and that page (§6.8).
 - New diagram types beyond v1's five visual editors.
 
 ---

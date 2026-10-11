@@ -12,6 +12,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev:web"],
       "port": 5190
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@nautink/site", "dev"],
+      "port": 5191
     }
   ]
 }

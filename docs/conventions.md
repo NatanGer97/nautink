@@ -16,10 +16,11 @@ the bottom as review-only, so nobody assumes the linter is checking it.
 | `scripts/check-agent-hook.ts` | Proves the agent hook still blocks a bad file and formats a clean one |
 | `scripts/check-agent-parity.ts` | Proves `CLAUDE.md` → `AGENTS.md`, skill stubs, and Codex prompts are in sync |
 | `scripts/check-coverage-gate.ts` | Proves an uncovered file still fails each gated package's coverage threshold |
-| `scripts/check-changeset.ts` | Fails a pull request that changes `apps/` or `packages/` source without a changeset |
+| `scripts/check-changeset.ts` | Fails a pull request that changes `apps/` or `packages/` source without a changeset (the marketing page in `apps/site` is exempt, ADR-003) |
 | `scripts/check-bundle-budget.ts` | Fails a web build whose entry, initial or lazy JavaScript is over its gzip budget (see [Bundle budgets](#bundle-budgets)) |
 | `scripts/generate-third-party-notices.ts` | Writes `THIRD_PARTY_NOTICES.md` and the web build's `third-party-licenses.txt`; `pnpm check:licenses` fails a stale file or a license outside the permissive list |
 | `.github/workflows/ci.yml` | Two jobs: `check` (install, the full check graph, then the gate assertions, the changeset check, and `format:check`) and `e2e` (the web app's Playwright suite in headless Chromium, report and traces uploaded on failure) |
+| `.github/workflows/site.yml` | Builds the marketing page in `apps/site` and deploys it to GitHub Pages on a push to `main` that touches it (ADR-003) |
 | `.github/workflows/release.yml` | Turns landed changesets into a "Version Packages" pull request, then runs `scripts/tag-release.ts`: one `v<version>` tag and one GitHub Release for the whole app |
 | `.husky/pre-commit` / `.husky/pre-push` | The two local git gates; installed by `prepare` on `pnpm install` |
 | `.claude/hooks/lint-edited-file.ts` | The Claude Code `PostToolUse` hook, registered in `.claude/settings.json` |

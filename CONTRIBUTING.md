@@ -89,7 +89,8 @@ lines. A change that adds code adds the tests that cover it.
 
 A change to source under `apps/` or `packages/` needs a changeset. Run `pnpm changeset`, pick the
 packages and the bump, write one sentence about what changed for a user, and commit the file it
-writes under `.changeset/`. Changes that are only docs, Markdown or repo configuration need none. CI
+writes under `.changeset/`. Changes that are only docs, Markdown or repo configuration need none, and
+neither does the marketing page in `apps/site`, which is not part of the released app (ADR-003). CI
 fails a pull request that changes package source without one.
 
 ### Commits

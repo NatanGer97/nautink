@@ -122,6 +122,21 @@ describe('chat panel', () => {
     expect(selectActiveDiagram(useWorkspaceStore.getState())?.sessionId).toBe('s1');
   });
 
+  it('sends with plain Enter and adds a new line with Shift+Enter', async () => {
+    replies.push(() => eventsResponse(replyEvents('Ok.')));
+    const user = await renderApp();
+    const composer = screen.getByLabelText<HTMLTextAreaElement>('Message Claude');
+    act(() => {
+      composer.focus();
+    });
+    await user.keyboard('Draw{Shift>}{Enter}{/Shift}a start');
+    expect(composer.value).toBe('Draw\na start');
+    await user.keyboard('{Enter}');
+    expect(composer.value).toBe('');
+    await within(chatPanel()).findByText('Ok.');
+    expect(chatRequests()[0]?.message).toBe('Draw\na start');
+  });
+
   it('undoes the whole reply from its change card', async () => {
     replies.push(() => eventsResponse(replyEvents(fenced(VALID))));
     const user = await renderApp();

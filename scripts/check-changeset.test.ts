@@ -21,6 +21,18 @@ test('a change to apps counts as source too', () => {
   assert.equal(decide(['apps/web/src/app/page.tsx']).exitCode, 1);
 });
 
+test('the marketing page needs no changeset: it is not part of the released app', () => {
+  assert.equal(decide(['apps/site/index.html', 'apps/site/src/tabs.ts']).exitCode, 0);
+});
+
+test('the marketing page next to an app change still needs one, for the app', () => {
+  const result = decide(['apps/site/index.html', 'apps/web/src/app/page.tsx']);
+
+  assert.equal(result.exitCode, 1);
+  assert.ok(result.message.includes('apps/web/src/app/page.tsx'));
+  assert.ok(!result.message.includes('apps/site/index.html'));
+});
+
 test('docs, Markdown and workflow changes need no changeset', () => {
   const result = decide([
     'docs/adr/0021-changesets.md',
