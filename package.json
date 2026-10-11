@@ -33,6 +33,8 @@
     "test:release-tag": "node --test scripts/tag-release.test.ts",
     "check:licenses": "node scripts/generate-third-party-notices.ts --check",
     "test:license-gate": "node --test scripts/generate-third-party-notices.test.ts",
+    "rulesets:apply": "node scripts/apply-rulesets.ts",
+    "test:rulesets": "node --test scripts/apply-rulesets.test.ts",
     "check:pack": "node scripts/check-pack.ts",
     "changeset": "changeset",
     "version": "changeset version",
