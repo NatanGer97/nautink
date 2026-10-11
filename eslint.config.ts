@@ -306,7 +306,7 @@ export default tseslint.config(
   // @nautink/storage keeps v1's boolean record fields so v1 backups import unchanged (PRD §7.3, §8).
   // Only these four names, only in the file that declares the records, skip the boolean prefix.
   {
-    files: ['packages/storage/src/records.ts'],
+    files: ['packages/storage/src/db/records.ts'],
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',

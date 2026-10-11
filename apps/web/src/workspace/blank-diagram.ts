@@ -1,4 +1,4 @@
-import type { EditMeta } from './edit-history.ts';
+import type { EditMeta } from './undo/edit-history.ts';
 import type { Diagram } from '@nautink/storage/records';
 
 /** The code of a quick new diagram and of the first one (v1's blank flowchart). */

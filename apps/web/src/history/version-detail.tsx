@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { deleteVersionWithUndo, renameVersionLabel } from './version-actions.ts';
 import { clockTime, versionText } from './version-text.ts';
-import { InlineRenameInput } from '../workspace/inline-rename-input.tsx';
+import { InlineRenameInput } from '../workspace/title/inline-rename-input.tsx';
 
 import type { Version } from '@nautink/storage/records';
 import type { ReactElement } from 'react';

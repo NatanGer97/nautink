@@ -19,7 +19,7 @@ import { TypeFilterChips } from '../../workspace/panel/type-filter-chips.tsx';
 import { useWorkspaceStore } from '../../workspace/use-workspace.ts';
 import { OUTLINE_BUTTON_CLASS } from '../button-styles.ts';
 
-import type { LoadStatus } from '../../workspace/workspace-state.ts';
+import type { LoadStatus } from '../../workspace/store/workspace-state.ts';
 import type { Diagram } from '@nautink/storage/records';
 import type { SearchHit } from '@nautink/storage/search';
 import type { ReactElement, RefObject } from 'react';

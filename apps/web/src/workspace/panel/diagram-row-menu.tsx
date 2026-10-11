@@ -11,7 +11,7 @@ import { useRef } from 'react';
 
 import { useWorkspaceStore } from '../use-workspace.ts';
 
-import type { WorkspaceState } from '../workspace-state.ts';
+import type { WorkspaceState } from '../store/workspace-state.ts';
 import type { Diagram } from '@nautink/storage/records';
 import type { ReactElement, RefObject } from 'react';
 

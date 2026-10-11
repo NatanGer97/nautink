@@ -6,7 +6,23 @@
   "type": "module",
   "description": "Browser persistence for Nautink: diagrams, versions and canvas positions in IndexedDB, plus backup import and export.",
   "exports": {
-    "./*": "./src/*.ts"
+    "./auto-title": "./src/diagrams/auto-title.ts",
+    "./backup": "./src/backup/backup.ts",
+    "./backup-format": "./src/backup/backup-format.ts",
+    "./backup-v1": "./src/backup/backup-v1.ts",
+    "./db": "./src/db/db.ts",
+    "./diagram-delete": "./src/diagrams/diagram-delete.ts",
+    "./diagram-files": "./src/diagrams/diagram-files.ts",
+    "./diagram-order": "./src/diagrams/diagram-order.ts",
+    "./diagram-type": "./src/diagrams/diagram-type.ts",
+    "./diagrams": "./src/diagrams/diagrams.ts",
+    "./errors": "./src/db/errors.ts",
+    "./import-plan": "./src/backup/import-plan.ts",
+    "./positions": "./src/diagrams/positions.ts",
+    "./records": "./src/db/records.ts",
+    "./search": "./src/diagrams/search.ts",
+    "./version-order": "./src/versions/version-order.ts",
+    "./versions": "./src/versions/versions.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 
-import type { NoticeAction } from '../workspace/workspace-deps.ts';
+import type { NoticeAction } from '../workspace/store/workspace-deps.ts';
 
 /** Errors stay a little longer, so there is time to read what went wrong. */
 const ERROR_NOTICE_MS: number = 6000;

@@ -5,8 +5,8 @@ import { useVersionCount, versionCountLabel } from '../history/versions-store.ts
 import { useViewedVersion } from '../history/viewed-version.ts';
 import { usePreviewStatus } from '../preview/preview-status.ts';
 import { useChosenModelLabel } from '../settings/models.ts';
-import { SaveStatus } from '../workspace/diagram-title.tsx';
 import { lineCount } from '../workspace/text.ts';
+import { SaveStatus } from '../workspace/title/diagram-title.tsx';
 import { useActiveDiagram } from '../workspace/use-workspace.ts';
 
 import type { PreviewStatus, PreviewValidity } from '../preview/preview-status.ts';

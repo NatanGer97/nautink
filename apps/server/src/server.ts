@@ -3,10 +3,10 @@ import { createServer } from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 
+import { HEALTH_TIMEOUT_MS } from './agents/health.ts';
 import { createApp } from './app.ts';
 import { loadConfig } from './config.ts';
-import { HEALTH_TIMEOUT_MS } from './health.ts';
-import { findWebDist } from './web-app.ts';
+import { findWebDist } from './http/web-app.ts';
 
 import type { ServerConfig } from './config.ts';
 import type { Logger } from './logger.ts';

@@ -4,7 +4,7 @@ import { findTurnDiagram } from './turn-edit.ts';
 
 import type { SendKind } from './auto-fix.ts';
 import type { ChatReply } from './chat-reply.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { AgentId } from '@nautink/contracts/agents';
 import type { ChatMessage, Diagram } from '@nautink/storage/records';
 

@@ -6,7 +6,7 @@ import { useNow } from '../use-now.ts';
 import { useWorkspaceStore } from '../use-workspace.ts';
 
 import type { ListKeyAction } from './list-keys.ts';
-import type { WorkspaceState } from '../workspace-state.ts';
+import type { WorkspaceState } from '../store/workspace-state.ts';
 import type { SearchHit } from '@nautink/storage/search';
 import type { FocusEvent, KeyboardEvent, ReactElement, RefObject } from 'react';
 

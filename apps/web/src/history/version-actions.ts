@@ -10,11 +10,11 @@ import { versionText } from './version-text.ts';
 import { announceVersionsChanged } from './versions-store.ts';
 import { viewVersion } from './viewed-version.ts';
 import { showError, showNotice } from '../lib/notices.ts';
+import { errorMessage } from '../workspace/store/workspace-context.ts';
 import { clip } from '../workspace/text.ts';
 import { selectActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
-import { errorMessage } from '../workspace/workspace-context.ts';
 
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { Diagram, Version } from '@nautink/storage/records';
 import type { AddVersionResult, NewVersion } from '@nautink/storage/versions';
 

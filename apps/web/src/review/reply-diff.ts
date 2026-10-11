@@ -8,7 +8,7 @@ import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { Proposal } from './review-store.ts';
-import type { EditEntry, EditStack } from '../workspace/edit-history.ts';
+import type { EditEntry, EditStack } from '../workspace/undo/edit-history.ts';
 import type { StoreApi, UseBoundStore } from 'zustand';
 
 /** Why "Diff" is off: the reply's code is gone (a reload, a new chat, or an old step). */

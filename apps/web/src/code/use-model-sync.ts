@@ -10,7 +10,7 @@ import {
 import { selectActiveStack, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { EditorHandle } from './use-monaco-editor.ts';
-import type { EditEntry, EditSelection, EditStack } from '../workspace/edit-history.ts';
+import type { EditEntry, EditSelection, EditStack } from '../workspace/undo/edit-history.ts';
 import type { Diagram } from '@nautink/storage/records';
 import type { editor, ISelection } from 'monaco-editor/editor/editor.api.js';
 

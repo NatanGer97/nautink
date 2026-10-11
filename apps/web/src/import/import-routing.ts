@@ -2,7 +2,7 @@ import { readDiagramFiles } from '@nautink/storage/diagram-files';
 
 import { clip } from '../workspace/text.ts';
 
-import type { NewDiagramDraft } from '../workspace/workspace-state.ts';
+import type { NewDiagramDraft } from '../workspace/store/workspace-state.ts';
 import type { DiagramDraft, DiagramFileImport, TextFile } from '@nautink/storage/diagram-files';
 
 /** Titles in history labels are cut so the step menu stays one line. */

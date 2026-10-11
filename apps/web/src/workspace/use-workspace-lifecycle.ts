@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { useWorkspaceStore } from './use-workspace.ts';
 
-import type { WorkspaceStore } from './workspace-state.ts';
+import type { WorkspaceStore } from './store/workspace-state.ts';
 
 /** Writes queued changes when the page is hidden or closed. Returns the cleanup. */
 export function flushOnPageHide(store: WorkspaceStore): () => void {

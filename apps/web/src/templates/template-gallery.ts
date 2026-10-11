@@ -1,7 +1,7 @@
 import { TEMPLATES } from './template-data.ts';
 
 import type { DiagramTemplate, TemplateCategory } from './template-data.ts';
-import type { NewDiagramDraft } from '../workspace/workspace-state.ts';
+import type { NewDiagramDraft } from '../workspace/store/workspace-state.ts';
 
 /** A gallery filter: every type, the visual editor types, or one category. */
 export type GalleryFilter = 'All' | 'Visual editor' | TemplateCategory;

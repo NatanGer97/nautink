@@ -3,10 +3,10 @@ import { useEffect } from 'react';
 import { rejectProposal } from './review-actions.ts';
 import { useReviewStore } from './review-store.ts';
 import { agentName } from '../chat/agent-name.ts';
-import { registerHistoryGuard } from '../workspace/history-guard.ts';
+import { registerHistoryGuard } from '../workspace/undo/history-guard.ts';
 
 import type { Proposal } from './review-store.ts';
-import type { HistoryGuard } from '../workspace/history-guard.ts';
+import type { HistoryGuard } from '../workspace/undo/history-guard.ts';
 
 /** What undo does while an agent's proposal is open (the top bar's tooltip says "Undo: …"). */
 export function rejectInstead(name: string): string {

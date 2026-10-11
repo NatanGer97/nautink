@@ -8,7 +8,7 @@ import type { AttemptResult } from './auto-fix.ts';
 import type { ChatDeps } from './chat-deps.ts';
 import type { TurnCodeSink } from './turn-edit.ts';
 import type { Proposal, ProposalReview } from '../review/review-store.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { AgentId } from '@nautink/contracts/agents';
 
 /**

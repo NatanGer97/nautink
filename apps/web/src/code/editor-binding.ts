@@ -1,6 +1,6 @@
 import type { MonacoApi } from './monaco-setup.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
-import type { EditSelection } from '../workspace/edit-history.ts';
+import type { EditSelection } from '../workspace/undo/edit-history.ts';
 import type { editor, IRange, Uri } from 'monaco-editor/editor/editor.api.js';
 
 /** The smallest single edit that turns `before` into `after`: [start, end in before, end in after]. */

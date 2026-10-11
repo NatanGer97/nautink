@@ -1,9 +1,9 @@
-import { createDefaultWorkspaceDeps } from './default-workspace-deps.ts';
-import { createWorkspaceStore } from './workspace-store.ts';
+import { createDefaultWorkspaceDeps } from './store/default-workspace-deps.ts';
+import { createWorkspaceStore } from './store/workspace-store.ts';
 
-import type { SaveState } from './autosave.ts';
-import type { EditStack } from './edit-history.ts';
-import type { WorkspaceData, WorkspaceStore } from './workspace-state.ts';
+import type { SaveState } from './store/autosave.ts';
+import type { WorkspaceData, WorkspaceStore } from './store/workspace-state.ts';
+import type { EditStack } from './undo/edit-history.ts';
 import type { Diagram } from '@nautink/storage/records';
 
 /** The app's workspace store. Read it with the hooks below or with a selector. */

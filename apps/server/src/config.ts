@@ -2,7 +2,7 @@ import { realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 
-import { expandHome, isStrictlyInside } from './repo-dir.ts';
+import { expandHome, isStrictlyInside } from './repo/repo-dir.ts';
 
 /** The server's settings, read once from the environment at startup. */
 export interface ServerConfig {

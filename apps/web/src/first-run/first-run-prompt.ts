@@ -2,7 +2,7 @@ import { finishFirstRun } from './first-run-store.ts';
 import { useUiStore } from '../state/ui-store.ts';
 import { selectActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { Diagram } from '@nautink/storage/records';
 
 /** A type the first-run prompt can ask for; `auto` lets Claude choose. */

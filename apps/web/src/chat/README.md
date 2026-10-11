@@ -31,7 +31,7 @@ the floating prompt bar, the welcome examples, "Ask Claude to fix" and ⌘K.
    selection.
 4. The floating "Ask Claude about these N…" prompt (`edit/selection-prompt/`) always sends the
    selection it floats under, with `toChatSelection(items)`.
-5. The server (`apps/server/src/prompt.ts`, `describeSelection`) adds the selection block: each item
+5. The server (`apps/server/src/chat/prompt.ts`, `describeSelection`) adds the selection block: each item
    as `kind id: "label"`, and the rule to change only those items and their direct links and keep
    every other line byte-identical.
 

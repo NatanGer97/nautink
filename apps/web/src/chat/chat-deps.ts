@@ -8,7 +8,7 @@ import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 import type { FetchLike } from './chat-client.ts';
 import type { MermaidError } from '../mermaid/validate.ts';
 import type { ProposalReview } from '../review/review-store.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { AgentId } from '@nautink/contracts/agents';
 
 const ERROR_TOAST_MS: number = 6000;
