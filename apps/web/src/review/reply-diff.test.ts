@@ -16,7 +16,7 @@ import { useUiStore } from '../state/ui-store.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { Proposal } from './review-store.ts';
-import type { EditEntry } from '../workspace/edit-history.ts';
+import type { EditEntry } from '../workspace/undo/edit-history.ts';
 
 function entry(id: number, code: string): EditEntry {
   return { id, code, label: 'x', source: 'claude', time: 1, sel: null, group: null, isOpen: false };

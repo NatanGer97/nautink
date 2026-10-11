@@ -1,4 +1,4 @@
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { Diagram } from '@nautink/storage/records';
 
 /** The diagram, or `undefined` once it was deleted while Claude replied. */

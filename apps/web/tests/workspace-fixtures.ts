@@ -1,10 +1,10 @@
 import { openNautinkDb } from '@nautink/storage/db';
 import { vi } from 'vitest';
 
-import { createWorkspaceStore } from '../src/workspace/workspace-store.ts';
+import { createWorkspaceStore } from '../src/workspace/store/workspace-store.ts';
 
-import type { WorkspaceDeps } from '../src/workspace/workspace-deps.ts';
-import type { WorkspaceStore } from '../src/workspace/workspace-state.ts';
+import type { WorkspaceDeps } from '../src/workspace/store/workspace-deps.ts';
+import type { WorkspaceStore } from '../src/workspace/store/workspace-state.ts';
 import type { NautinkDb } from '@nautink/storage/db';
 import type { Mock } from 'vitest';
 

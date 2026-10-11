@@ -12,8 +12,8 @@ import { ExportMenu } from '../export/export-menu.tsx';
 import { SHORTCUTS, shortcutLabel } from '../lib/shortcuts.ts';
 import { RepoBadge } from '../settings/repo-badge.tsx';
 import { useUiStore } from '../state/ui-store.ts';
-import { DiagramTitle, SaveStatus } from '../workspace/diagram-title.tsx';
-import { UndoRedoControls } from '../workspace/undo-redo-controls.tsx';
+import { DiagramTitle, SaveStatus } from '../workspace/title/diagram-title.tsx';
+import { UndoRedoControls } from '../workspace/undo/undo-redo-controls.tsx';
 
 import type { ReactElement } from 'react';
 

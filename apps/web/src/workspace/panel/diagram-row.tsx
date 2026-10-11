@@ -3,9 +3,9 @@ import { Pin } from 'lucide-react';
 
 import { DiagramRowMenu } from './diagram-row-menu.tsx';
 import { MatchSnippet } from './match-snippet.tsx';
-import { InlineRenameInput } from '../inline-rename-input.tsx';
 import { relativeTime } from '../relative-time.ts';
 import { displayTitle } from '../text.ts';
+import { InlineRenameInput } from '../title/inline-rename-input.tsx';
 
 import type { SearchHit } from '@nautink/storage/search';
 import type { MouseEvent, ReactElement } from 'react';

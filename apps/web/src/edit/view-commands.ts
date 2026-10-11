@@ -2,7 +2,7 @@ import { CANVAS_VIEW_LABELS, CANVAS_VIEWS, viewAvailability } from './canvas-vie
 import { selectActiveDiagram } from '../workspace/use-workspace.ts';
 
 import type { AppCommand } from '../commands/command-registry.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { Diagram, DiagramView } from '@nautink/storage/records';
 
 type GetWorkspace = () => WorkspaceState;

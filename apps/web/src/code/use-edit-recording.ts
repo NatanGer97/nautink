@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 
 import { changeLabel, diagramIdOf, toEditSelection } from './editor-binding.ts';
-import { TYPING_GROUP } from '../workspace/edit-history.ts';
+import { TYPING_GROUP } from '../workspace/undo/edit-history.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { ChangeKind } from './editor-binding.ts';
 import type { EditorHandle } from './use-monaco-editor.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { editor, IDisposable, Selection } from 'monaco-editor/editor/editor.api.js';
 
 /** A paste may land a moment after its DOM event (Monaco applies some asynchronously). */

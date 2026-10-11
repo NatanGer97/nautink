@@ -6,7 +6,7 @@ import { useRegisterCommands } from '../commands/use-commands.ts';
 import { selectActiveDiagram, useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { AppCommand } from '../commands/command-registry.ts';
-import type { WorkspaceData } from '../workspace/workspace-state.ts';
+import type { WorkspaceData } from '../workspace/store/workspace-state.ts';
 
 function selectCanEdit(state: WorkspaceData): boolean {
   return viewAvailability(selectActiveDiagram(state)?.code ?? '').reason === null;

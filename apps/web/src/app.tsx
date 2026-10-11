@@ -14,9 +14,9 @@ import { TemplatesDialog } from './shell/templates-dialog.tsx';
 import { useAppliedTheme } from './shell/use-applied-theme.ts';
 import { useGlobalShortcuts } from './shell/use-global-shortcuts.ts';
 import { useUiStore } from './state/ui-store.ts';
-import { useHistoryShortcuts } from './workspace/history-shortcuts.ts';
+import { useWorkspaceCommands } from './workspace/commands/use-workspace-commands.ts';
 import { useTwoTabNotice } from './workspace/two-tab-notice.ts';
-import { useWorkspaceCommands } from './workspace/use-workspace-commands.ts';
+import { useHistoryShortcuts } from './workspace/undo/history-shortcuts.ts';
 import { useWorkspaceLifecycle } from './workspace/use-workspace-lifecycle.ts';
 
 import type { AppCommand } from './commands/command-registry.ts';

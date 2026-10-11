@@ -1,13 +1,13 @@
 import { API_ROUTES } from '@nautink/contracts/routes';
 import express from 'express';
 
-import { createChatHandler } from './chat-route.ts';
-import { guardHost } from './host-guard.ts';
-import { NOT_FOUND, sendError } from './http-errors.ts';
-import { createInfoRouter } from './info-routes.ts';
-import { parseJsonBody } from './json-body.ts';
-import { RepoSelection } from './repo-selection.ts';
-import { serveWebApp } from './web-app.ts';
+import { createChatHandler } from './chat/chat-route.ts';
+import { guardHost } from './http/host-guard.ts';
+import { NOT_FOUND, sendError } from './http/http-errors.ts';
+import { parseJsonBody } from './http/json-body.ts';
+import { serveWebApp } from './http/web-app.ts';
+import { createInfoRouter } from './info/info-routes.ts';
+import { RepoSelection } from './repo/repo-selection.ts';
 
 import type { Logger } from './logger.ts';
 import type { Express, Request, Response } from 'express';

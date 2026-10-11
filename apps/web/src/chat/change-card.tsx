@@ -10,12 +10,12 @@ import {
   showProposalAgain,
 } from '../review/review-actions.ts';
 import { useReviewStore } from '../review/review-store.ts';
-import { canAmend } from '../workspace/edit-history.ts';
+import { canAmend } from '../workspace/undo/edit-history.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
 
 import type { Proposal } from '../review/review-store.ts';
-import type { EditStack } from '../workspace/edit-history.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
+import type { EditStack } from '../workspace/undo/edit-history.ts';
 import type { ChatMessageReview } from '@nautink/storage/records';
 import type { ReactElement } from 'react';
 

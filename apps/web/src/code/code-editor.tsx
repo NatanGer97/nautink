@@ -13,7 +13,7 @@ import { useAgentName } from '../chat/agent-name.ts';
 import { useIsDarkTheme } from '../lib/use-is-dark-theme.ts';
 import { parseErrorTitle } from '../preview/parse-error-notice.tsx';
 import { usePreviewStatus } from '../preview/preview-status.ts';
-import { APP_HISTORY_ATTRIBUTE } from '../workspace/history-shortcuts.ts';
+import { APP_HISTORY_ATTRIBUTE } from '../workspace/undo/history-shortcuts.ts';
 
 import type { CursorPosition } from './use-cursor-position.ts';
 import type { ViewedCode } from './use-model-sync.ts';

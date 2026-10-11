@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { changedDiagramId, loadVersions, VERSIONS_CHANGED_EVENT } from './versions-store.ts';
 import { viewVersion } from './viewed-version.ts';
 import { showError } from '../lib/notices.ts';
+import { errorMessage } from '../workspace/store/workspace-context.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
-import { errorMessage } from '../workspace/workspace-context.ts';
 
 async function refresh(diagramId: string): Promise<void> {
   try {

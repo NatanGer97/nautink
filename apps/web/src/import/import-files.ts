@@ -3,9 +3,9 @@ import { InvalidBackupError } from '@nautink/storage/errors';
 import { countsMessage, IMPORT_ACCEPT, parseBackupText, routeImport } from './import-routing.ts';
 import { showError, showNotice } from '../lib/notices.ts';
 import { pickFiles } from '../lib/pick-files.ts';
-import { downloadTextFile } from '../workspace/default-workspace-deps.ts';
+import { downloadTextFile } from '../workspace/store/default-workspace-deps.ts';
+import { errorMessage } from '../workspace/store/workspace-context.ts';
 import { useWorkspaceStore } from '../workspace/use-workspace.ts';
-import { errorMessage } from '../workspace/workspace-context.ts';
 
 import type { ImportRoute } from './import-routing.ts';
 import type { ImportResult } from '@nautink/storage/backup';

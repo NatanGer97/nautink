@@ -10,7 +10,7 @@ import { saveTurnVersions } from '../chat/turn-versions.ts';
 
 import type { Proposal, ProposalReview } from './review-store.ts';
 import type { ChatDeps } from '../chat/chat-deps.ts';
-import type { WorkspaceState } from '../workspace/workspace-state.ts';
+import type { WorkspaceState } from '../workspace/store/workspace-state.ts';
 import type { AgentId } from '@nautink/contracts/agents';
 import type { NautinkDb } from '@nautink/storage/db';
 import type { ChatMessage, ChatMessageReview, Diagram } from '@nautink/storage/records';

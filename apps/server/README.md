@@ -15,9 +15,23 @@ pnpm --filter @nautink/server start
 | `CODEX_BIN` | `codex` | The Codex CLI to run when the user picks Codex (ADR-002) |
 | `REPO_DIR` | none | A codebase the agent may read at startup (repo-aware mode); must be inside your home folder |
 
-The prompt Claude gets is built in `src/prompt.ts` (`SYSTEM_PROMPT_VERSION`, `buildPrompt`). A
+The prompt Claude gets is built in `src/chat/prompt.ts` (`SYSTEM_PROMPT_VERSION`, `buildPrompt`). A
 canvas selection adds a block that lists the selected items (kind, id, label) and tells Claude to
 change only them and their direct links, keeping every other line byte-identical (PRD §4.1).
+
+## Layout
+
+| Path | What |
+|---|---|
+| `src/main.ts`, `src/server.ts`, `src/app.ts` | Entry point, `startServer`/`listen`, and the Express app that wires the routes |
+| `src/config.ts`, `src/logger.ts` | Environment config and the process logger |
+| `src/chat/` | `POST /api/chat`: the route and the prompt |
+| `src/info/` | The health, info, models and repo routes |
+| `src/agents/` | Running an agent CLI (`cli-run.ts`) and checking it (`health.ts`); `claude/` and `codex/` hold each CLI's arguments and output parser |
+| `src/repo/` | The codebase the agent may read (repo-aware mode) |
+| `src/http/` | HTTP plumbing: host guard, errors, JSON body, SSE stream, serving the web app |
+| `tests/` | Fake CLIs and the test server helpers |
+| `scripts/` | The selection check (below) |
 
 ## Selection check (PRD §4.1 "done when")
 

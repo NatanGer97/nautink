@@ -6,7 +6,16 @@
   "type": "module",
   "description": "The visual editor contract, diagram type detection, commit labels and the positions adapter, shared by every editor.",
   "exports": {
-    "./*": "./src/*.ts"
+    "./detect": "./src/contract/detect.ts",
+    "./diagram-loader": "./src/contract/diagram-loader.ts",
+    "./editor-contract": "./src/contract/editor-contract.ts",
+    "./geometry": "./src/canvas/geometry.ts",
+    "./icons": "./src/icons/icons.ts",
+    "./labels": "./src/text/labels.ts",
+    "./positions": "./src/canvas/positions.ts",
+    "./preamble": "./src/contract/preamble.ts",
+    "./text": "./src/text/text.ts",
+    "./text-measure": "./src/text/text-measure.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
