@@ -82,6 +82,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm test:release-tag
 
+      - name: Test the ruleset apply script
+        if: ${{ !cancelled() }}
+        run: pnpm test:rulesets
+
       - name: Assert the license check still fails a copyleft dependency
         if: ${{ !cancelled() }}
         run: pnpm test:license-gate
