@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
@@ -49,6 +49,30 @@ describe('startServer', () => {
     ]);
     const info = await (await fetch(`http://127.0.0.1:${String(port)}/api/info`)).json();
     expect(info).toEqual({ repoDir: repo });
+  });
+
+  it('serves the web app folder it is given, whatever NODE_ENV says', async () => {
+    const webDistDir = await makeTempDir('start-web');
+    await writeFile(path.join(webDistDir, 'index.html'), '<title>given app</title>');
+    const env = { API_PORT: '0' };
+    const server = await startServer({
+      env,
+      homeDir: '/',
+      logger: createMemoryLogger(),
+      webDistDir,
+    });
+    servers.push(server);
+    const { port } = server.address() as AddressInfo;
+    const page = await (await fetch(`http://127.0.0.1:${String(port)}/`)).text();
+    expect(page).toBe('<title>given app</title>');
+  });
+
+  it('refuses a web app folder without index.html', async () => {
+    const webDistDir = await makeTempDir('start-web-empty');
+    const options = { env: { API_PORT: '0' }, homeDir: '/', logger: createMemoryLogger() };
+    await expect(startServer({ ...options, webDistDir })).rejects.toThrow(
+      `The web app folder has no index.html: ${webDistDir}`,
+    );
   });
 
   it('throws on invalid config', async () => {

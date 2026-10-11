@@ -31,6 +31,10 @@ const GATED: GatedPackage[] = [
     root: path.join(import.meta.dirname, '..', 'packages', 'storage'),
   },
   {
+    name: 'apps/cli',
+    root: path.join(import.meta.dirname, '..', 'apps', 'cli'),
+  },
+  {
     name: 'apps/server',
     root: path.join(import.meta.dirname, '..', 'apps', 'server'),
   },

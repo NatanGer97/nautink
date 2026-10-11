@@ -7,6 +7,8 @@ dist/
 build/
 out/
 storybook-static/
+# apps/cli/tests/build.test.ts builds here and removes it after
+.build-test/
 .next/
 .turbo/
 *.tsbuildinfo

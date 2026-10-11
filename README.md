@@ -77,7 +77,7 @@ through your own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) o
 
 ## Requirements
 
-- **Node 22** (22.18 or newer) and **pnpm 9**.
+- **Node 22** (22.18 or newer).
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** or
   **[Codex CLI](https://github.com/openai/codex)**, installed and logged in, for the chat. Nautink
   runs the `claude` or `codex` command on your `PATH` (set `CLAUDE_BIN` or `CODEX_BIN` to use
@@ -88,24 +88,24 @@ through your own [Claude Code](https://docs.anthropic.com/en/docs/claude-code) o
 ## Quick start
 
 ```bash
+npx nautink
+```
+
+This starts Nautink on http://127.0.0.1:8791 (localhost only) and opens it in your browser. Stop it
+with Ctrl+C. `npx nautink --help` lists the options (`--port`, `--no-open`); the settings
+(`API_PORT`, `CLAUDE_BIN`, `CODEX_BIN`, `REPO_DIR`) are in [`apps/cli/README.md`](apps/cli/README.md).
+
+`npx nautink` works once the first release is on npm. Until then, or to work on Nautink itself, run
+it from source with pnpm 9:
+
+```bash
 git clone https://github.com/NatanGer97/nautink.git
 cd nautink
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:5190. `pnpm dev` starts the web app (port 5190) and the local server (port
-8791, on 127.0.0.1 only).
-
-To run the built app from one process instead:
-
-```bash
-pnpm build
-NODE_ENV=production pnpm --filter @nautink/server start
-```
-
-Then open http://127.0.0.1:8791. The server settings (`API_PORT`, `CLAUDE_BIN`, `CODEX_BIN`, `REPO_DIR`) are in
-[`apps/server/README.md`](apps/server/README.md).
+Then open http://localhost:5190. [CONTRIBUTING.md](CONTRIBUTING.md#running-the-app) has the details.
 
 ## How it works
 
@@ -180,6 +180,31 @@ Nautink is a TypeScript rebuild of Mermaid Chat (v1) and is in its last pre-rele
 feature and the new AI-native features are in, and accessibility, performance budgets and release
 docs are being finished. There is no tagged release yet, and nothing is published to a package
 registry. Expect breaking changes until 1.0.
+
+## Coming soon
+
+Nautink is growing into a place to design a feature with your AI before it writes the code. Each item
+links to its issue; follow it there or say what you need.
+
+**First release**
+
+- [`npx nautink` on npm](https://github.com/NatanGer97/nautink/issues/4): a `0.1.0` preview, so you can
+  start Nautink with one command and no clone.
+- [A hosted demo](https://github.com/NatanGer97/nautink/issues/3): try the editors, templates and export
+  in the browser before you install anything.
+
+**From diagram to design**
+
+- [Diagrams as files in your repo](https://github.com/NatanGer97/nautink/issues/6): pick a folder such as
+  `docs/design/`, and Nautink reads and writes its Markdown and `.mmd` files, so designs are reviewed in
+  pull requests ([ADR-004](docs/adr/004-project-folder-storage.md)).
+- [Designs](https://github.com/NatanGer97/nautink/issues/7): several diagrams plus the problem, options,
+  decision and open questions, in one place the AI sees as a whole.
+- [Export a design as a plan](https://github.com/NatanGer97/nautink/issues/8) that Claude Code or Codex
+  can build from.
+- [Review an agent's diagram in Nautink](https://github.com/NatanGer97/nautink/issues/9): a local MCP
+  server lets your coding agent open its proposed diagram on the canvas for you to edit, accept or
+  reject.
 
 ## Contributing
 

@@ -1,0 +1,31 @@
+{
+  "name": "nautink",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "Start Nautink, the local-first Mermaid diagram app, with one command.",
+  "bin": {
+    "nautink": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^22.18.0 || >=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@nautink/server": "workspace:^",
+    "@types/node": "^22",
+    "esbuild": "^0.28.2"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "zod": "^4.6.5"
+  }
+}

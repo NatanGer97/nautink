@@ -5,6 +5,10 @@
   "license": "MIT",
   "type": "module",
   "description": "Local Node bridge between the Nautink web app and the user's Claude Code CLI.",
+  "exports": {
+    "./server": "./src/server.ts",
+    "./logger": "./src/logger.ts"
+  },
   "engines": {
     "node": "^22.18.0 || >=24"
   },
