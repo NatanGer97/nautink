@@ -338,6 +338,26 @@ h1 {
   border-bottom-left-radius: 0;
 }
 
+/* The install command in the hero, styled like the quick-start terminal. */
+.install-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 6px 6px 18px;
+  border-radius: 10px;
+  background: #071423;
+  color: #d7e3f0;
+  box-shadow: var(--shadow);
+}
+
+.install-pill code {
+  font-size: 15px;
+}
+
+.install-pill code span {
+  color: #8193aa;
+}
+
 /* ------------------------------------------------------------ window frame */
 .window {
   overflow: hidden;
@@ -906,6 +926,10 @@ h3 {
 .start .start-note {
   margin-top: 18px;
   font-size: 15px;
+}
+
+.start .start-note + .start-note {
+  margin-top: 8px;
 }
 
 /* ------------------------------------------------------------------- footer */
